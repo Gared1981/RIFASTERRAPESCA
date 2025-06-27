@@ -106,11 +106,14 @@ const RafflesListPage: React.FC = () => {
                       alt={raffle.name}
                       className="w-full h-48 object-cover"
                     />
-                    <div className="absolute top-0 right-0 m-2 flex flex-col gap-2">
+                    <div className="absolute top-0 right-0 m-2">
                       <div className="bg-green-500 text-white px-3 py-1 text-sm rounded-full font-semibold shadow-lg">
                         ${raffle.price} MXN
                       </div>
-                      <div className="bg-blue-500 text-white px-2 py-1 text-sm rounded">
+                    </div>
+                    {/* Badge "Activo" en la parte inferior */}
+                    <div className="absolute bottom-2 left-2">
+                      <div className="bg-blue-500 text-white px-2 py-1 text-xs rounded font-semibold shadow-lg">
                         Activo
                       </div>
                     </div>

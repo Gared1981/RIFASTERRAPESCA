@@ -237,7 +237,7 @@ const RafflePage: React.FC = () => {
                           ))}
                         </div>
 
-                        {/* Imagen principal */}
+                        {/* Imagen principal - MÁS GRANDE Y EQUILIBRADA */}
                         <div className="order-1 lg:order-2 flex-1 relative group">
                           <div 
                             className="relative cursor-pointer bg-gray-50 rounded-lg overflow-hidden"
@@ -246,7 +246,7 @@ const RafflePage: React.FC = () => {
                             <img
                               src={allImages[currentImageIndex]}
                               alt={raffle.name}
-                              className="w-full h-96 lg:h-[500px] object-contain transition-transform duration-300 group-hover:scale-105"
+                              className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover transition-transform duration-300 group-hover:scale-105"
                             />
                             
                             {/* Overlay con icono de zoom */}
@@ -282,29 +282,21 @@ const RafflePage: React.FC = () => {
                         <img
                           src={raffle.image_url}
                           alt={raffle.name}
-                          className="w-full h-96 object-cover rounded-lg shadow-lg hover:scale-105 transition-transform duration-300"
+                          className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover rounded-lg shadow-lg hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     )}
                   </div>
 
-                  {/* GIF del premio especial debajo de la galería */}
+                  {/* GIF del premio especial debajo de la galería - SIN TEXTO */}
                   <div className="mt-6">
-                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-200">
-                      <div className="text-center mb-3">
-                        <h3 className="text-lg font-bold text-yellow-800 mb-2">
-                          🏆 ¡Premio Especial para Pagos con Mercado Pago!
-                        </h3>
-                        <p className="text-yellow-700 text-sm">
-                          Al pagar con Mercado Pago, automáticamente participas en nuestro premio especial adicional
-                        </p>
-                      </div>
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-6 border border-yellow-200">
                       <div className="flex justify-center">
                         <img
                           src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/ENVIO_GRATIS.gif?v=1750992275"
                           alt="Premio Especial - Envío Gratis"
                           className="max-w-full h-auto rounded-lg shadow-md"
-                          style={{ maxHeight: '200px' }}
+                          style={{ maxHeight: '300px', width: 'auto' }}
                         />
                       </div>
                     </div>
