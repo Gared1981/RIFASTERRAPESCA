@@ -33,12 +33,10 @@
 ### 2. 🎫 Compra de Boletos
 - **Acceso:** Menú "Boletos" o botón "Ver todos los sorteos"
 - **Proceso:**
-  1. Seleccionar sorteo activo
-  2. Elegir números manualmente o usar "Maquinita de la Suerte"
-  3. Completar formulario con datos personales
-  4. Elegir método de pago:
-     - **Mercado Pago:** Pago inmediato con tarjeta
-     - **WhatsApp:** Coordinación manual del pago
+  1. Navega por nuestro catálogo de sorteos activos
+  2. Reserva en línea - Completa el formulario con tus datos personales para reservar los boletos seleccionados
+  3. Paga directamente tus boletos con pago seguro de Mercado Pago o bien puedes realizar el proceso vía WhatsApp
+  4. ¡Espera el sorteo! - Una vez confirmado tu pago, solo queda esperar al día del sorteo. ¡Buena suerte!
 
 ### 3. 🔍 Verificar Boletos
 - **Acceso:** Menú "Verificar"
@@ -157,11 +155,11 @@
 
 ### Para Usuarios (Compra)
 1. **Entrar** → Página principal
-2. **Explorar** → Ver sorteos disponibles
+2. **Explorar** → Navegar por catálogo de sorteos activos
 3. **Seleccionar** → Elegir sorteo y boletos
-4. **Completar** → Datos personales
-5. **Pagar** → Mercado Pago o WhatsApp
-6. **Confirmar** → Recibir confirmación
+4. **Reservar** → Completar formulario con datos personales
+5. **Pagar** → Mercado Pago seguro o WhatsApp
+6. **Esperar** → ¡Buena suerte en el sorteo!
 
 ### Para Administradores (Gestión)
 1. **Login** → Panel de administración

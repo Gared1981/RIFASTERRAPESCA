@@ -230,7 +230,7 @@ const HomePage: React.FC = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Elige tus boletos</h3>
               <p className="text-gray-600">
-                Navega por nuestro catálogo de boletos disponibles y selecciona los números que más te gusten.
+                Navega por nuestro catálogo de sorteos activos y selecciona los números que más te gusten.
               </p>
             </div>
             
@@ -250,7 +250,7 @@ const HomePage: React.FC = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Realiza tu pago</h3>
               <p className="text-gray-600">
-                Te contactaremos por WhatsApp para coordinar el pago de tus boletos reservados.
+                Paga directamente tus boletos con pago seguro de Mercado Pago o bien puedes realizar el proceso vía WhatsApp.
               </p>
             </div>
             
