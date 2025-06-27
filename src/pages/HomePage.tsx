@@ -83,11 +83,11 @@ const HomePage: React.FC = () => {
         <div className="relative z-10 h-full flex items-end justify-center pb-20 sm:pb-24 md:pb-28 lg:pb-32">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              {/* Botones responsive con mejor contraste */}
-              <div className="flex flex-col space-y-4 sm:space-y-6 md:flex-row md:space-y-0 md:space-x-6 lg:space-x-8 justify-center items-center">
+              {/* Botones responsive con mejor contraste - CENTRADOS EN MÓVIL */}
+              <div className="flex flex-col items-center space-y-4 sm:space-y-6 md:flex-row md:space-y-0 md:space-x-6 lg:space-x-8 md:justify-center">
                 <Link
                   to="/sorteos"
-                  className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold text-white bg-gradient-to-r from-green-600 via-green-700 to-green-800 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-green-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-green-400/50 hover:border-green-300 backdrop-blur-md"
+                  className="group relative w-full max-w-sm sm:w-auto inline-flex items-center justify-center px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold text-white bg-gradient-to-r from-green-600 via-green-700 to-green-800 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-green-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-green-400/50 hover:border-green-300 backdrop-blur-md"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                   <span className="relative flex items-center">
@@ -101,7 +101,7 @@ const HomePage: React.FC = () => {
                 
                 <Link
                   to="/verificar"
-                  className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-blue-400/50 hover:border-blue-300 backdrop-blur-md"
+                  className="group relative w-full max-w-sm sm:w-auto inline-flex items-center justify-center px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-blue-400/50 hover:border-blue-300 backdrop-blur-md"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                   <span className="relative flex items-center">
@@ -164,23 +164,7 @@ const HomePage: React.FC = () => {
                         <Calendar className="h-4 w-4 mr-2" />
                         Sorteo: {new Date(raffle.draw_date).toLocaleDateString()}
                       </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Users className="h-4 w-4 mr-2" />
-                        {raffle.participant_count} participantes
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Ticket className="h-4 w-4 mr-2" />
-                        {raffle.tickets_sold} / {raffle.max_tickets} boletos vendidos
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded-full" 
-                          style={{ width: `${(raffle.tickets_sold / raffle.max_tickets) * 100}%` }}
-                        ></div>
-                      </div>
+                      {/* QUITADO: participantes y boletos vendidos */}
                     </div>
 
                     <Link
