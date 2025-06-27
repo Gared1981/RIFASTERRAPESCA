@@ -46,44 +46,44 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section Responsive */}
+      {/* Hero Section Responsive con mejor posicionamiento */}
       <section className="relative w-full h-screen overflow-hidden">
-        {/* Background Image Container with Responsive Images */}
+        {/* Background Image Container con mejor object-position */}
         <div className="absolute inset-0">
           <picture>
-            {/* Mobile version */}
+            {/* Mobile version - centrado en la parte superior */}
             <source 
               media="(max-width: 768px)" 
               srcSet="/Mobile-03.jpg" 
             />
             
-            {/* Tablet version */}
+            {/* Tablet version - posición ajustada */}
             <source 
               media="(max-width: 1024px)" 
               srcSet="/tablet-02.jpg" 
             />
             
-            {/* Desktop version */}
+            {/* Desktop version con mejor posicionamiento */}
             <img
               src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/Desktop.jpg?v=1750806041"
               alt="Sorteos Terrapesca"
-              className="w-full h-full object-cover object-center"
+              className="w-full h-full object-cover"
               style={{
                 filter: 'brightness(1.1) contrast(1.05) saturate(1.1)',
-                objectPosition: 'center center'
+                objectPosition: 'center 35%' // Movido hacia arriba para mostrar mejor las letras
               }}
             />
           </picture>
           
-          {/* Gradient overlay más sutil para mejor claridad */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+          {/* Gradient overlay optimizado para mejor legibilidad */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
         </div>
         
-        {/* Content Container - Responsive positioning */}
-        <div className="relative z-10 h-full flex items-center justify-center">
-          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 md:pb-24 lg:pb-32">
+        {/* Content Container - Mejor posicionamiento responsive */}
+        <div className="relative z-10 h-full flex items-end justify-center pb-20 sm:pb-24 md:pb-28 lg:pb-32">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              {/* Botones responsive con diseño premium */}
+              {/* Botones responsive con mejor contraste */}
               <div className="flex flex-col space-y-4 sm:space-y-6 md:flex-row md:space-y-0 md:space-x-6 lg:space-x-8 justify-center items-center">
                 <Link
                   to="/sorteos"
