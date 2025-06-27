@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Ticket } from '../utils/supabaseClient';
-import { CreditCard, MessageSquare, ArrowRight, Shield } from 'lucide-react';
+import { CreditCard, MessageSquare, ArrowRight, Shield, Gift } from 'lucide-react';
 import MercadoPagoPayment from './MercadoPagoPayment';
+import PDFGenerator from './PDFGenerator';
 
 interface PaymentMethodSelectorProps {
   selectedTickets: Ticket[];
@@ -9,12 +10,14 @@ interface PaymentMethodSelectorProps {
     id: number;
     name: string;
     price: number;
+    draw_date: string;
   };
   userInfo: {
     firstName: string;
     lastName: string;
     phone: string;
     email: string;
+    state: string;
   };
   onComplete: () => void;
   onCancel: () => void;
@@ -33,6 +36,8 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [showMercadoPago, setShowMercadoPago] = useState(false);
+  const [showPDFGenerator, setShowPDFGenerator] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'whatsapp'>('mercadopago');
 
   const totalAmount = selectedTickets.length * raffleInfo.price;
 
@@ -51,7 +56,10 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     
     const whatsappLink = `https://wa.me/526686889571?text=${encodeURIComponent(whatsappMessage)}`;
     window.open(whatsappLink, '_blank');
-    onComplete();
+    
+    // Mostrar generador de PDF para WhatsApp
+    setPaymentMethod('whatsapp');
+    setShowPDFGenerator(true);
   };
 
   const handleMercadoPagoSelect = () => {
@@ -60,12 +68,83 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   const handleMercadoPagoSuccess = (paymentData: any) => {
     console.log('Payment successful:', paymentData);
-    onComplete();
+    // Mostrar generador de PDF para Mercado Pago
+    setPaymentMethod('mercadopago');
+    setShowPDFGenerator(true);
   };
 
   const handleMercadoPagoCancel = () => {
     setShowMercadoPago(false);
   };
+
+  const handlePDFGenerated = (pdfBlob: Blob) => {
+    // Crear enlace de descarga
+    const url = URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `comprobante-sorteo-${selectedTickets.map(t => t.number).join('-')}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    // Completar el proceso
+    onComplete();
+  };
+
+  if (showPDFGenerator) {
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto text-center">
+        <div className="mb-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Gift className="h-8 w-8 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            ¡Pago Confirmado!
+          </h2>
+          <p className="text-gray-600">
+            {paymentMethod === 'mercadopago' 
+              ? '🏆 ¡Felicidades! Por pagar con Mercado Pago, automáticamente participas en nuestro premio especial adicional.'
+              : 'Tu reserva ha sido registrada. Te contactaremos por WhatsApp para coordinar el pago.'
+            }
+          </p>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <h3 className="font-semibold mb-2">Resumen de tu compra</h3>
+          <div className="text-sm text-gray-600 space-y-1">
+            <p>Boletos: {selectedTickets.map(t => t.number).join(', ')}</p>
+            <p>Sorteo: {raffleInfo.name}</p>
+            <p>Total: ${totalAmount.toLocaleString()} MXN</p>
+            {paymentMethod === 'mercadopago' && (
+              <p className="text-green-600 font-semibold">✨ Incluye participación en premio especial</p>
+            )}
+          </div>
+        </div>
+
+        <PDFGenerator
+          tickets={selectedTickets}
+          user={{
+            id: '',
+            first_name: userInfo.firstName,
+            last_name: userInfo.lastName,
+            phone: userInfo.phone,
+            state: userInfo.state
+          }}
+          raffleInfo={raffleInfo}
+          paymentMethod={paymentMethod}
+          onGenerate={handlePDFGenerated}
+        />
+
+        <button
+          onClick={onComplete}
+          className="mt-4 text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          Continuar sin descargar
+        </button>
+      </div>
+    );
+  }
 
   if (showMercadoPago) {
     return (
@@ -140,6 +219,11 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                   <Shield className="h-4 w-4 text-green-500 mr-1" />
                   <span className="text-sm text-green-600">Pago protegido</span>
                 </div>
+                {/* Premio especial badge */}
+                <div className="flex items-center mt-2">
+                  <Gift className="h-4 w-4 text-yellow-500 mr-1" />
+                  <span className="text-sm text-yellow-600 font-semibold">🏆 Incluye premio especial</span>
+                </div>
               </div>
             </div>
             <div className="text-right">
@@ -154,6 +238,14 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           
           {selectedMethod === 'mercadopago' && (
             <div className="mt-4 pt-4 border-t border-blue-200">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center text-yellow-800">
+                  <Gift className="h-4 w-4 mr-2" />
+                  <span className="text-sm font-semibold">
+                    ¡Bonus! Al pagar con Mercado Pago participas automáticamente en nuestro premio especial adicional
+                  </span>
+                </div>
+              </div>
               <button
                 onClick={handleMercadoPagoSelect}
                 className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"

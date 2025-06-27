@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
-import { Calendar, Users, Share2, Copy, MapIcon as WhatsappIcon, Ticket, ChevronLeft, ChevronRight, Video, ZoomIn, X } from 'lucide-react';
+import { Calendar, Users, Share2, Copy, MapIcon as WhatsappIcon, Ticket, ChevronLeft, ChevronRight, Video, ZoomIn, X, Clock } from 'lucide-react';
 import Footer from '../components/Footer';
 import CountdownTimer from '../components/CountdownTimer';
 import VideoPlayer from '../components/VideoPlayer';
@@ -163,6 +163,20 @@ const RafflePage: React.FC = () => {
   const allVideos = [raffle.video_url, ...(raffle.video_urls || [])].filter(Boolean);
   const hasMedia = allImages.length > 0 || allVideos.length > 0;
 
+  // Formatear fecha con zona horaria del Pacífico
+  const formatDrawDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-MX', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'America/Mazatlan'
+    });
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
@@ -273,6 +287,28 @@ const RafflePage: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* GIF del premio especial debajo de la galería */}
+                  <div className="mt-6">
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-200">
+                      <div className="text-center mb-3">
+                        <h3 className="text-lg font-bold text-yellow-800 mb-2">
+                          🏆 ¡Premio Especial para Pagos con Mercado Pago!
+                        </h3>
+                        <p className="text-yellow-700 text-sm">
+                          Al pagar con Mercado Pago, automáticamente participas en nuestro premio especial adicional
+                        </p>
+                      </div>
+                      <div className="flex justify-center">
+                        <img
+                          src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/ENVIO_GRATIS.gif?v=1750992275"
+                          alt="Premio Especial - Envío Gratis"
+                          className="max-w-full h-auto rounded-lg shadow-md"
+                          style={{ maxHeight: '200px' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </>
               )}
             </div>
@@ -314,14 +350,20 @@ const RafflePage: React.FC = () => {
               )}
 
               <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div className="flex items-center">
                     <Calendar className="h-5 w-5 text-green-600 mr-2" />
                     <div>
                       <p className="text-sm text-gray-500">Fecha del sorteo</p>
                       <p className="font-semibold">
-                        {new Date(raffle.draw_date).toLocaleDateString()}
+                        {formatDrawDate(raffle.draw_date)}
                       </p>
+                      <div className="flex items-center mt-1">
+                        <Clock className="h-4 w-4 text-blue-500 mr-1" />
+                        <span className="text-xs text-blue-600 font-medium">
+                          Hora del Pacífico - Sinaloa
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -340,7 +382,7 @@ const RafflePage: React.FC = () => {
                     ¡Sorteo Realizado!
                   </h3>
                   <p className="text-green-700">
-                    Fecha: {new Date(raffle.drawn_at).toLocaleDateString()}
+                    Fecha: {formatDrawDate(raffle.drawn_at)}
                   </p>
                   {raffle.winner_id && (
                     <div className="mt-2">
