@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
-import { Calendar, Users, Share2, Copy, MapIcon as WhatsappIcon, Ticket, ChevronLeft, ChevronRight, Video, ZoomIn, X, Clock, Shield } from 'lucide-react';
+import { Calendar, Users, Share2, Copy, MapIcon as WhatsappIcon, Ticket, ChevronLeft, ChevronRight, Video, ZoomIn, X, Clock, Shield, Gift } from 'lucide-react';
 import Footer from '../components/Footer';
 import CountdownTimer from '../components/CountdownTimer';
 import VideoPlayer from '../components/VideoPlayer';
@@ -38,6 +38,7 @@ const RafflePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'images' | 'videos'>('images');
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
+  const [showGifModal, setShowGifModal] = useState(false);
 
   useEffect(() => {
     const fetchRaffle = async () => {
@@ -104,6 +105,14 @@ const RafflePage: React.FC = () => {
     setShowImageModal(false);
   };
 
+  const openGifModal = () => {
+    setShowGifModal(true);
+  };
+
+  const closeGifModal = () => {
+    setShowGifModal(false);
+  };
+
   const nextModalImage = () => {
     if (raffle && allImages.length > 0) {
       setModalImageIndex((prev) => (prev + 1) % allImages.length);
@@ -119,20 +128,23 @@ const RafflePage: React.FC = () => {
   // Handle keyboard navigation in modal
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (!showImageModal) return;
+      if (!showImageModal && !showGifModal) return;
       
       if (e.key === 'Escape') {
-        closeImageModal();
-      } else if (e.key === 'ArrowLeft') {
-        prevModalImage();
-      } else if (e.key === 'ArrowRight') {
-        nextModalImage();
+        if (showImageModal) closeImageModal();
+        if (showGifModal) closeGifModal();
+      } else if (showImageModal) {
+        if (e.key === 'ArrowLeft') {
+          prevModalImage();
+        } else if (e.key === 'ArrowRight') {
+          nextModalImage();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showImageModal]);
+  }, [showImageModal, showGifModal]);
 
   if (loading) {
     return (
@@ -288,32 +300,21 @@ const RafflePage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* GIF del premio especial - MISMO TAMAÑO QUE LA IMAGEN PRINCIPAL */}
+                  {/* Botón para mostrar GIF del premio especial */}
                   <div className="mt-8 flex justify-center">
-                    <div className="relative w-full">
-                      <img
-                        src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/ENVIO_GRATIS.gif?v=1750992275"
-                        alt="Premio Especial - Envío Gratis"
-                        className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-contain rounded-xl"
-                        style={{ 
-                          filter: 'drop-shadow(0 25px 50px rgba(0, 0, 0, 0.25)) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.15))',
-                          transform: 'perspective(1000px) rotateX(5deg)',
-                          boxShadow: `
-                            0 25px 50px -12px rgba(0, 0, 0, 0.25),
-                            0 15px 30px -15px rgba(0, 0, 0, 0.15),
-                            0 8px 16px -8px rgba(0, 0, 0, 0.1),
-                            inset 0 1px 0 rgba(255, 255, 255, 0.1)
-                          `
-                        }}
-                      />
-                      {/* Sombra adicional en el suelo */}
-                      <div 
-                        className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-4/5 h-6 bg-black opacity-20 rounded-full blur-lg"
-                        style={{
-                          background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, transparent 70%)'
-                        }}
-                      ></div>
-                    </div>
+                    <button
+                      onClick={openGifModal}
+                      className="group relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:shadow-yellow-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-yellow-300 hover:border-yellow-200"
+                    >
+                      <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                      <span className="relative flex items-center">
+                        <Gift className="mr-3 h-6 w-6 group-hover:rotate-12 transition-transform duration-300" />
+                        🎁 Ver Premio Especial
+                        <Gift className="ml-3 h-6 w-6 group-hover:rotate-12 transition-transform duration-300" />
+                      </span>
+                      {/* Efecto de brillo */}
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transform -skew-x-12 group-hover:animate-pulse transition-all duration-700"></div>
+                    </button>
                   </div>
                 </>
               )}
@@ -459,6 +460,53 @@ const RafflePage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Modal del GIF del premio especial */}
+      {showGifModal && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4">
+          <div className="relative max-w-4xl w-full">
+            {/* Botón cerrar */}
+            <button
+              onClick={closeGifModal}
+              className="absolute -top-12 right-0 z-10 text-white hover:text-gray-300 transition-colors bg-black bg-opacity-50 rounded-full p-3"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            
+            {/* Contenido del modal */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
+              <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white p-6 text-center">
+                <h2 className="text-3xl font-bold mb-2">🎁 ¡PREMIO ESPECIAL! 🎁</h2>
+                <p className="text-lg opacity-90">Envío completamente GRATIS a toda la República Mexicana</p>
+              </div>
+              
+              <div className="p-6">
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/ENVIO_GRATIS.gif?v=1750992275"
+                  alt="Premio Especial - Envío Gratis"
+                  className="w-full h-auto rounded-xl shadow-lg"
+                  style={{ 
+                    maxHeight: '70vh',
+                    objectFit: 'contain'
+                  }}
+                />
+                
+                <div className="mt-6 text-center">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-green-800 mb-2">
+                      ✨ Beneficio Exclusivo
+                    </h3>
+                    <p className="text-green-700">
+                      Tu premio será enviado sin costo adicional a cualquier parte de México. 
+                      ¡No importa dónde te encuentres, nosotros nos encargamos de todo!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de imagen ampliada estilo Amazon */}
       {showImageModal && (
