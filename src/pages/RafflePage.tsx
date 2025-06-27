@@ -288,17 +288,33 @@ const RafflePage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* GIF del premio especial debajo de la galería - SIN TEXTO */}
-                  <div className="mt-6">
-                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-6 border border-yellow-200">
-                      <div className="flex justify-center">
-                        <img
-                          src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/ENVIO_GRATIS.gif?v=1750992275"
-                          alt="Premio Especial - Envío Gratis"
-                          className="max-w-full h-auto rounded-lg shadow-md"
-                          style={{ maxHeight: '300px', width: 'auto' }}
-                        />
-                      </div>
+                  {/* GIF del premio especial debajo de la galería - CON EFECTO SOMBRA 3D */}
+                  <div className="mt-8 flex justify-center">
+                    <div className="relative">
+                      <img
+                        src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/ENVIO_GRATIS.gif?v=1750992275"
+                        alt="Premio Especial - Envío Gratis"
+                        className="max-w-full h-auto rounded-xl"
+                        style={{ 
+                          maxHeight: '300px', 
+                          width: 'auto',
+                          filter: 'drop-shadow(0 25px 50px rgba(0, 0, 0, 0.25)) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.15))',
+                          transform: 'perspective(1000px) rotateX(5deg)',
+                          boxShadow: `
+                            0 25px 50px -12px rgba(0, 0, 0, 0.25),
+                            0 15px 30px -15px rgba(0, 0, 0, 0.15),
+                            0 8px 16px -8px rgba(0, 0, 0, 0.1),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                          `
+                        }}
+                      />
+                      {/* Sombra adicional en el suelo */}
+                      <div 
+                        className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-4/5 h-6 bg-black opacity-20 rounded-full blur-lg"
+                        style={{
+                          background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, transparent 70%)'
+                        }}
+                      ></div>
                     </div>
                   </div>
                 </>
