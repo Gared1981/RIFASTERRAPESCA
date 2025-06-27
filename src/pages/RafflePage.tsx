@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
-import { Calendar, Users, Share2, Copy, MapIcon as WhatsappIcon, Ticket, ChevronLeft, ChevronRight, Video, ZoomIn, X, Clock } from 'lucide-react';
+import { Calendar, Users, Share2, Copy, MapIcon as WhatsappIcon, Ticket, ChevronLeft, ChevronRight, Video, ZoomIn, X, Clock, Shield } from 'lucide-react';
 import Footer from '../components/Footer';
 import CountdownTimer from '../components/CountdownTimer';
 import VideoPlayer from '../components/VideoPlayer';
@@ -237,7 +237,7 @@ const RafflePage: React.FC = () => {
                           ))}
                         </div>
 
-                        {/* Imagen principal - MÁS GRANDE Y EQUILIBRADA */}
+                        {/* Imagen principal - MISMO TAMAÑO QUE LA GALERÍA */}
                         <div className="order-1 lg:order-2 flex-1 relative group">
                           <div 
                             className="relative cursor-pointer bg-gray-50 rounded-lg overflow-hidden"
@@ -288,16 +288,14 @@ const RafflePage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* GIF del premio especial debajo de la galería - CON EFECTO SOMBRA 3D */}
+                  {/* GIF del premio especial - MISMO TAMAÑO QUE LA IMAGEN PRINCIPAL */}
                   <div className="mt-8 flex justify-center">
-                    <div className="relative">
+                    <div className="relative w-full">
                       <img
                         src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/ENVIO_GRATIS.gif?v=1750992275"
                         alt="Premio Especial - Envío Gratis"
-                        className="max-w-full h-auto rounded-xl"
+                        className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-contain rounded-xl"
                         style={{ 
-                          maxHeight: '300px', 
-                          width: 'auto',
                           filter: 'drop-shadow(0 25px 50px rgba(0, 0, 0, 0.25)) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.15))',
                           transform: 'perspective(1000px) rotateX(5deg)',
                           boxShadow: `
@@ -356,6 +354,21 @@ const RafflePage: React.FC = () => {
                   />
                 </div>
               )}
+
+              {/* Insignia de Pago Seguro - POSICIONADA ESTRATÉGICAMENTE */}
+              <div className="mb-6 flex justify-center">
+                <div className="relative">
+                  <img
+                    src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/pago-seguro-pizarronesplus-2023-768x217.png?v=1750993563"
+                    alt="Pago Seguro - Mercado Pago"
+                    className="h-16 md:h-20 w-auto object-contain"
+                    style={{
+                      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1))',
+                      maxWidth: '300px'
+                    }}
+                  />
+                </div>
+              </div>
 
               <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
                 <div className="grid grid-cols-1 gap-4">
