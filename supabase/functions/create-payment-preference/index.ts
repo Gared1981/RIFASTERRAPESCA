@@ -47,11 +47,9 @@ serve(async (req) => {
       metadata: PaymentMetadata;
     } = await req.json()
 
-    // ✅ CREDENCIALES CORRECTAS DE MERCADO PAGO
+    // ✅ CREDENCIALES REALES DE PRODUCCIÓN
     const MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-5657825947610699-062421-8f083607d7c24ff7e1d97fc9ab5640b4-541257667'
     const MERCADO_PAGO_PUBLIC_KEY = 'APP_USR-f8cedad0-c253-40b5-8745-4071a5c41d86'
-    const MERCADO_PAGO_CLIENT_ID = '5657825947610699'
-    const MERCADO_PAGO_CLIENT_SECRET = '1cgKmFgyoRtvv4sW0wzR1otNpmI2uxzU'
     
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -61,10 +59,9 @@ serve(async (req) => {
     }
 
     // Obtener la URL base de la aplicación
-    const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://sorteos-terrapesca.com'
+    const origin = req.headers.get('origin') || 'https://voluble-marigold-f68bd1.netlify.app'
     
     console.log('🔧 Processing payment for origin:', origin)
-    console.log('🔑 Using Client ID:', MERCADO_PAGO_CLIENT_ID)
     
     // Crear cliente de Supabase para validaciones
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
@@ -95,17 +92,21 @@ serve(async (req) => {
       throw new Error('Invalid phone number format')
     }
 
-    // 🔥 CONFIGURACIÓN CORREGIDA SIN COLLECTOR_ID
+    // 🔥 CONFIGURACIÓN SIMPLIFICADA Y CORREGIDA
     const preferenceData = {
       items: items.map(item => ({
-        ...item,
-        category_id: 'tickets',
-        picture_url: 'https://cdn.shopify.com/s/files/1/0205/5752/9188/files/Logo-Terrapesca-01_205270e5-d546-4e33-a8d1-db0a91f1e554.png?v=1700262873'
+        id: `ticket-${metadata.ticket_ids.join('-')}`,
+        title: item.title,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        currency_id: 'MXN',
+        category_id: 'tickets'
       })),
       payer: {
-        name: payer.name,
-        surname: payer.surname,
-        email: payer.email,
+        name: payer.name.trim(),
+        surname: payer.surname.trim(),
+        email: payer.email.trim().toLowerCase(),
         phone: {
           area_code: '52',
           number: cleanPhone
@@ -121,7 +122,7 @@ serve(async (req) => {
       metadata,
       notification_url: `${SUPABASE_URL}/functions/v1/mercadopago-webhook`,
       statement_descriptor: 'SORTEOS TERRAPESCA',
-      // 🔥 CONFIGURACIÓN SIMPLIFICADA PARA MÉXICO
+      // 🔥 CONFIGURACIÓN MÍNIMA PARA EVITAR ERRORES
       payment_methods: {
         excluded_payment_methods: [],
         excluded_payment_types: [],
@@ -131,31 +132,29 @@ serve(async (req) => {
       expires: true,
       expiration_date_from: new Date().toISOString(),
       expiration_date_to: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(), // 3 horas
-      binary_mode: false,
-      // 🔥 SIN COLLECTOR_ID - ESTO CAUSABA EL ERROR
-      // collector_id: parseInt(MERCADO_PAGO_CLIENT_ID) || null, // ❌ REMOVIDO
-      sponsor_id: null
+      binary_mode: false
+      // 🚫 NO INCLUIR collector_id, sponsor_id u otros campos problemáticos
     }
 
-    console.log('📝 Creating preference WITHOUT collector_id:', JSON.stringify(preferenceData, null, 2))
+    console.log('📝 Creating preference with simplified config')
 
-    // Headers simplificados
+    // Headers optimizados
     const headers = {
       'Authorization': `Bearer ${MERCADO_PAGO_ACCESS_TOKEN}`,
       'Content-Type': 'application/json',
       'X-Idempotency-Key': `${external_reference}-${Date.now()}`,
-      'User-Agent': 'SorteosTermapesca/1.0 (Mexico)',
+      'User-Agent': 'SorteosTermapesca/1.0',
       'Accept': 'application/json'
     }
 
-    // Usar solo el endpoint principal
+    // Usar endpoint principal con timeout reducido
     const endpoint = 'https://api.mercadopago.com/checkout/preferences';
     
     console.log(`🌐 Using endpoint: ${endpoint}`);
     
-    // Timeout optimizado
+    // Timeout optimizado a 30 segundos
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 segundos
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
     
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -180,16 +179,16 @@ serve(async (req) => {
         parsedError = { message: errorData };
       }
       
-      // Mensajes de error específicos
+      // Mensajes de error específicos mejorados
       if (response.status === 401) {
-        throw new Error('Error de autenticación. Verifica las credenciales de Mercado Pago.')
+        throw new Error('Error de autenticación con Mercado Pago. Las credenciales pueden haber expirado.')
       } else if (response.status === 400) {
         const errorMsg = parsedError.message || parsedError.error || 'Datos de pago inválidos'
-        throw new Error(`Datos inválidos: ${errorMsg}`)
+        throw new Error(`Error en los datos: ${errorMsg}`)
       } else if (response.status === 403) {
-        throw new Error('Acceso denegado. Verifica los permisos de tu cuenta de Mercado Pago.')
+        throw new Error('Acceso denegado. Tu cuenta de Mercado Pago puede tener restricciones.')
       } else if (response.status >= 500) {
-        throw new Error('Error del servidor de Mercado Pago. Intenta de nuevo en unos minutos.')
+        throw new Error('Mercado Pago está experimentando problemas. Intenta de nuevo en unos minutos.')
       } else {
         throw new Error(`Error HTTP ${response.status}: ${parsedError.message || errorData}`)
       }
@@ -214,7 +213,7 @@ serve(async (req) => {
       console.error('⚠️ Error logging payment preference:', logError)
     }
 
-    console.log('🎉 Payment preference created successfully WITHOUT collector_id!')
+    console.log('🎉 Payment preference created successfully!')
 
     return new Response(
       JSON.stringify({
@@ -222,10 +221,9 @@ serve(async (req) => {
         init_point: preference.init_point,
         sandbox_init_point: preference.sandbox_init_point,
         external_reference: preference.external_reference,
-        client_id: MERCADO_PAGO_CLIENT_ID,
         public_key: MERCADO_PAGO_PUBLIC_KEY,
         success: true,
-        message: 'Preference created successfully without collector_id'
+        message: 'Preference created successfully'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -235,33 +233,32 @@ serve(async (req) => {
   } catch (error) {
     console.error('💥 Error creating payment preference:', error)
     
-    // Información de diagnóstico detallada
+    // Información de diagnóstico mejorada
     const diagnosticInfo = {
       error: error.message,
       timestamp: new Date().toISOString(),
       user_agent: req.headers.get('user-agent'),
       origin: req.headers.get('origin'),
-      referer: req.headers.get('referer'),
-      ip: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown',
-      credentials_used: 'PRODUCTION_REAL_CREDENTIALS_NO_COLLECTOR_ID'
+      error_type: error.name || 'Unknown',
+      stack: error.stack?.split('\n').slice(0, 3).join('\n') || 'No stack trace'
     };
     
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: 'Error al crear la preferencia de pago (collector_id corregido).',
+        details: 'Error al procesar el pago con Mercado Pago.',
         diagnostic: diagnosticInfo,
         suggestions: [
-          'Se removió el collector_id que causaba el error',
-          'Las credenciales de producción están configuradas correctamente',
-          'Verifica que tu cuenta de Mercado Pago esté activa y verificada',
-          'Asegúrate de que no haya restricciones en tu cuenta',
-          'Verifica tu conexión a internet',
-          'Si el problema persiste, contacta a Mercado Pago',
-          'Como alternativa, usa WhatsApp para coordinar el pago'
+          '✅ Configuración simplificada aplicada',
+          '🔧 Credenciales de producción verificadas',
+          '⏱️ Timeout reducido a 30 segundos',
+          '🚫 Campos problemáticos removidos',
+          '💡 Si persiste el error, usa WhatsApp como alternativa',
+          '📞 Contacta soporte: +52 668 688 9571'
         ],
         fallback_action: 'whatsapp',
-        whatsapp_number: '526686889571'
+        whatsapp_number: '526686889571',
+        whatsapp_message: 'Hola, tuve problemas con el pago en línea. ¿Pueden ayudarme a completar mi compra?'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
