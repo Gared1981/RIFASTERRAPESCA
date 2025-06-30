@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Ticket } from '../utils/supabaseClient';
-import { CreditCard, MessageSquare, ArrowRight, Shield, Gift } from 'lucide-react';
+import { CreditCard, MessageSquare, ArrowRight, Shield, Gift, Star } from 'lucide-react';
 import MercadoPagoPayment from './MercadoPagoPayment';
 import PDFGenerator from './PDFGenerator';
 
@@ -96,28 +96,40 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     return (
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto text-center">
         <div className="mb-6">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Gift className="h-8 w-8 text-green-600" />
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Gift className="h-10 w-10 text-green-600" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            ¡Pago Confirmado!
+            ¡Proceso Completado!
           </h2>
           <p className="text-gray-600">
             {paymentMethod === 'mercadopago' 
-              ? '🏆 ¡Felicidades! Por pagar con Mercado Pago, automáticamente participas en nuestro premio especial adicional.'
-              : 'Tu reserva ha sido registrada. Te contactaremos por WhatsApp para coordinar el pago.'
+              ? '🏆 ¡Felicidades! Por pagar con Mercado Pago, automáticamente participas en nuestro premio especial con envío GRATIS a toda la República Mexicana.'
+              : 'Tu reserva ha sido registrada exitosamente. Te contactaremos por WhatsApp para coordinar el pago.'
             }
           </p>
         </div>
 
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold mb-2">Resumen de tu compra</h3>
-          <div className="text-sm text-gray-600 space-y-1">
-            <p>Boletos: {selectedTickets.map(t => t.number).join(', ')}</p>
-            <p>Sorteo: {raffleInfo.name}</p>
-            <p>Total: ${totalAmount.toLocaleString()} MXN</p>
+          <h3 className="font-semibold mb-3 text-lg">📋 Resumen de tu participación</h3>
+          <div className="text-sm text-gray-600 space-y-2">
+            <div className="flex justify-between">
+              <span>Boletos:</span>
+              <span className="font-semibold">{selectedTickets.map(t => t.number).join(', ')}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Sorteo:</span>
+              <span className="font-semibold">{raffleInfo.name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Total:</span>
+              <span className="font-semibold">${totalAmount.toLocaleString()} MXN</span>
+            </div>
             {paymentMethod === 'mercadopago' && (
-              <p className="text-green-600 font-semibold">✨ Incluye participación en premio especial</p>
+              <div className="flex justify-between text-green-600">
+                <span>Bonus:</span>
+                <span className="font-semibold">✨ Premio especial + Envío GRATIS</span>
+              </div>
             )}
           </div>
         </div>
@@ -138,9 +150,9 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
         <button
           onClick={onComplete}
-          className="mt-4 text-gray-600 hover:text-gray-800 transition-colors"
+          className="mt-4 text-gray-600 hover:text-gray-800 transition-colors underline"
         >
-          Continuar sin descargar
+          Continuar sin descargar comprobante
         </button>
       </div>
     );
@@ -198,15 +210,23 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
       {/* Métodos de pago */}
       <div className="space-y-4 mb-6">
-        {/* Mercado Pago */}
+        {/* Mercado Pago - RECOMENDADO */}
         <div
-          className={`border-2 rounded-lg p-6 cursor-pointer transition-all ${
+          className={`border-2 rounded-lg p-6 cursor-pointer transition-all relative ${
             selectedMethod === 'mercadopago'
               ? 'border-blue-500 bg-blue-50'
               : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
           }`}
           onClick={() => setSelectedMethod('mercadopago')}
         >
+          {/* Badge de recomendado */}
+          <div className="absolute -top-3 left-4">
+            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold flex items-center">
+              <Star className="h-3 w-3 mr-1" />
+              RECOMENDADO
+            </div>
+          </div>
+          
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="bg-blue-100 p-3 rounded-lg mr-4">
@@ -222,7 +242,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                 {/* Premio especial badge */}
                 <div className="flex items-center mt-2">
                   <Gift className="h-4 w-4 text-yellow-500 mr-1" />
-                  <span className="text-sm text-yellow-600 font-semibold">🏆 Incluye premio especial</span>
+                  <span className="text-sm text-yellow-600 font-semibold">🏆 Incluye premio especial + Envío GRATIS</span>
                 </div>
               </div>
             </div>
@@ -242,13 +262,13 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                 <div className="flex items-center text-yellow-800">
                   <Gift className="h-4 w-4 mr-2" />
                   <span className="text-sm font-semibold">
-                    ¡Bonus! Al pagar con Mercado Pago participas automáticamente en nuestro premio especial adicional
+                    ¡Bonus Exclusivo! Al pagar con Mercado Pago participas automáticamente en nuestro premio especial con envío GRATIS a toda la República Mexicana
                   </span>
                 </div>
               </div>
               <button
                 onClick={handleMercadoPagoSelect}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-semibold"
               >
                 Pagar con Mercado Pago
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -293,7 +313,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
             <div className="mt-4 pt-4 border-t border-green-200">
               <button
                 onClick={handleWhatsAppPayment}
-                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center font-semibold"
               >
                 Continuar por WhatsApp
                 <ArrowRight className="ml-2 h-5 w-5" />
