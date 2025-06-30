@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
-import { Calendar, Users, Share2, Copy, MapIcon as WhatsappIcon, Ticket, ChevronLeft, ChevronRight, Video, ZoomIn, X, Clock, Shield, Gift } from 'lucide-react';
+import { Calendar, Share2, Copy, MapIcon as WhatsappIcon, Ticket, ChevronLeft, ChevronRight, Video, ZoomIn, X, Clock, Shield, Gift } from 'lucide-react';
 import Footer from '../components/Footer';
 import CountdownTimer from '../components/CountdownTimer';
 import VideoPlayer from '../components/VideoPlayer';
@@ -22,13 +22,9 @@ interface PublicRaffle {
   winner_id: string | null;
   winner_first_name: string | null;
   winner_last_name: string | null;
-  participant_count: number;
-  total_tickets: number;
   price: number;
   slug: string;
   status: string;
-  max_tickets: number;
-  tickets_sold: number;
 }
 
 const RafflePage: React.FC = () => {
@@ -405,26 +401,6 @@ const RafflePage: React.FC = () => {
                         <span className="text-xs text-blue-600 font-medium">
                           Hora del Pacífico - Sinaloa
                         </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="h-5 w-5 text-green-600 mr-2" />
-                    <div>
-                      <p className="text-sm text-gray-500">Participantes</p>
-                      <p className="font-semibold">{raffle.participant_count}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <Ticket className="h-5 w-5 text-green-600 mr-2" />
-                    <div>
-                      <p className="text-sm text-gray-500">Boletos vendidos</p>
-                      <p className="font-semibold">{raffle.tickets_sold} / {raffle.max_tickets}</p>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                        <div 
-                          className="bg-green-500 h-2 rounded-full transition-all duration-300" 
-                          style={{ width: `${Math.min((raffle.tickets_sold / raffle.max_tickets) * 100, 100)}%` }}
-                        ></div>
                       </div>
                     </div>
                   </div>

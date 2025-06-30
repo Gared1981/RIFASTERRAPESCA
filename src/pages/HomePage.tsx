@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Trophy, CheckCircle, Clock, Users, Ticket } from 'lucide-react';
+import { ArrowRight, Calendar, Trophy, CheckCircle, Clock } from 'lucide-react';
 import Footer from '../components/Footer';
 import CountdownTimer from '../components/CountdownTimer';
 import { supabase } from '../utils/supabaseClient';
@@ -12,9 +12,6 @@ interface PublicRaffle {
   image_url: string;
   draw_date: string;
   price: number;
-  participant_count: number;
-  tickets_sold: number;
-  max_tickets: number;
   status: string;
   slug: string;
 }
@@ -180,22 +177,9 @@ const HomePage: React.FC = () => {
                         <Calendar className="h-4 w-4 mr-2" />
                         Sorteo: {new Date(raffle.draw_date).toLocaleDateString()}
                       </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Users className="h-4 w-4 mr-2" />
-                        {raffle.participant_count} participantes
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Ticket className="h-4 w-4 mr-2" />
-                        {raffle.tickets_sold} / {raffle.max_tickets} boletos vendidos
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded-full" 
-                          style={{ width: `${(raffle.tickets_sold / raffle.max_tickets) * 100}%` }}
-                        ></div>
+                      <div className="flex items-center text-sm text-blue-600">
+                        <Clock className="h-4 w-4 mr-2" />
+                        Hora del Pacífico - Sinaloa
                       </div>
                     </div>
 

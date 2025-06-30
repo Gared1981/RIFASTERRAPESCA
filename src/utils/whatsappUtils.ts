@@ -44,47 +44,26 @@ export function generateReservationConfirmationMessage(
 ): string {
   const totalAmount = ticketNumbers.length * raffleInfo.price;
   const baseUrl = window.location.origin;
-  const drawDate = new Date(raffleInfo.draw_date).toLocaleDateString('es-MX', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'America/Mazatlan'
-  });
   
   let message = `🎟️ *BOLETOS RESERVADOS EXITOSAMENTE* 🎟️\n\n`;
   message += `👤 *Cliente:* ${userInfo.firstName} ${userInfo.lastName}\n`;
   message += `📱 *WhatsApp:* ${userInfo.phone}\n`;
   message += `📍 *Estado:* ${userInfo.state}\n\n`;
   message += `🎰 *Sorteo:* ${raffleInfo.name}\n`;
-  message += `📅 *Fecha del sorteo:* ${drawDate}\n`;
   message += `🎫 *Boletos reservados:* ${ticketNumbers.join(', ')}\n`;
-  message += `💰 *Total a pagar:* $${totalAmount.toLocaleString()} MXN\n`;
-  message += `💵 *Precio por boleto:* $${raffleInfo.price} MXN\n\n`;
+  message += `💰 *Total a pagar:* $${totalAmount.toLocaleString()} MXN\n\n`;
   
   if (promoterCode) {
-    message += `👨‍💼 *Código de promotor:* ${promoterCode}\n`;
-    message += `💼 *Comisión del promotor:* $${(ticketNumbers.length * 1000).toLocaleString()} MXN\n\n`;
+    message += `👨‍💼 *Código de promotor:* ${promoterCode}\n\n`;
   }
   
-  message += `⏰ *IMPORTANTE:* Tus boletos están reservados por *3 HORAS*\n`;
-  message += `⌛ *Después de este tiempo volverán a estar disponibles*\n\n`;
-  message += `💳 *OPCIONES DE PAGO:*\n\n`;
-  message += `🥇 *OPCIÓN 1 - PAGO EN LÍNEA (RECOMENDADO)*\n`;
-  message += `✅ Pago inmediato con Mercado Pago\n`;
-  message += `✅ Tarjetas de crédito/débito\n`;
-  message += `✅ Transferencias bancarias\n`;
-  message += `✅ Confirmación automática\n`;
-  message += `🔗 *Enlace directo:* ${baseUrl}/boletos?raffle=${raffleInfo.id}\n\n`;
-  message += `🥈 *OPCIÓN 2 - PAGO POR WHATSAPP*\n`;
-  message += `📞 Coordinar pago directamente\n`;
-  message += `🏦 Transferencia bancaria\n`;
-  message += `💰 Depósito en efectivo\n`;
-  message += `📱 Responde a este mensaje para coordinar\n\n`;
-  message += `🐟 *¡Gracias por participar en Sorteos Terrapesca!* 🐟\n`;
-  message += `🍀 *¡Mucha suerte en el sorteo!* 🍀`;
+  message += `⏰ *IMPORTANTE:* Tus boletos están reservados por *3 horas*.\n\n`;
+  message += `💳 *Para completar tu pago, puedes:*\n`;
+  message += `1️⃣ *Pagar en línea con Mercado Pago (recomendado)*\n`;
+  message += `🔗 *Enlace para pagar en línea:* ${baseUrl}/boletos?raffle=${raffleInfo.id}\n\n`;
+  message += `2️⃣ *Pagar por WhatsApp*\n`;
+  message += `https://cdn.shopify.com/s/files/1/0205/5752/9188/files/f09af494-4c14-40e1-93b3-2aebe6e3ee50_1.jpg?v=1751326649\n\n`;
+  message += `¡Gracias por participar en Sorteos Terrapesca! 🐟`;
   
   return message;
 }
