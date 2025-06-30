@@ -32,12 +32,12 @@ const TicketsPage: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Fetch all active raffles
+        // Fetch all active raffles with real-time data
         const { data: rafflesData, error: rafflesError } = await supabase
-          .from('raffles')
+          .from('public_raffles')
           .select('*')
           .eq('status', 'active')
-          .order('created_at', { ascending: false });
+          .order('draw_date', { ascending: true });
           
         if (rafflesError) {
           console.error('Supabase error:', rafflesError);
@@ -73,6 +73,22 @@ const TicketsPage: React.FC = () => {
     };
     
     fetchRaffles();
+    
+    // Set up real-time subscription for raffle changes
+    const subscription = supabase
+      .channel('raffles-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'raffles' },
+        () => {
+          // Refresh raffles when any raffle changes
+          fetchRaffles();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [raffleId]);
   
   const handleSelectTicket = (ticket: Ticket) => {
@@ -192,6 +208,7 @@ const TicketsPage: React.FC = () => {
                       
                       <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                         <span>Sorteo: {new Date(raffle.draw_date).toLocaleDateString()}</span>
+                        <span>Boletos: {raffle.tickets_sold || 0}/{raffle.max_tickets || 0}</span>
                       </div>
 
                       <button className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors font-medium">
@@ -235,6 +252,7 @@ const TicketsPage: React.FC = () => {
                         <span className="font-semibold text-green-600">
                           Precio: ${selectedRaffle.price.toLocaleString()} MXN
                         </span>
+                        <span>Boletos vendidos: {selectedRaffle.tickets_sold || 0}/{selectedRaffle.max_tickets || 0}</span>
                       </div>
                     </div>
                   </div>
@@ -281,67 +299,76 @@ const TicketsPage: React.FC = () => {
                   raffleInfo={{
                     id: selectedRaffle.id,
                     name: selectedRaffle.name,
-                    price: selectedRaffle.price
+                    price: selectedRaffle.price,
+                    draw_date: selectedRaffle.draw_date
                   }}
                   onComplete={handleSubmitForm}
                   onCancel={() => setShowForm(false)}
                   promoterCode={promoterCode || undefined}
                 />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="md:col-span-3">
-                    <TicketGrid
-                      raffleId={selectedRaffle.id}
-                      selectedTickets={selectedTickets}
-                      onSelectTicket={handleSelectTicket}
-                    />
+                <div className="space-y-6">
+                  {/* Maquinita de la Suerte - CENTRADA AL INICIO */}
+                  <div className="flex justify-center">
+                    <div className="w-full max-w-md">
+                      <LuckyMachine
+                        raffleId={selectedRaffle.id}
+                        onTicketsSelected={handleRandomSelection}
+                      />
+                    </div>
                   </div>
-                  
-                  <div className="space-y-6">
-                    <LuckyMachine
-                      raffleId={selectedRaffle.id}
-                      onTicketsSelected={handleRandomSelection}
-                    />
+
+                  {/* Grid de boletos */}
+                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div className="lg:col-span-3">
+                      <TicketGrid
+                        raffleId={selectedRaffle.id}
+                        selectedTickets={selectedTickets}
+                        onSelectTicket={handleSelectTicket}
+                      />
+                    </div>
                     
-                    {selectedTickets.length > 0 && (
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <h3 className="text-lg font-semibold mb-3">Resumen de selección</h3>
-                        <p className="mb-2">
-                          <span className="font-medium">Boletos seleccionados:</span> {selectedTickets.length}
-                        </p>
-                        <p className="mb-4">
-                          <span className="font-medium">Total a pagar:</span> ${(selectedTickets.length * selectedRaffle.price).toLocaleString()} MXN
-                        </p>
-                        {promoterCode && (
-                          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <div className="flex items-center text-green-700">
-                              <Tag className="h-4 w-4 mr-2" />
-                              <span className="font-medium">Código: {promoterCode}</span>
+                    <div className="space-y-6">
+                      {selectedTickets.length > 0 && (
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-lg font-semibold mb-3">Resumen de selección</h3>
+                          <p className="mb-2">
+                            <span className="font-medium">Boletos seleccionados:</span> {selectedTickets.length}
+                          </p>
+                          <p className="mb-4">
+                            <span className="font-medium">Total a pagar:</span> ${(selectedTickets.length * selectedRaffle.price).toLocaleString()} MXN
+                          </p>
+                          {promoterCode && (
+                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <div className="flex items-center text-green-700">
+                                <Tag className="h-4 w-4 mr-2" />
+                                <span className="font-medium">Código: {promoterCode}</span>
+                              </div>
+                              <p className="text-xs text-green-600 mt-1">
+                                Comisión del promotor: ${(selectedTickets.length * 1000).toLocaleString()} MXN
+                              </p>
                             </div>
-                            <p className="text-xs text-green-600 mt-1">
-                              Comisión del promotor: ${(selectedTickets.length * 1000).toLocaleString()} MXN
+                          )}
+                          <button
+                            onClick={() => setShowForm(true)}
+                            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                          >
+                            Continuar con la reserva
+                          </button>
+                        </div>
+                      )}
+                      
+                      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                        <div className="flex">
+                          <div className="flex-shrink-0">
+                            <Info className="h-5 w-5 text-yellow-400" />
+                          </div>
+                          <div className="ml-3">
+                            <p className="text-sm text-yellow-700">
+                              Los boletos serán reservados por 3 horas una vez completado el formulario. 
+                              Si no se realiza el pago en ese tiempo, volverán a estar disponibles.
                             </p>
                           </div>
-                        )}
-                        <button
-                          onClick={() => setShowForm(true)}
-                          className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                        >
-                          Continuar con la reserva
-                        </button>
-                      </div>
-                    )}
-                    
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                      <div className="flex">
-                        <div className="flex-shrink-0">
-                          <Info className="h-5 w-5 text-yellow-400" />
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm text-yellow-700">
-                            Los boletos serán reservados por 3 horas una vez completado el formulario. 
-                            Si no se realiza el pago en ese tiempo, volverán a estar disponibles.
-                          </p>
                         </div>
                       </div>
                     </div>

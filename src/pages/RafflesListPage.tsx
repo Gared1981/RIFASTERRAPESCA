@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
-import { Calendar, Users, ArrowRight, DollarSign, Clock } from 'lucide-react';
+import { Calendar, Users, ArrowRight, DollarSign, Clock, Ticket } from 'lucide-react';
 import Footer from '../components/Footer';
 
 interface PublicRaffle {
@@ -19,6 +19,8 @@ interface PublicRaffle {
   price: number;
   slug: string;
   status: string;
+  max_tickets: number;
+  tickets_sold: number;
 }
 
 const RafflesListPage: React.FC = () => {
@@ -48,6 +50,22 @@ const RafflesListPage: React.FC = () => {
     };
 
     fetchRaffles();
+
+    // Set up real-time subscription for raffle changes
+    const subscription = supabase
+      .channel('raffles-list')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'raffles' },
+        () => {
+          // Refresh raffles when any raffle changes
+          fetchRaffles();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Formatear fecha con zona horaria del Pacífico
@@ -137,6 +155,23 @@ const RafflesListPage: React.FC = () => {
                         <Users className="h-4 w-4 mr-2" />
                         {raffle.participant_count} participantes
                       </div>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Ticket className="h-4 w-4 mr-2" />
+                        {raffle.tickets_sold} / {raffle.max_tickets} boletos vendidos
+                      </div>
+                    </div>
+
+                    {/* Barra de progreso de boletos vendidos */}
+                    <div className="mb-4">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${Math.min((raffle.tickets_sold / raffle.max_tickets) * 100, 100)}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {Math.round((raffle.tickets_sold / raffle.max_tickets) * 100)}% vendido
+                      </p>
                     </div>
 
                     <p className="text-gray-600 line-clamp-2 mb-4">

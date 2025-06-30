@@ -27,6 +27,8 @@ interface PublicRaffle {
   price: number;
   slug: string;
   status: string;
+  max_tickets: number;
+  tickets_sold: number;
 }
 
 const RafflePage: React.FC = () => {
@@ -63,6 +65,24 @@ const RafflePage: React.FC = () => {
     if (slug) {
       fetchRaffle();
     }
+
+    // Set up real-time subscription for raffle changes
+    const subscription = supabase
+      .channel('raffle-page')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'raffles' },
+        (payload) => {
+          // Refresh raffle data when it changes
+          if (payload.new && payload.new.slug === slug) {
+            fetchRaffle();
+          }
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [slug]);
 
   const handleShare = async () => {
@@ -393,6 +413,19 @@ const RafflePage: React.FC = () => {
                     <div>
                       <p className="text-sm text-gray-500">Participantes</p>
                       <p className="font-semibold">{raffle.participant_count}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <Ticket className="h-5 w-5 text-green-600 mr-2" />
+                    <div>
+                      <p className="text-sm text-gray-500">Boletos vendidos</p>
+                      <p className="font-semibold">{raffle.tickets_sold} / {raffle.max_tickets}</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${Math.min((raffle.tickets_sold / raffle.max_tickets) * 100, 100)}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </div>

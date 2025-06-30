@@ -42,6 +42,22 @@ const HomePage: React.FC = () => {
     };
 
     fetchActiveRaffles();
+
+    // Set up real-time subscription for raffle changes
+    const subscription = supabase
+      .channel('raffles-homepage')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'raffles' },
+        () => {
+          // Refresh raffles when any raffle changes
+          fetchActiveRaffles();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
