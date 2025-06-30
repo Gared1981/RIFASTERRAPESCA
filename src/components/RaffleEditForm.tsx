@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { Calendar, DollarSign, Image, Hash, FileText, Plus, X, Gift, Video } from 'lucide-react';
+import { Calendar, DollarSign, Image, Hash, FileText, Plus, X, Gift, Video, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface RaffleEditFormProps {
@@ -38,6 +38,7 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
     prize_items: raffle.prize_items || []
   });
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -109,11 +110,20 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
     }
     
     try {
+      setSaving(true);
       setLoading(true);
       
       const drawDateTime = `${formData.draw_date}T${formData.draw_time}`;
       
-      const { error } = await supabase
+      console.log('🔄 Updating raffle with data:', {
+        id: raffle.id,
+        name: formData.name,
+        price: formData.price,
+        status: formData.status,
+        draw_date: drawDateTime
+      });
+      
+      const { data, error } = await supabase
         .from('raffles')
         .update({
           name: formData.name,
@@ -126,26 +136,45 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
           draw_date: drawDateTime,
           total_tickets: formData.total_tickets,
           status: formData.status,
-          prize_items: formData.prize_items
+          prize_items: formData.prize_items,
+          updated_at: new Date().toISOString()
         })
-        .eq('id', raffle.id);
+        .eq('id', raffle.id)
+        .select();
         
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Update error:', error);
+        throw error;
+      }
       
+      console.log('✅ Update successful:', data);
       toast.success('Sorteo actualizado exitosamente');
-      onComplete();
+      
+      // Wait a moment before completing to ensure the update is processed
+      setTimeout(() => {
+        onComplete();
+      }, 500);
       
     } catch (error) {
       console.error('Error updating raffle:', error);
-      toast.error('Error al actualizar el sorteo');
+      toast.error(`Error al actualizar el sorteo: ${error.message}`);
     } finally {
+      setSaving(false);
       setLoading(false);
     }
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold mb-6">Editar Sorteo</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold">Editar Sorteo</h2>
+        {saving && (
+          <div className="flex items-center text-blue-600">
+            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-600 mr-2"></div>
+            Guardando...
+          </div>
+        )}
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -446,18 +475,29 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            disabled={saving}
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            disabled={loading || raffle.status === 'completed'}
-            className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${
-              (loading || raffle.status === 'completed') ? 'opacity-50 cursor-not-allowed' : ''
+            disabled={loading || saving || raffle.status === 'completed'}
+            className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${
+              (loading || saving || raffle.status === 'completed') ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            {loading ? 'Guardando...' : 'Guardar Cambios'}
+            {saving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                Guardando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Guardar Cambios
+              </>
+            )}
           </button>
         </div>
       </form>

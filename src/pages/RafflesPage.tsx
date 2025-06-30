@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { Plus, Edit, Trash2, Eye, Users, Bug, BugOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Users, Bug, BugOff, RefreshCw } from 'lucide-react';
 import RaffleForm from '../components/RaffleForm';
 import RaffleEditForm from '../components/RaffleEditForm';
 import PromoterLinkGenerator from '../components/PromoterLinkGenerator';
@@ -15,10 +15,28 @@ const RafflesPage = () => {
   const [showLinkGenerator, setShowLinkGenerator] = useState(false);
   const [debugMode, setDebugMode] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
   useEffect(() => {
     checkAuthentication();
     fetchRaffles();
+    
+    // Set up real-time subscription for raffle changes
+    const subscription = supabase
+      .channel('raffles-admin')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'raffles' },
+        (payload) => {
+          console.log('Raffle change detected:', payload);
+          // Refresh raffles when any raffle changes
+          fetchRaffles();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkAuthentication = async () => {
@@ -55,6 +73,8 @@ const RafflesPage = () => {
   const fetchRaffles = async () => {
     try {
       setLoading(true);
+      
+      // Force fresh data by adding timestamp
       const { data, error } = await supabase
         .from('raffles')
         .select('*')
@@ -62,10 +82,10 @@ const RafflesPage = () => {
         
       if (error) throw error;
       
-      setRaffles(data);
+      setRaffles(data || []);
       
       if (debugMode) {
-        console.log('📊 Raffles fetched:', data?.length || 0);
+        console.log('📊 Raffles fetched:', data?.length || 0, data);
       }
     } catch (error) {
       console.error('Error fetching raffles:', error);
@@ -82,6 +102,8 @@ const RafflesPage = () => {
     }
 
     try {
+      setRefreshing(true);
+      
       if (debugMode) {
         console.log('🔄 Attempting status change:', { raffleId, newStatus });
         
@@ -99,26 +121,34 @@ const RafflesPage = () => {
         }
       }
 
-      // Realizar la actualización normal
-      const { error } = await supabase
+      // Realizar la actualización con timestamp forzado
+      const { data, error } = await supabase
         .from('raffles')
         .update({ 
           status: newStatus,
           updated_at: new Date().toISOString()
         })
-        .eq('id', raffleId);
+        .eq('id', raffleId)
+        .select();
         
       if (error) {
         console.error('❌ Update error:', error);
         throw error;
       }
       
+      console.log('✅ Update successful:', data);
       toast.success(`Estado cambiado a ${newStatus}`);
-      await fetchRaffles();
+      
+      // Force refresh after a short delay
+      setTimeout(() => {
+        fetchRaffles();
+      }, 500);
       
     } catch (error) {
       console.error('Error updating raffle status:', error);
       toast.error(`Error al cambiar el estado: ${error.message}`);
+    } finally {
+      setRefreshing(false);
     }
   };
   
@@ -165,6 +195,13 @@ const RafflesPage = () => {
     toast.success(`Modo debug ${!debugMode ? 'activado' : 'desactivado'}`);
   };
 
+  const forceRefresh = async () => {
+    setRefreshing(true);
+    await fetchRaffles();
+    setRefreshing(false);
+    toast.success('Datos actualizados');
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
@@ -188,6 +225,16 @@ const RafflesPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Sorteos</h1>
         <div className="flex space-x-2">
+          <button
+            onClick={forceRefresh}
+            disabled={refreshing}
+            className={`inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 ${
+              refreshing ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            Actualizar
+          </button>
           <button
             onClick={toggleDebugMode}
             className={`inline-flex items-center px-3 py-2 border rounded-md shadow-sm text-sm font-medium ${
@@ -223,6 +270,8 @@ const RafflesPage = () => {
             <p>• Estado de autenticación: {isAuthenticated ? '✅ Autenticado' : '❌ No autenticado'}</p>
             <p>• Revisa la consola del navegador para logs detallados</p>
             <p>• Los cambios de estado mostrarán información de debugging</p>
+            <p>• Total de sorteos cargados: {raffles.length}</p>
+            <p>• Última actualización: {new Date().toLocaleTimeString()}</p>
           </div>
         </div>
       )}
@@ -280,7 +329,15 @@ const RafflesPage = () => {
                           <span className={`ml-2 px-2 py-1 text-xs rounded-full ${getStatusColor(raffle.status)}`}>
                             {getStatusText(raffle.status)}
                           </span>
+                          <span className="ml-2 text-xs text-gray-400">
+                            ${raffle.price} MXN
+                          </span>
                         </div>
+                        {debugMode && (
+                          <div className="text-xs text-gray-400 mt-1">
+                            ID: {raffle.id} | Slug: {raffle.slug} | Actualizado: {new Date(raffle.updated_at).toLocaleString()}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -289,9 +346,9 @@ const RafflesPage = () => {
                       <select
                         value={raffle.status}
                         onChange={(e) => handleStatusChange(raffle.id, e.target.value)}
-                        disabled={raffle.status === 'completed'}
+                        disabled={raffle.status === 'completed' || refreshing}
                         className={`text-sm border border-gray-300 rounded-md px-2 py-1 ${
-                          raffle.status === 'completed' ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+                          raffle.status === 'completed' || refreshing ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
                         }`}
                       >
                         <option value="draft">Borrador</option>
@@ -339,6 +396,19 @@ const RafflesPage = () => {
               </li>
             ))}
           </ul>
+          
+          {raffles.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No hay sorteos disponibles</p>
+              <button
+                onClick={() => setShowForm(true)}
+                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Crear primer sorteo
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
