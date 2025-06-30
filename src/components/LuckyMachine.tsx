@@ -17,14 +17,14 @@ const LuckyMachine: React.FC<LuckyMachineProps> = ({ raffleId, onTicketsSelected
   
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
-    if (!isNaN(value) && value > 0 && value <= 100) {
+    if (!isNaN(value) && value > 0 && value <= 50) {
       setQuantity(value);
       setDisplayNumbers(Array(value).fill('0000'));
     }
   };
   
   const generateRandomNumber = () => {
-    return Math.floor(Math.random() * 8999 + 1001).toString();
+    return Math.floor(Math.random() * 1000 + 1001).toString();
   };
   
   const animateNumbers = () => {
@@ -115,7 +115,7 @@ const LuckyMachine: React.FC<LuckyMachineProps> = ({ raffleId, onTicketsSelected
             <input
               type="number"
               min="1"
-              max="100"
+              max="50"
               value={quantity}
               onChange={handleQuantityChange}
               className="w-20 px-3 py-2 border-2 border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-center font-bold text-green-700"
@@ -168,6 +168,12 @@ const LuckyMachine: React.FC<LuckyMachineProps> = ({ raffleId, onTicketsSelected
           </>
         )}
       </button>
+
+      <div className="mt-4 text-center">
+        <p className="text-xs text-gray-600">
+          Selecciona entre 1 y 50 boletos de forma aleatoria
+        </p>
+      </div>
     </div>
   );
 };

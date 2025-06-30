@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Ticket, supabase } from '../utils/supabaseClient';
-import { Tag, Gift, MessageSquare, ExternalLink } from 'lucide-react';
+import { Tag, Gift, MessageSquare, ExternalLink, Clock, CheckCircle } from 'lucide-react';
 import PaymentMethodSelector from './PaymentMethodSelector';
+import { generateReservationConfirmationMessage } from '../utils/whatsappUtils';
 import toast from 'react-hot-toast';
 
 interface PromoterTicketFormProps {
@@ -42,6 +43,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null);
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
+  const [reservationComplete, setReservationComplete] = useState(false);
 
   useEffect(() => {
     // Si hay código de promotor inicial, buscar información del promotor
@@ -80,34 +82,13 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
     }));
   };
 
-  const generateWhatsAppMessage = (ticketNumbers: number[], userInfo: any, raffleInfo: any, promoterCode?: string) => {
-    const totalAmount = ticketNumbers.length * raffleInfo.price;
-    const baseUrl = window.location.origin;
-    
-    let message = `🎟️ *BOLETOS RESERVADOS EXITOSAMENTE* 🎟️\n\n`;
-    message += `👤 *Cliente:* ${userInfo.firstName} ${userInfo.lastName}\n`;
-    message += `📱 *WhatsApp:* ${userInfo.phone}\n`;
-    message += `📍 *Estado:* ${userInfo.state}\n\n`;
-    message += `🎰 *Sorteo:* ${raffleInfo.name}\n`;
-    message += `🎫 *Boletos reservados:* ${ticketNumbers.join(', ')}\n`;
-    message += `💰 *Total a pagar:* $${totalAmount.toLocaleString()} MXN\n\n`;
-    
-    if (promoterCode) {
-      message += `👨‍💼 *Código de promotor:* ${promoterCode}\n\n`;
-    }
-    
-    message += `⏰ *IMPORTANTE:* Tus boletos están reservados por 3 horas.\n\n`;
-    message += `💳 *Para completar tu pago, puedes:*\n`;
-    message += `1️⃣ Pagar en línea con Mercado Pago (recomendado)\n`;
-    message += `2️⃣ Coordinar pago por WhatsApp\n\n`;
-    message += `🔗 *Enlace para pagar en línea:*\n${baseUrl}/boletos?raffle=${raffleInfo.id}\n\n`;
-    message += `¡Gracias por participar en Sorteos Terrapesca! 🐟`;
-    
-    return message;
-  };
-
   const sendWhatsAppConfirmation = (ticketNumbers: number[], userInfo: any) => {
-    const message = generateWhatsAppMessage(ticketNumbers, userInfo, raffleInfo, initialPromoterCode);
+    const message = generateReservationConfirmationMessage(
+      ticketNumbers, 
+      userInfo, 
+      raffleInfo, 
+      initialPromoterCode
+    );
     const whatsappUrl = `https://wa.me/526686889571?text=${encodeURIComponent(message)}`;
     
     // Abrir WhatsApp en una nueva ventana
@@ -201,10 +182,13 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
       // Send WhatsApp confirmation with payment link
       sendWhatsAppConfirmation(ticketNumbers, formData);
       
+      setReservationComplete(true);
       toast.success('¡Boletos reservados con éxito!');
       
-      // Show payment methods
-      setShowPaymentMethods(true);
+      // Show payment methods after a brief delay
+      setTimeout(() => {
+        setShowPaymentMethods(true);
+      }, 2000);
       
     } catch (error) {
       console.error('Error reserving tickets:', error);
@@ -223,7 +207,6 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
   };
   
   const totalAmount = selectedTickets.length * raffleInfo.price;
-  const bonusAmount = initialPromoterCode ? selectedTickets.length * 1000 : 0;
 
   if (showPaymentMethods) {
     return (
@@ -241,6 +224,48 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
         onCancel={handlePaymentCancel}
         promoterCode={initialPromoterCode}
       />
+    );
+  }
+
+  if (reservationComplete) {
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto text-center">
+        <div className="mb-6">
+          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-green-700 mb-2">
+            ¡Boletos Reservados!
+          </h2>
+          <p className="text-gray-600">
+            Tus boletos han sido reservados exitosamente por 3 horas.
+          </p>
+        </div>
+
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-center text-green-700 mb-2">
+            <Clock className="h-5 w-5 mr-2" />
+            <span className="font-semibold">Tiempo de reserva: 3 horas</span>
+          </div>
+          <p className="text-sm text-green-600">
+            Se ha enviado un mensaje de WhatsApp con toda la información y opciones de pago.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <button
+            onClick={() => setShowPaymentMethods(true)}
+            className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+          >
+            Proceder al Pago
+          </button>
+          
+          <button
+            onClick={onComplete}
+            className="w-full text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            Continuar navegando
+          </button>
+        </div>
+      </div>
     );
   }
   
@@ -261,6 +286,9 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
         <p className="text-lg font-bold mt-2">
           Total a pagar: ${totalAmount.toLocaleString()} MXN
         </p>
+        <p className="text-sm text-gray-600 mt-1">
+          Precio por boleto: ${raffleInfo.price} MXN
+        </p>
         
         {selectedPromoter && (
           <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -272,7 +300,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
               Código: {selectedPromoter.code}
             </p>
             <p className="text-xs text-blue-500 mt-1">
-              El promotor recibirá ${bonusAmount.toLocaleString()} MXN en bonos por esta venta
+              El promotor recibirá ${(selectedTickets.length * 1000).toLocaleString()} MXN en bonos por esta venta
             </p>
           </div>
         )}

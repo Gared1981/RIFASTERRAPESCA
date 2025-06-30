@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import TicketCard from './TicketCard';
 import { Ticket, supabase } from '../utils/supabaseClient';
-import { calculateBonus } from '../utils/whatsappUtils';
 
 interface TicketGridProps {
   raffleId: number;
@@ -20,17 +19,18 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
-  
-  const bonus = calculateBonus(selectedTickets.length);
 
   useEffect(() => {
     const fetchTickets = async () => {
       try {
         setLoading(true);
+        
+        // Only fetch available tickets to hide reserved/purchased ones from the grid
         const { data, error } = await supabase
           .from('tickets')
           .select('*')
           .eq('raffle_id', raffleId)
+          .eq('status', 'available') // Only show available tickets
           .order('number', { ascending: true });
           
         if (error) throw error;
@@ -52,14 +52,8 @@ const TicketGrid: React.FC<TicketGridProps> = ({
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'tickets', filter: `raffle_id=eq.${raffleId}` },
         (payload) => {
-          // Update local state when tickets change in the database
-          if (payload.eventType === 'UPDATE') {
-            setTickets(prevTickets => 
-              prevTickets.map(ticket => 
-                ticket.id === payload.new.id ? { ...ticket, ...payload.new } : ticket
-              )
-            );
-          }
+          // Refresh tickets when any ticket changes
+          fetchTickets();
         }
       )
       .subscribe();
@@ -68,6 +62,19 @@ const TicketGrid: React.FC<TicketGridProps> = ({
       subscription.unsubscribe();
     };
   }, [raffleId]);
+
+  // Auto-cleanup expired tickets every 30 seconds
+  useEffect(() => {
+    const cleanupInterval = setInterval(async () => {
+      try {
+        await supabase.rpc('auto_cleanup_tickets');
+      } catch (error) {
+        console.error('Error during auto cleanup:', error);
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(cleanupInterval);
+  }, []);
   
   const isSelected = (ticket: Ticket) => {
     return selectedTickets.some(t => t.id === ticket.id);
@@ -82,10 +89,8 @@ const TicketGrid: React.FC<TicketGridProps> = ({
     : tickets;
     
   const ticketStats = {
-    total: tickets.length,
-    available: tickets.filter(t => t.status === 'available').length,
-    reserved: tickets.filter(t => t.status === 'reserved').length,
-    purchased: tickets.filter(t => t.status === 'purchased').length
+    available: tickets.length,
+    total: 1000 // Fixed total of 1000 tickets
   };
 
   return (
@@ -106,10 +111,10 @@ const TicketGrid: React.FC<TicketGridProps> = ({
             Disponibles: {ticketStats.available}
           </div>
           <div className="px-3 py-1 bg-gray-300 border border-gray-400 text-gray-700 rounded-md">
-            Reservados: {ticketStats.reserved}
+            Vendidos: {ticketStats.total - ticketStats.available}
           </div>
-          <div className="px-3 py-1 bg-green-500 border border-green-700 text-white rounded-md">
-            Pagados: {ticketStats.purchased}
+          <div className="px-3 py-1 bg-blue-100 border border-blue-300 text-blue-700 rounded-md">
+            Total: {ticketStats.total}
           </div>
         </div>
       </div>
@@ -126,11 +131,6 @@ const TicketGrid: React.FC<TicketGridProps> = ({
               </span>
             ))}
           </div>
-          {bonus && (
-            <div className="mt-2 text-green-700 font-semibold">
-              ¡Felicidades! Has obtenido: {bonus}
-            </div>
-          )}
         </div>
       )}
       
@@ -156,7 +156,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
       
       {filteredTickets.length === 0 && !loading && (
         <div className="text-center py-10 text-gray-500">
-          No se encontraron boletos con ese número.
+          {searchValue ? 'No se encontraron boletos con ese número.' : 'No hay boletos disponibles en este momento.'}
         </div>
       )}
     </div>
