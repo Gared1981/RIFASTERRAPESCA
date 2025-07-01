@@ -131,23 +131,23 @@ const RafflesPage = () => {
       if (directError) {
         console.error('❌ Direct update failed:', directError);
         
-        // Método 2: Usar función de forzado
-        console.log('🔄 Trying force update function...');
-        const { data: forceResult, error: forceError } = await supabase
-          .rpc('force_update_raffle', {
+        // Método 2: Usar función de administrador
+        console.log('🔄 Trying admin update function...');
+        const { data: adminResult, error: adminError } = await supabase
+          .rpc('admin_update_raffle', {
             raffle_id: raffleId,
-            raffle_data: { status: newStatus }
+            update_data: { status: newStatus }
           });
           
-        if (forceError) {
-          console.error('❌ Force update failed:', forceError);
-          throw forceError;
+        if (adminError) {
+          console.error('❌ Admin update failed:', adminError);
+          throw adminError;
         }
         
-        console.log('✅ Force update result:', forceResult);
+        console.log('✅ Admin update result:', adminResult);
         
-        if (!forceResult.success) {
-          throw new Error(forceResult.error || 'Force update failed');
+        if (!adminResult.success) {
+          throw new Error(adminResult.error || 'Admin update failed');
         }
       } else {
         console.log('✅ Direct update successful:', directUpdate);
@@ -198,7 +198,7 @@ const RafflesPage = () => {
   const handleCopyLink = async (slug: string) => {
     try {
       // Limpiar el slug de guiones extra
-      const cleanSlug = slug.replace(/-+$/, '');
+      const cleanSlug = slug?.replace(/-+$/, '') || '';
       const url = `${window.location.origin}/sorteo/${cleanSlug}`;
       await navigator.clipboard.writeText(url);
       toast.success('Enlace copiado al portapapeles');
@@ -404,7 +404,7 @@ const RafflesPage = () => {
                       
                       <div className="flex space-x-2">
                         <Link
-                          to={`/sorteo/${raffle.slug?.replace(/-+$/, '')}`}
+                          to={`/sorteo/${raffle.slug?.replace(/-+$/, '') || raffle.id}`}
                           target="_blank"
                           className="inline-flex items-center p-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                         >

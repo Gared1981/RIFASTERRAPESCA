@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { Calendar, DollarSign, Image, Hash, FileText, Plus, X, Gift, Video, Save } from 'lucide-react';
+import { Calendar, DollarSign, Image, Hash, FileText, Plus, X, Gift, Video, Save, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface RaffleEditFormProps {
@@ -39,10 +39,12 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setError(null); // Clear error when user makes changes
   };
 
   const handleImageAdd = () => {
@@ -112,6 +114,7 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
     try {
       setSaving(true);
       setLoading(true);
+      setError(null);
       
       const drawDateTime = `${formData.draw_date}T${formData.draw_time}`;
       
@@ -122,8 +125,9 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         status: formData.status,
         draw_date: drawDateTime
       });
-      
-      const { data, error } = await supabase
+
+      // Método 1: Intentar actualización directa
+      const { data: directUpdate, error: directError } = await supabase
         .from('raffles')
         .update({
           name: formData.name,
@@ -141,23 +145,56 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         })
         .eq('id', raffle.id)
         .select();
+
+      if (directError) {
+        console.error('❌ Direct update failed:', directError);
         
-      if (error) {
-        console.error('❌ Update error:', error);
-        throw error;
+        // Método 2: Usar función de administrador
+        console.log('🔄 Trying admin update function...');
+        const { data: adminResult, error: adminError } = await supabase
+          .rpc('admin_update_raffle', {
+            raffle_id: raffle.id,
+            update_data: {
+              name: formData.name,
+              description: formData.description,
+              image_url: formData.image_url,
+              video_url: formData.video_url || null,
+              images: formData.images,
+              video_urls: formData.video_urls,
+              price: formData.price,
+              draw_date: drawDateTime,
+              total_tickets: formData.total_tickets,
+              status: formData.status,
+              prize_items: formData.prize_items
+            }
+          });
+          
+        if (adminError) {
+          console.error('❌ Admin update failed:', adminError);
+          throw new Error(`Error de actualización: ${adminError.message}`);
+        }
+        
+        console.log('✅ Admin update result:', adminResult);
+        
+        if (!adminResult.success) {
+          throw new Error(adminResult.error || 'Admin update failed');
+        }
+      } else {
+        console.log('✅ Direct update successful:', directUpdate);
       }
       
-      console.log('✅ Update successful:', data);
       toast.success('Sorteo actualizado exitosamente');
       
       // Wait a moment before completing to ensure the update is processed
       setTimeout(() => {
         onComplete();
-      }, 500);
+      }, 1000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating raffle:', error);
-      toast.error(`Error al actualizar el sorteo: ${error.message}`);
+      const errorMessage = error.message || 'Error desconocido al actualizar el sorteo';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
       setLoading(false);
@@ -175,6 +212,18 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
           </div>
         )}
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+            <div>
+              <h3 className="text-sm font-medium text-red-800">Error al guardar</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
