@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { Plus, Edit, Trash2, Eye, Users, Bug, BugOff, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Users, Bug, BugOff, RefreshCw, AlertCircle } from 'lucide-react';
 import RaffleForm from '../components/RaffleForm';
 import RaffleEditForm from '../components/RaffleEditForm';
 import PromoterLinkGenerator from '../components/PromoterLinkGenerator';
@@ -16,6 +16,7 @@ const RafflesPage = () => {
   const [debugMode, setDebugMode] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('checking');
   
   useEffect(() => {
     checkAuthentication();
@@ -27,12 +28,17 @@ const RafflesPage = () => {
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'raffles' },
         (payload) => {
-          console.log('Raffle change detected:', payload);
+          console.log('🔄 Raffle change detected:', payload);
           // Refresh raffles when any raffle changes
-          fetchRaffles();
+          setTimeout(() => {
+            fetchRaffles();
+          }, 1000);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Subscription status:', status);
+        setConnectionStatus(status);
+      });
       
     return () => {
       subscription.unsubscribe();
@@ -41,7 +47,7 @@ const RafflesPage = () => {
 
   const checkAuthentication = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
       const authenticated = !!session;
       setIsAuthenticated(authenticated);
       
@@ -49,7 +55,8 @@ const RafflesPage = () => {
         console.log('🔐 Authentication Status:', {
           authenticated,
           user_id: session?.user?.id,
-          session: !!session
+          session: !!session,
+          error: error?.message
         });
         
         // Verificar permisos usando la función de la base de datos
@@ -80,7 +87,10 @@ const RafflesPage = () => {
         .select('*')
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching raffles:', error);
+        throw error;
+      }
       
       setRaffles(data || []);
       
@@ -106,23 +116,10 @@ const RafflesPage = () => {
       
       if (debugMode) {
         console.log('🔄 Attempting status change:', { raffleId, newStatus });
-        
-        // Usar función de debug para obtener información detallada
-        const { data: debugData, error: debugError } = await supabase
-          .rpc('debug_raffle_update', {
-            raffle_id: raffleId,
-            new_status: newStatus
-          });
-          
-        if (debugError) {
-          console.error('❌ Debug function error:', debugError);
-        } else {
-          console.log('🐛 Debug result:', debugData);
-        }
       }
 
-      // Realizar la actualización con timestamp forzado
-      const { data, error } = await supabase
+      // Método 1: Actualización directa
+      const { data: directUpdate, error: directError } = await supabase
         .from('raffles')
         .update({ 
           status: newStatus,
@@ -131,18 +128,37 @@ const RafflesPage = () => {
         .eq('id', raffleId)
         .select();
         
-      if (error) {
-        console.error('❌ Update error:', error);
-        throw error;
+      if (directError) {
+        console.error('❌ Direct update failed:', directError);
+        
+        // Método 2: Usar función de forzado
+        console.log('🔄 Trying force update function...');
+        const { data: forceResult, error: forceError } = await supabase
+          .rpc('force_update_raffle', {
+            raffle_id: raffleId,
+            raffle_data: { status: newStatus }
+          });
+          
+        if (forceError) {
+          console.error('❌ Force update failed:', forceError);
+          throw forceError;
+        }
+        
+        console.log('✅ Force update result:', forceResult);
+        
+        if (!forceResult.success) {
+          throw new Error(forceResult.error || 'Force update failed');
+        }
+      } else {
+        console.log('✅ Direct update successful:', directUpdate);
       }
       
-      console.log('✅ Update successful:', data);
       toast.success(`Estado cambiado a ${newStatus}`);
       
       // Force refresh after a short delay
       setTimeout(() => {
         fetchRaffles();
-      }, 500);
+      }, 1000);
       
     } catch (error) {
       console.error('Error updating raffle status:', error);
@@ -181,7 +197,9 @@ const RafflesPage = () => {
 
   const handleCopyLink = async (slug: string) => {
     try {
-      const url = `${window.location.origin}/sorteo/${slug}`;
+      // Limpiar el slug de guiones extra
+      const cleanSlug = slug.replace(/-+$/, '');
+      const url = `${window.location.origin}/sorteo/${cleanSlug}`;
       await navigator.clipboard.writeText(url);
       toast.success('Enlace copiado al portapapeles');
     } catch (error) {
@@ -190,16 +208,16 @@ const RafflesPage = () => {
     }
   };
 
-  const toggleDebugMode = () => {
-    setDebugMode(!debugMode);
-    toast.success(`Modo debug ${!debugMode ? 'activado' : 'desactivado'}`);
-  };
-
   const forceRefresh = async () => {
     setRefreshing(true);
     await fetchRaffles();
     setRefreshing(false);
     toast.success('Datos actualizados');
+  };
+
+  const toggleDebugMode = () => {
+    setDebugMode(!debugMode);
+    toast.success(`Modo debug ${!debugMode ? 'activado' : 'desactivado'}`);
   };
 
   const getStatusColor = (status) => {
@@ -263,15 +281,43 @@ const RafflesPage = () => {
         </div>
       </div>
 
+      {/* Status indicators */}
+      <div className="mb-4 flex items-center space-x-4 text-sm">
+        <div className={`flex items-center ${isAuthenticated ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`w-2 h-2 rounded-full mr-2 ${isAuthenticated ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          {isAuthenticated ? 'Autenticado' : 'No autenticado'}
+        </div>
+        <div className={`flex items-center ${connectionStatus === 'SUBSCRIBED' ? 'text-green-600' : 'text-yellow-600'}`}>
+          <div className={`w-2 h-2 rounded-full mr-2 ${connectionStatus === 'SUBSCRIBED' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+          Tiempo real: {connectionStatus}
+        </div>
+      </div>
+
       {debugMode && (
         <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <h3 className="text-sm font-medium text-yellow-800 mb-2">🐛 Modo Debug Activo</h3>
           <div className="text-xs text-yellow-700">
             <p>• Estado de autenticación: {isAuthenticated ? '✅ Autenticado' : '❌ No autenticado'}</p>
+            <p>• Conexión tiempo real: {connectionStatus}</p>
             <p>• Revisa la consola del navegador para logs detallados</p>
             <p>• Los cambios de estado mostrarán información de debugging</p>
             <p>• Total de sorteos cargados: {raffles.length}</p>
             <p>• Última actualización: {new Date().toLocaleTimeString()}</p>
+          </div>
+        </div>
+      )}
+
+      {!isAuthenticated && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+            <div>
+              <h3 className="text-sm font-medium text-red-800">Sesión no válida</h3>
+              <p className="text-sm text-red-700 mt-1">
+                Necesitas iniciar sesión para editar sorteos. 
+                <Link to="/admin" className="underline ml-1">Ir a login</Link>
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -358,7 +404,7 @@ const RafflesPage = () => {
                       
                       <div className="flex space-x-2">
                         <Link
-                          to={`/sorteo/${raffle.slug}`}
+                          to={`/sorteo/${raffle.slug?.replace(/-+$/, '')}`}
                           target="_blank"
                           className="inline-flex items-center p-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                         >
