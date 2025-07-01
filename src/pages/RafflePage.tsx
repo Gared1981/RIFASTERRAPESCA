@@ -316,20 +316,17 @@ const RafflePage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Botón para mostrar GIF del premio especial */}
-                  <div className="mt-8 flex justify-center">
+                  {/* Botón para mostrar GIF del premio especial - MÁS PEQUEÑO */}
+                  <div className="mt-6 flex justify-center">
                     <button
                       onClick={openGifModal}
-                      className="group relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:shadow-yellow-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-yellow-300 hover:border-yellow-200"
+                      className="group relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white px-6 py-3 rounded-lg font-bold text-base shadow-xl hover:shadow-yellow-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-yellow-300 hover:border-yellow-200"
                     >
-                      <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                      <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                       <span className="relative flex items-center">
-                        <Gift className="mr-3 h-6 w-6 group-hover:rotate-12 transition-transform duration-300" />
+                        <Gift className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
                         🎁 Ver Premio Especial
-                        <Gift className="ml-3 h-6 w-6 group-hover:rotate-12 transition-transform duration-300" />
                       </span>
-                      {/* Efecto de brillo */}
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transform -skew-x-12 group-hover:animate-pulse transition-all duration-700"></div>
                     </button>
                   </div>
                 </>
@@ -470,42 +467,43 @@ const RafflePage: React.FC = () => {
         </div>
       </main>
 
-      {/* Modal del GIF del premio especial */}
+      {/* Modal del GIF del premio especial - MÁS PEQUEÑO Y CON BOTÓN DE CERRAR VISIBLE */}
       {showGifModal && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4">
-          <div className="relative max-w-4xl w-full">
-            {/* Botón cerrar */}
+          <div className="relative max-w-2xl w-full">
+            {/* Botón cerrar - MÁS VISIBLE */}
             <button
               onClick={closeGifModal}
-              className="absolute -top-12 right-0 z-10 text-white hover:text-gray-300 transition-colors bg-black bg-opacity-50 rounded-full p-3"
+              className="absolute -top-4 right-0 z-20 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg transition-colors"
+              title="Cerrar"
             >
-              <X className="w-8 h-8" />
+              <X className="w-6 h-6" />
             </button>
             
-            {/* Contenido del modal */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
-              <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white p-6 text-center">
-                <h2 className="text-3xl font-bold mb-2">🎁 ¡PREMIO ESPECIAL! 🎁</h2>
-                <p className="text-lg opacity-90">Envío completamente GRATIS a toda la República Mexicana</p>
+            {/* Contenido del modal - MÁS COMPACTO */}
+            <div className="bg-white rounded-xl overflow-hidden shadow-2xl">
+              <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white p-4 text-center">
+                <h2 className="text-xl font-bold mb-1">🎁 ¡PREMIO ESPECIAL! 🎁</h2>
+                <p className="text-sm opacity-90">Envío completamente GRATIS a toda la República Mexicana</p>
               </div>
               
-              <div className="p-6">
+              <div className="p-4">
                 <img
                   src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/ENVIO_GRATIS.gif?v=1750992275"
                   alt="Premio Especial - Envío Gratis"
-                  className="w-full h-auto rounded-xl shadow-lg"
+                  className="w-full h-auto rounded-lg shadow-md"
                   style={{ 
-                    maxHeight: '70vh',
+                    maxHeight: '400px',
                     objectFit: 'contain'
                   }}
                 />
                 
-                <div className="mt-6 text-center">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-green-800 mb-2">
+                <div className="mt-4 text-center">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <h3 className="text-base font-semibold text-green-800 mb-1">
                       ✨ Beneficio Exclusivo
                     </h3>
-                    <p className="text-green-700">
+                    <p className="text-sm text-green-700">
                       Tu premio será enviado sin costo adicional a cualquier parte de México. 
                       ¡No importa dónde te encuentres, nosotros nos encargamos de todo!
                     </p>
