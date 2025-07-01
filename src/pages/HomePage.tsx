@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import Footer from '../components/Footer';
+import SecurePaymentBadge from '../components/SecurePaymentBadge';
 
 const HomePage: React.FC = () => {
   return (
@@ -47,7 +48,7 @@ const HomePage: React.FC = () => {
               <div className="flex flex-col space-y-4 sm:space-y-6 md:flex-row md:space-y-0 md:space-x-6 lg:space-x-8 justify-center items-center">
                 <Link
                   to="/sorteos"
-                  className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold text-white bg-gradient-to-r from-green-600 via-green-700 to-green-800 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-green-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-green-400/50 hover:border-green-300 backdrop-blur-md"
+                  className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold text-white bg-gradient-to-r from-terrapesca-green-600 via-terrapesca-green-700 to-terrapesca-green-800 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-terrapesca-green-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-terrapesca-green-400/50 hover:border-terrapesca-green-300 backdrop-blur-md"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                   <span className="relative flex items-center">
@@ -60,11 +61,11 @@ const HomePage: React.FC = () => {
                 
                 <Link
                   to="/verificar"
-                  className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-blue-400/50 hover:border-blue-300 backdrop-blur-md"
+                  className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl font-bold text-white bg-gradient-to-r from-terrapesca-blue-600 via-terrapesca-blue-700 to-terrapesca-blue-800 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-terrapesca-blue-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-terrapesca-blue-400/50 hover:border-terrapesca-blue-300 backdrop-blur-md"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                   <span className="relative flex items-center">
-                    <CheckCircle className="mr-2 sm:mr-3 md:mr-4 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 group-hover:scale-110 transition-transform duration-300 text-blue-200" />
+                    <CheckCircle className="mr-2 sm:mr-3 md:mr-4 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 group-hover:scale-110 transition-transform duration-300 text-terrapesca-blue-200" />
                     <span className="text-base sm:text-lg md:text-xl font-extrabold tracking-wide">Verificar mi boleto</span>
                   </span>
                   {/* Efecto de brillo */}
@@ -84,53 +85,67 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
+      {/* Secure Payment Badge Section - NUEVA SECCIÓN */}
+      <section className="py-8 bg-gradient-to-r from-terrapesca-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <SecurePaymentBadge size="lg" showText={true} />
+            <p className="mt-4 text-terrapesca-blue-600 font-medium">
+              Procesamos tus pagos de forma 100% segura con Mercado Pago
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">¿Cómo funciona?</h2>
-            <p className="text-gray-600 max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-terrapesca-blue-800 mb-4">¿Cómo funciona?</h2>
+            <p className="text-terrapesca-blue-600 max-w-3xl mx-auto">
               Participar en nuestro sorteo es muy sencillo. Sigue estos pasos y estarás más cerca de ganar.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xl font-bold mb-4">
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-12 h-12 bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform duration-300">
                 1
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Elige tus boletos</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-medium text-terrapesca-blue-800 mb-2">Elige tus boletos</h3>
+              <p className="text-terrapesca-blue-600">
                 Navega por nuestro catálogo de sorteos activos y selecciona los números que más te gusten.
               </p>
             </div>
             
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xl font-bold mb-4">
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-12 h-12 bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform duration-300">
                 2
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Reserva en línea</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-medium text-terrapesca-blue-800 mb-2">Reserva en línea</h3>
+              <p className="text-terrapesca-blue-600">
                 Completa el formulario con tus datos personales para reservar los boletos seleccionados.
               </p>
             </div>
             
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xl font-bold mb-4">
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-12 h-12 bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform duration-300">
                 3
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Realiza tu pago</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-medium text-terrapesca-blue-800 mb-2">Realiza tu pago</h3>
+              <p className="text-terrapesca-blue-600 mb-4">
                 Paga directamente tus boletos con pago seguro de Mercado Pago o bien puedes realizar el proceso vía WhatsApp.
               </p>
+              {/* Badge de pago seguro en el paso 3 */}
+              <SecurePaymentBadge size="sm" showText={false} />
             </div>
             
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xl font-bold mb-4">
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-12 h-12 bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform duration-300">
                 4
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">¡Espera el sorteo!</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-medium text-terrapesca-blue-800 mb-2">¡Espera el sorteo!</h3>
+              <p className="text-terrapesca-blue-600">
                 Una vez confirmado tu pago, solo queda esperar al día del sorteo. ¡Buena suerte!
               </p>
             </div>

@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import CountdownTimer from '../components/CountdownTimer';
 import VideoPlayer from '../components/VideoPlayer';
 import CollapsiblePrizeList from '../components/CollapsiblePrizeList';
+import SecurePaymentBadge from '../components/SecurePaymentBadge';
 import toast from 'react-hot-toast';
 
 interface PublicRaffle {
@@ -165,7 +166,7 @@ const RafflePage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terrapesca-green-500"></div>
       </div>
     );
   }
@@ -173,13 +174,13 @@ const RafflePage: React.FC = () => {
   if (error || !raffle) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Sorteo no encontrado</h2>
-        <p className="text-gray-600 text-center mb-4">
+        <h2 className="text-2xl font-bold text-terrapesca-blue-800 mb-2">Sorteo no encontrado</h2>
+        <p className="text-terrapesca-blue-600 text-center mb-4">
           El sorteo que buscas no existe o no está disponible.
         </p>
         <Link
           to="/sorteos"
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-terrapesca-green-600 hover:bg-terrapesca-green-700"
         >
           Ver todos los sorteos
         </Link>
@@ -216,13 +217,13 @@ const RafflePage: React.FC = () => {
                 <>
                   {/* Tabs para cambiar entre imágenes y videos */}
                   {allImages.length > 0 && allVideos.length > 0 && (
-                    <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                    <div className="flex space-x-1 bg-terrapesca-gray-100 p-1 rounded-lg">
                       <button
                         onClick={() => setActiveTab('images')}
                         className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                           activeTab === 'images'
-                            ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                            ? 'bg-white text-terrapesca-blue-800 shadow-sm'
+                            : 'text-terrapesca-blue-500 hover:text-terrapesca-blue-700'
                         }`}
                       >
                         Imágenes ({allImages.length})
@@ -231,8 +232,8 @@ const RafflePage: React.FC = () => {
                         onClick={() => setActiveTab('videos')}
                         className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                           activeTab === 'videos'
-                            ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                            ? 'bg-white text-terrapesca-blue-800 shadow-sm'
+                            : 'text-terrapesca-blue-500 hover:text-terrapesca-blue-700'
                         }`}
                       >
                         Videos ({allVideos.length})
@@ -252,8 +253,8 @@ const RafflePage: React.FC = () => {
                               onClick={() => setCurrentImageIndex(index)}
                               className={`flex-shrink-0 w-16 h-16 lg:w-20 lg:h-20 overflow-hidden rounded-lg border-2 transition-all duration-200 ${
                                 index === currentImageIndex 
-                                  ? 'border-orange-500 shadow-lg' 
-                                  : 'border-gray-200 hover:border-gray-300'
+                                  ? 'border-terrapesca-orange-500 shadow-lg' 
+                                  : 'border-terrapesca-gray-200 hover:border-terrapesca-gray-300'
                               }`}
                             >
                               <img
@@ -268,7 +269,7 @@ const RafflePage: React.FC = () => {
                         {/* Imagen principal - MISMO TAMAÑO QUE LA GALERÍA */}
                         <div className="order-1 lg:order-2 flex-1 relative group">
                           <div 
-                            className="relative cursor-pointer bg-gray-50 rounded-lg overflow-hidden"
+                            className="relative cursor-pointer bg-terrapesca-gray-50 rounded-lg overflow-hidden"
                             onClick={() => openImageModal(currentImageIndex)}
                           >
                             <img
@@ -281,7 +282,7 @@ const RafflePage: React.FC = () => {
                             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <div className="bg-white bg-opacity-90 rounded-full p-3 shadow-lg">
-                                  <ZoomIn className="w-6 h-6 text-gray-800" />
+                                  <ZoomIn className="w-6 h-6 text-terrapesca-blue-800" />
                                 </div>
                               </div>
                             </div>
@@ -320,7 +321,7 @@ const RafflePage: React.FC = () => {
                   <div className="mt-6 flex justify-center">
                     <button
                       onClick={openGifModal}
-                      className="group relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white px-6 py-3 rounded-lg font-bold text-base shadow-xl hover:shadow-yellow-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-yellow-300 hover:border-yellow-200"
+                      className="group relative bg-gradient-to-r from-terrapesca-orange-400 via-terrapesca-orange-500 to-terrapesca-orange-600 text-white px-6 py-3 rounded-lg font-bold text-base shadow-xl hover:shadow-terrapesca-orange-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-terrapesca-orange-300 hover:border-terrapesca-orange-200"
                     >
                       <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                       <span className="relative flex items-center">
@@ -336,18 +337,18 @@ const RafflePage: React.FC = () => {
             {/* Información del sorteo */}
             <div>
               <div className="flex justify-between items-start mb-4">
-                <h1 className="text-3xl font-bold text-gray-900">{raffle.name}</h1>
+                <h1 className="text-3xl font-bold text-terrapesca-blue-800">{raffle.name}</h1>
                 <div className="flex space-x-2">
                   <button
                     onClick={handleShare}
-                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                    className="p-2 text-terrapesca-blue-500 hover:text-terrapesca-blue-700 rounded-full hover:bg-terrapesca-blue-100 transition-colors"
                     title="Compartir"
                   >
                     <Share2 className="h-5 w-5" />
                   </button>
                   <button
                     onClick={handleWhatsAppShare}
-                    className="p-2 text-green-500 hover:text-green-700 rounded-full hover:bg-green-50 transition-colors"
+                    className="p-2 text-terrapesca-green-500 hover:text-terrapesca-green-700 rounded-full hover:bg-terrapesca-green-50 transition-colors"
                     title="Compartir por WhatsApp"
                   >
                     <WhatsappIcon className="h-5 w-5" />
@@ -356,7 +357,7 @@ const RafflePage: React.FC = () => {
               </div>
 
               <div className="prose max-w-none mb-6">
-                <p className="whitespace-pre-line text-gray-600">{raffle.description}</p>
+                <p className="whitespace-pre-line text-terrapesca-blue-600">{raffle.description}</p>
               </div>
 
               {/* Contenido del premio con componente colapsable */}
@@ -371,31 +372,21 @@ const RafflePage: React.FC = () => {
 
               {/* Insignia de Pago Seguro - POSICIONADA ESTRATÉGICAMENTE */}
               <div className="mb-6 flex justify-center">
-                <div className="relative">
-                  <img
-                    src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/pago-seguro-pizarronesplus-2023-768x217.png?v=1750993563"
-                    alt="Pago Seguro - Mercado Pago"
-                    className="h-16 md:h-20 w-auto object-contain"
-                    style={{
-                      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1))',
-                      maxWidth: '300px'
-                    }}
-                  />
-                </div>
+                <SecurePaymentBadge size="md" showText={true} />
               </div>
 
-              <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+              <div className="bg-white rounded-lg shadow-terrapesca p-6 mb-6 border border-terrapesca-blue-100">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="flex items-center">
-                    <Calendar className="h-5 w-5 text-green-600 mr-2" />
+                    <Calendar className="h-5 w-5 text-terrapesca-green-600 mr-2" />
                     <div>
-                      <p className="text-sm text-gray-500">Fecha del sorteo</p>
-                      <p className="font-semibold">
+                      <p className="text-sm text-terrapesca-blue-500">Fecha del sorteo</p>
+                      <p className="font-semibold text-terrapesca-blue-800">
                         {formatDrawDate(raffle.draw_date)}
                       </p>
                       <div className="flex items-center mt-1">
-                        <Clock className="h-4 w-4 text-blue-500 mr-1" />
-                        <span className="text-xs text-blue-600 font-medium">
+                        <Clock className="h-4 w-4 text-terrapesca-blue-500 mr-1" />
+                        <span className="text-xs text-terrapesca-blue-600 font-medium">
                           Hora del Pacífico - Sinaloa
                         </span>
                       </div>
@@ -405,16 +396,16 @@ const RafflePage: React.FC = () => {
               </div>
 
               {raffle.drawn_at ? (
-                <div className="bg-green-50 rounded-lg p-6 mb-6 border border-green-200">
-                  <h3 className="text-lg font-semibold text-green-800 mb-2">
+                <div className="bg-terrapesca-green-50 rounded-lg p-6 mb-6 border border-terrapesca-green-200">
+                  <h3 className="text-lg font-semibold text-terrapesca-green-800 mb-2">
                     ¡Sorteo Realizado!
                   </h3>
-                  <p className="text-green-700">
+                  <p className="text-terrapesca-green-700">
                     Fecha: {formatDrawDate(raffle.drawn_at)}
                   </p>
                   {raffle.winner_id && (
                     <div className="mt-2">
-                      <p className="font-medium text-green-800">
+                      <p className="font-medium text-terrapesca-green-800">
                         Ganador: {raffle.winner_first_name} {raffle.winner_last_name}
                       </p>
                     </div>
@@ -422,31 +413,31 @@ const RafflePage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <h3 className="text-lg font-semibold mb-4">Tiempo restante</h3>
+                  <div className="bg-white rounded-lg shadow-terrapesca p-6 mb-6 border border-terrapesca-blue-100">
+                    <h3 className="text-lg font-semibold text-terrapesca-blue-800 mb-4">Tiempo restante</h3>
                     <CountdownTimer targetDate={raffle.draw_date} />
                   </div>
 
                   {raffle.status === 'active' && (
-                    <div className="bg-green-50 rounded-lg p-6 mb-6 border border-green-200">
+                    <div className="bg-terrapesca-green-50 rounded-lg p-6 mb-6 border border-terrapesca-green-200">
                       <div className="flex justify-between items-center mb-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-green-800">
+                          <h3 className="text-lg font-semibold text-terrapesca-green-800">
                             Precio por boleto
                           </h3>
-                          <p className="text-2xl font-bold text-green-600">
+                          <p className="text-2xl font-bold text-terrapesca-green-600">
                             ${raffle.price} MXN
                           </p>
                         </div>
                         <Link
                           to={`/boletos?raffle=${raffle.id}`}
-                          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 shadow-sm transition-colors"
+                          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-terrapesca-green-600 hover:bg-terrapesca-green-700 shadow-sm transition-colors"
                         >
                           <Ticket className="mr-2 h-5 w-5" />
                           Comprar Boletos
                         </Link>
                       </div>
-                      <div className="text-sm text-green-700">
+                      <div className="text-sm text-terrapesca-green-700">
                         * Los boletos serán reservados por 3 horas una vez seleccionados
                       </div>
                     </div>
@@ -457,7 +448,7 @@ const RafflePage: React.FC = () => {
               <div className="mt-6">
                 <Link
                   to="/sorteos"
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors"
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-terrapesca-green-600 hover:bg-terrapesca-green-700 transition-colors"
                 >
                   Ver todos los sorteos
                 </Link>
@@ -482,7 +473,7 @@ const RafflePage: React.FC = () => {
             
             {/* Contenido del modal - MÁS COMPACTO */}
             <div className="bg-white rounded-xl overflow-hidden shadow-2xl">
-              <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white p-4 text-center">
+              <div className="bg-gradient-to-r from-terrapesca-orange-400 via-terrapesca-orange-500 to-terrapesca-orange-600 text-white p-4 text-center">
                 <h2 className="text-xl font-bold mb-1">🎁 ¡PREMIO ESPECIAL! 🎁</h2>
                 <p className="text-sm opacity-90">Envío completamente GRATIS a toda la República Mexicana</p>
               </div>
@@ -499,11 +490,11 @@ const RafflePage: React.FC = () => {
                 />
                 
                 <div className="mt-4 text-center">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                    <h3 className="text-base font-semibold text-green-800 mb-1">
+                  <div className="bg-terrapesca-green-50 border border-terrapesca-green-200 rounded-lg p-3">
+                    <h3 className="text-base font-semibold text-terrapesca-green-800 mb-1">
                       ✨ Beneficio Exclusivo
                     </h3>
-                    <p className="text-sm text-green-700">
+                    <p className="text-sm text-terrapesca-green-700">
                       Tu premio será enviado sin costo adicional a cualquier parte de México. 
                       ¡No importa dónde te encuentres, nosotros nos encargamos de todo!
                     </p>
@@ -522,7 +513,7 @@ const RafflePage: React.FC = () => {
             {/* Botón cerrar */}
             <button
               onClick={closeImageModal}
-              className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors bg-black bg-opacity-50 rounded-full p-3"
+              className="absolute top-4 right-4 z-10 text-white hover:text-terrapesca-gray-300 transition-colors bg-black bg-opacity-50 rounded-full p-3"
             >
               <X className="w-6 h-6" />
             </button>
@@ -540,13 +531,13 @@ const RafflePage: React.FC = () => {
                 <>
                   <button
                     onClick={prevModalImage}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 p-3 rounded-full shadow-lg transition-all"
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-terrapesca-blue-800 p-3 rounded-full shadow-lg transition-all"
                   >
                     <ChevronLeft className="h-6 w-6" />
                   </button>
                   <button
                     onClick={nextModalImage}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 p-3 rounded-full shadow-lg transition-all"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-terrapesca-blue-800 p-3 rounded-full shadow-lg transition-all"
                   >
                     <ChevronRight className="h-6 w-6" />
                   </button>
@@ -558,7 +549,7 @@ const RafflePage: React.FC = () => {
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-6 py-3 rounded-lg">
               <div className="text-center">
                 <p className="text-sm font-medium">{raffle.name}</p>
-                <p className="text-xs text-gray-300 mt-1">
+                <p className="text-xs text-terrapesca-gray-300 mt-1">
                   Imagen {modalImageIndex + 1} de {allImages.length}
                 </p>
               </div>

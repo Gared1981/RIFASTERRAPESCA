@@ -3,6 +3,7 @@ import { Ticket } from '../utils/supabaseClient';
 import { CreditCard, MessageSquare, ArrowRight, Shield, Gift, Star } from 'lucide-react';
 import MercadoPagoPayment from './MercadoPagoPayment';
 import PDFGenerator from './PDFGenerator';
+import SecurePaymentBadge from './SecurePaymentBadge';
 
 interface PaymentMethodSelectorProps {
   selectedTickets: Ticket[];
@@ -96,13 +97,13 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     return (
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto text-center">
         <div className="mb-6">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Gift className="h-10 w-10 text-green-600" />
+          <div className="w-20 h-20 bg-terrapesca-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Gift className="h-10 w-10 text-terrapesca-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-terrapesca-blue-800 mb-2">
             ¡Proceso Completado!
           </h2>
-          <p className="text-gray-600">
+          <p className="text-terrapesca-blue-600">
             {paymentMethod === 'mercadopago' 
               ? '🏆 ¡Felicidades! Por pagar con Mercado Pago, automáticamente participas en nuestro premio especial con envío GRATIS a toda la República Mexicana.'
               : 'Tu reserva ha sido registrada exitosamente. Te contactaremos por WhatsApp para coordinar el pago.'
@@ -110,9 +111,9 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           </p>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold mb-3 text-lg">📋 Resumen de tu participación</h3>
-          <div className="text-sm text-gray-600 space-y-2">
+        <div className="bg-terrapesca-gray-50 rounded-lg p-4 mb-6">
+          <h3 className="font-semibold mb-3 text-lg text-terrapesca-blue-800">📋 Resumen de tu participación</h3>
+          <div className="text-sm text-terrapesca-blue-600 space-y-2">
             <div className="flex justify-between">
               <span>Boletos:</span>
               <span className="font-semibold">{selectedTickets.map(t => t.number).join(', ')}</span>
@@ -126,7 +127,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
               <span className="font-semibold">${totalAmount.toLocaleString()} MXN</span>
             </div>
             {paymentMethod === 'mercadopago' && (
-              <div className="flex justify-between text-green-600">
+              <div className="flex justify-between text-terrapesca-green-600">
                 <span>Bonus:</span>
                 <span className="font-semibold">✨ Premio especial + Envío GRATIS</span>
               </div>
@@ -150,7 +151,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
         <button
           onClick={onComplete}
-          className="mt-4 text-gray-600 hover:text-gray-800 transition-colors underline"
+          className="mt-4 text-terrapesca-blue-600 hover:text-terrapesca-blue-800 transition-colors underline"
         >
           Continuar sin descargar comprobante
         </button>
@@ -172,40 +173,45 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Elige tu método de pago</h2>
+    <div className="bg-white rounded-lg shadow-terrapesca-lg p-6 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold text-terrapesca-blue-800 mb-6">Elige tu método de pago</h2>
       
       {/* Resumen de compra */}
-      <div className="bg-gray-50 rounded-lg p-4 mb-6">
-        <h3 className="font-semibold text-gray-900 mb-3">Resumen de tu compra</h3>
+      <div className="bg-terrapesca-gray-50 rounded-lg p-4 mb-6 border border-terrapesca-blue-100">
+        <h3 className="font-semibold text-terrapesca-blue-800 mb-3">Resumen de tu compra</h3>
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span className="text-gray-600">Sorteo:</span>
-            <span className="font-medium">{raffleInfo.name}</span>
+            <span className="text-terrapesca-blue-600">Sorteo:</span>
+            <span className="font-medium text-terrapesca-blue-800">{raffleInfo.name}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Boletos:</span>
-            <span className="font-medium">{selectedTickets.length}</span>
+            <span className="text-terrapesca-blue-600">Boletos:</span>
+            <span className="font-medium text-terrapesca-blue-800">{selectedTickets.length}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Números:</span>
-            <span className="font-medium text-sm">
+            <span className="text-terrapesca-blue-600">Números:</span>
+            <span className="font-medium text-sm text-terrapesca-blue-800">
               {selectedTickets.map(t => t.number).join(', ')}
             </span>
           </div>
           {promoterCode && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Código promotor:</span>
-              <span className="font-medium text-green-600">{promoterCode}</span>
+              <span className="text-terrapesca-blue-600">Código promotor:</span>
+              <span className="font-medium text-terrapesca-green-600">{promoterCode}</span>
             </div>
           )}
-          <div className="border-t pt-2 mt-2">
+          <div className="border-t border-terrapesca-blue-200 pt-2 mt-2">
             <div className="flex justify-between text-lg font-bold">
-              <span>Total a pagar:</span>
-              <span className="text-green-600">${totalAmount.toLocaleString()} MXN</span>
+              <span className="text-terrapesca-blue-800">Total a pagar:</span>
+              <span className="text-terrapesca-green-600">${totalAmount.toLocaleString()} MXN</span>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Badge de pago seguro */}
+      <div className="mb-6">
+        <SecurePaymentBadge size="md" showText={true} />
       </div>
 
       {/* Métodos de pago */}
@@ -214,14 +220,14 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         <div
           className={`border-2 rounded-lg p-6 cursor-pointer transition-all relative ${
             selectedMethod === 'mercadopago'
-              ? 'border-blue-500 bg-blue-50'
-              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+              ? 'border-terrapesca-blue-500 bg-terrapesca-blue-50'
+              : 'border-terrapesca-gray-200 hover:border-terrapesca-blue-300 hover:bg-terrapesca-blue-50'
           }`}
           onClick={() => setSelectedMethod('mercadopago')}
         >
           {/* Badge de recomendado */}
           <div className="absolute -top-3 left-4">
-            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold flex items-center">
+            <div className="bg-gradient-to-r from-terrapesca-orange-400 to-terrapesca-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center">
               <Star className="h-3 w-3 mr-1" />
               RECOMENDADO
             </div>
@@ -229,26 +235,26 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                <CreditCard className="h-6 w-6 text-blue-600" />
+              <div className="bg-terrapesca-blue-100 p-3 rounded-lg mr-4">
+                <CreditCard className="h-6 w-6 text-terrapesca-blue-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Mercado Pago</h3>
-                <p className="text-gray-600">Pago inmediato y seguro</p>
+                <h3 className="text-lg font-semibold text-terrapesca-blue-800">Mercado Pago</h3>
+                <p className="text-terrapesca-blue-600">Pago inmediato y seguro</p>
                 <div className="flex items-center mt-1">
-                  <Shield className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm text-green-600">Pago protegido</span>
+                  <Shield className="h-4 w-4 text-terrapesca-green-500 mr-1" />
+                  <span className="text-sm text-terrapesca-green-600">Pago protegido</span>
                 </div>
                 {/* Premio especial badge */}
                 <div className="flex items-center mt-2">
-                  <Gift className="h-4 w-4 text-yellow-500 mr-1" />
-                  <span className="text-sm text-yellow-600 font-semibold">🏆 Incluye premio especial + Envío GRATIS</span>
+                  <Gift className="h-4 w-4 text-terrapesca-orange-500 mr-1" />
+                  <span className="text-sm text-terrapesca-orange-600 font-semibold">🏆 Incluye premio especial + Envío GRATIS</span>
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500 mb-1">Acepta:</div>
-              <div className="text-xs text-gray-600">
+              <div className="text-sm text-terrapesca-blue-500 mb-1">Acepta:</div>
+              <div className="text-xs text-terrapesca-blue-600">
                 • Tarjetas de crédito/débito<br />
                 • Transferencia bancaria<br />
                 • Billeteras digitales
@@ -257,9 +263,9 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           </div>
           
           {selectedMethod === 'mercadopago' && (
-            <div className="mt-4 pt-4 border-t border-blue-200">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                <div className="flex items-center text-yellow-800">
+            <div className="mt-4 pt-4 border-t border-terrapesca-blue-200">
+              <div className="bg-terrapesca-orange-50 border border-terrapesca-orange-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center text-terrapesca-orange-800">
                   <Gift className="h-4 w-4 mr-2" />
                   <span className="text-sm font-semibold">
                     ¡Bonus Exclusivo! Al pagar con Mercado Pago participas automáticamente en nuestro premio especial con envío GRATIS a toda la República Mexicana
@@ -268,7 +274,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
               </div>
               <button
                 onClick={handleMercadoPagoSelect}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-semibold"
+                className="w-full bg-terrapesca-blue-600 text-white py-3 px-4 rounded-lg hover:bg-terrapesca-blue-700 transition-colors flex items-center justify-center font-semibold"
               >
                 Pagar con Mercado Pago
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -281,27 +287,27 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         <div
           className={`border-2 rounded-lg p-6 cursor-pointer transition-all ${
             selectedMethod === 'whatsapp'
-              ? 'border-green-500 bg-green-50'
-              : 'border-gray-200 hover:border-green-300 hover:bg-green-50'
+              ? 'border-terrapesca-green-500 bg-terrapesca-green-50'
+              : 'border-terrapesca-gray-200 hover:border-terrapesca-green-300 hover:bg-terrapesca-green-50'
           }`}
           onClick={() => setSelectedMethod('whatsapp')}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="bg-green-100 p-3 rounded-lg mr-4">
-                <MessageSquare className="h-6 w-6 text-green-600" />
+              <div className="bg-terrapesca-green-100 p-3 rounded-lg mr-4">
+                <MessageSquare className="h-6 w-6 text-terrapesca-green-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">WhatsApp</h3>
-                <p className="text-gray-600">Coordina tu pago por WhatsApp</p>
-                <div className="text-sm text-gray-500 mt-1">
+                <h3 className="text-lg font-semibold text-terrapesca-blue-800">WhatsApp</h3>
+                <p className="text-terrapesca-blue-600">Coordina tu pago por WhatsApp</p>
+                <div className="text-sm text-terrapesca-blue-500 mt-1">
                   Te contactaremos para coordinar el pago
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500 mb-1">Acepta:</div>
-              <div className="text-xs text-gray-600">
+              <div className="text-sm text-terrapesca-blue-500 mb-1">Acepta:</div>
+              <div className="text-xs text-terrapesca-blue-600">
                 • Transferencia bancaria<br />
                 • Depósito en efectivo<br />
                 • Otros métodos
@@ -310,10 +316,10 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           </div>
           
           {selectedMethod === 'whatsapp' && (
-            <div className="mt-4 pt-4 border-t border-green-200">
+            <div className="mt-4 pt-4 border-t border-terrapesca-green-200">
               <button
                 onClick={handleWhatsAppPayment}
-                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center font-semibold"
+                className="w-full bg-terrapesca-green-600 text-white py-3 px-4 rounded-lg hover:bg-terrapesca-green-700 transition-colors flex items-center justify-center font-semibold"
               >
                 Continuar por WhatsApp
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -327,14 +333,14 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       <div className="flex justify-center">
         <button
           onClick={onCancel}
-          className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+          className="px-6 py-2 text-terrapesca-blue-600 hover:text-terrapesca-blue-800 transition-colors"
         >
           Cancelar compra
         </button>
       </div>
 
       {/* Información adicional */}
-      <div className="mt-6 text-center text-sm text-gray-500">
+      <div className="mt-6 text-center text-sm text-terrapesca-blue-500">
         <p>
           Al continuar, aceptas los términos y condiciones del sorteo.
           <br />

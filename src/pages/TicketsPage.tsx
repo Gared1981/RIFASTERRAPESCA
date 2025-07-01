@@ -5,6 +5,7 @@ import TicketGrid from '../components/TicketGrid';
 import PromoterTicketForm from '../components/PromoterTicketForm';
 import LuckyMachine from '../components/LuckyMachine';
 import Footer from '../components/Footer';
+import SecurePaymentBadge from '../components/SecurePaymentBadge';
 import { useReservationTimer } from '../hooks/useReservationTimer';
 import { Info, AlertTriangle, Tag, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -121,7 +122,7 @@ const TicketsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terrapesca-green-500"></div>
       </div>
     );
   }
@@ -130,13 +131,13 @@ const TicketsPage: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <AlertTriangle className="text-red-500 mb-4" size={48} />
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
-        <p className="text-gray-600 text-center max-w-md mb-4">
+        <h2 className="text-2xl font-bold text-terrapesca-blue-800 mb-2">Error</h2>
+        <p className="text-terrapesca-blue-600 text-center max-w-md mb-4">
           {error || 'No hay sorteos activos disponibles en este momento.'}
         </p>
         <Link
           to="/sorteos"
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-terrapesca-green-600 hover:bg-terrapesca-green-700"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Ver todos los sorteos
@@ -154,25 +155,30 @@ const TicketsPage: React.FC = () => {
           {!selectedRaffle ? (
             <div className="mb-8">
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-3xl font-bold text-terrapesca-blue-800 mb-2">
                   Selecciona un Sorteo
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-terrapesca-blue-600">
                   Elige el sorteo en el que deseas participar para ver los boletos disponibles
                 </p>
               </div>
 
+              {/* Badge de pago seguro en la selección */}
+              <div className="mb-8 flex justify-center">
+                <SecurePaymentBadge size="md" showText={true} />
+              </div>
+
               {promoterCode && (
-                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                <div className="bg-terrapesca-blue-50 border-l-4 border-terrapesca-blue-400 p-4 mb-6">
                   <div className="flex">
                     <div className="flex-shrink-0">
-                      <Tag className="h-5 w-5 text-blue-400" />
+                      <Tag className="h-5 w-5 text-terrapesca-blue-400" />
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-blue-700">
+                      <p className="text-sm text-terrapesca-blue-700">
                         <strong>Código de promotor activo:</strong> {promoterCode}
                       </p>
-                      <p className="text-xs text-blue-600 mt-1">
+                      <p className="text-xs text-terrapesca-blue-600 mt-1">
                         Tu compra será registrada para este promotor y recibirá su comisión correspondiente.
                       </p>
                     </div>
@@ -184,7 +190,7 @@ const TicketsPage: React.FC = () => {
                 {activeRaffles.map((raffle) => (
                   <div
                     key={raffle.id}
-                    className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
+                    className="bg-white rounded-lg shadow-terrapesca-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-300 hover:shadow-terrapesca-lg border border-terrapesca-blue-100"
                     onClick={() => handleRaffleSelection(raffle)}
                   >
                     <div className="relative">
@@ -194,24 +200,24 @@ const TicketsPage: React.FC = () => {
                         className="w-full h-48 object-cover"
                       />
                       <div className="absolute top-0 right-0 m-2">
-                        <div className="bg-green-500 text-white px-3 py-1 text-sm rounded-full font-semibold shadow-lg">
+                        <div className="bg-terrapesca-green-500 text-white px-3 py-1 text-sm rounded-full font-semibold shadow-lg">
                           ${raffle.price} MXN
                         </div>
                       </div>
                     </div>
 
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{raffle.name}</h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      <h3 className="text-xl font-bold text-terrapesca-blue-800 mb-2">{raffle.name}</h3>
+                      <p className="text-terrapesca-blue-600 text-sm mb-4 line-clamp-2">
                         {raffle.description}
                       </p>
                       
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                      <div className="flex items-center justify-between text-sm text-terrapesca-blue-500 mb-4">
                         <span>Sorteo: {new Date(raffle.draw_date).toLocaleDateString()}</span>
                         <span>Boletos: {raffle.tickets_sold || 0}/{raffle.max_tickets || 0}</span>
                       </div>
 
-                      <button className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors font-medium">
+                      <button className="w-full bg-terrapesca-green-600 text-white py-2 px-4 rounded-md hover:bg-terrapesca-green-700 transition-colors font-medium">
                         Seleccionar este sorteo
                       </button>
                     </div>
@@ -226,14 +232,14 @@ const TicketsPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <button
                     onClick={() => setSelectedRaffle(null)}
-                    className="inline-flex items-center text-green-600 hover:text-green-700 font-medium"
+                    className="inline-flex items-center text-terrapesca-green-600 hover:text-terrapesca-green-700 font-medium"
                   >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Cambiar sorteo
                   </button>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div className="bg-white rounded-lg shadow-terrapesca-lg p-6 mb-6 border border-terrapesca-blue-100">
                   <div className="flex flex-col md:flex-row md:items-center gap-4">
                     <img
                       src={selectedRaffle.image_url}
@@ -241,15 +247,15 @@ const TicketsPage: React.FC = () => {
                       className="w-full md:w-32 h-32 object-cover rounded-lg"
                     />
                     <div className="flex-1">
-                      <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                      <h1 className="text-2xl md:text-3xl font-bold text-terrapesca-blue-800 mb-2">
                         {selectedRaffle.name}
                       </h1>
-                      <p className="text-gray-600 mb-2">
+                      <p className="text-terrapesca-blue-600 mb-2">
                         {selectedRaffle.description}
                       </p>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                      <div className="flex flex-wrap gap-4 text-sm text-terrapesca-blue-500">
                         <span>Sorteo: {new Date(selectedRaffle.draw_date).toLocaleDateString()}</span>
-                        <span className="font-semibold text-green-600">
+                        <span className="font-semibold text-terrapesca-green-600">
                           Precio: ${selectedRaffle.price.toLocaleString()} MXN
                         </span>
                         <span>Boletos vendidos: {selectedRaffle.tickets_sold || 0}/{selectedRaffle.max_tickets || 0}</span>
@@ -259,16 +265,16 @@ const TicketsPage: React.FC = () => {
                 </div>
 
                 {promoterCode && (
-                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                  <div className="bg-terrapesca-blue-50 border-l-4 border-terrapesca-blue-400 p-4 mb-6">
                     <div className="flex">
                       <div className="flex-shrink-0">
-                        <Tag className="h-5 w-5 text-blue-400" />
+                        <Tag className="h-5 w-5 text-terrapesca-blue-400" />
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm text-blue-700">
+                        <p className="text-sm text-terrapesca-blue-700">
                           <strong>Código de promotor activo:</strong> {promoterCode}
                         </p>
-                        <p className="text-xs text-blue-600 mt-1">
+                        <p className="text-xs text-terrapesca-blue-600 mt-1">
                           Tu compra será registrada para este promotor y recibirá su comisión correspondiente.
                         </p>
                       </div>
@@ -277,13 +283,13 @@ const TicketsPage: React.FC = () => {
                 )}
                 
                 {isActive && (
-                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                  <div className="bg-terrapesca-blue-50 border-l-4 border-terrapesca-blue-400 p-4 mb-6">
                     <div className="flex">
                       <div className="flex-shrink-0">
-                        <Info className="h-5 w-5 text-blue-400" />
+                        <Info className="h-5 w-5 text-terrapesca-blue-400" />
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm text-blue-700">
+                        <p className="text-sm text-terrapesca-blue-700">
                           Tiempo restante para completar tu reserva: <strong>{formattedTime}</strong>
                         </p>
                       </div>
@@ -330,41 +336,48 @@ const TicketsPage: React.FC = () => {
                     
                     <div className="space-y-6">
                       {selectedTickets.length > 0 && (
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                          <h3 className="text-lg font-semibold mb-3">Resumen de selección</h3>
+                        <div className="bg-white border border-terrapesca-blue-200 rounded-lg p-4 shadow-terrapesca">
+                          <h3 className="text-lg font-semibold text-terrapesca-blue-800 mb-3">Resumen de selección</h3>
                           <p className="mb-2">
-                            <span className="font-medium">Boletos seleccionados:</span> {selectedTickets.length}
+                            <span className="font-medium text-terrapesca-blue-700">Boletos seleccionados:</span> {selectedTickets.length}
                           </p>
                           <p className="mb-4">
-                            <span className="font-medium">Total a pagar:</span> ${(selectedTickets.length * selectedRaffle.price).toLocaleString()} MXN
+                            <span className="font-medium text-terrapesca-blue-700">Total a pagar:</span> 
+                            <span className="text-terrapesca-green-600 font-bold"> ${(selectedTickets.length * selectedRaffle.price).toLocaleString()} MXN</span>
                           </p>
                           {promoterCode && (
-                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                              <div className="flex items-center text-green-700">
+                            <div className="mb-4 p-3 bg-terrapesca-green-50 border border-terrapesca-green-200 rounded-lg">
+                              <div className="flex items-center text-terrapesca-green-700">
                                 <Tag className="h-4 w-4 mr-2" />
                                 <span className="font-medium">Código: {promoterCode}</span>
                               </div>
-                              <p className="text-xs text-green-600 mt-1">
+                              <p className="text-xs text-terrapesca-green-600 mt-1">
                                 Comisión del promotor: ${(selectedTickets.length * 1000).toLocaleString()} MXN
                               </p>
                             </div>
                           )}
+                          
+                          {/* Badge de pago seguro en el resumen */}
+                          <div className="mb-4">
+                            <SecurePaymentBadge size="sm" showText={false} />
+                          </div>
+                          
                           <button
                             onClick={() => setShowForm(true)}
-                            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-terrapesca-green-600 hover:bg-terrapesca-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-terrapesca-green-500"
                           >
                             Continuar con la reserva
                           </button>
                         </div>
                       )}
                       
-                      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                      <div className="bg-terrapesca-orange-50 border-l-4 border-terrapesca-orange-400 p-4">
                         <div className="flex">
                           <div className="flex-shrink-0">
-                            <Info className="h-5 w-5 text-yellow-400" />
+                            <Info className="h-5 w-5 text-terrapesca-orange-400" />
                           </div>
                           <div className="ml-3">
-                            <p className="text-sm text-yellow-700">
+                            <p className="text-sm text-terrapesca-orange-700">
                               Los boletos serán reservados por 3 horas una vez completado el formulario. 
                               Si no se realiza el pago en ese tiempo, volverán a estar disponibles.
                             </p>
