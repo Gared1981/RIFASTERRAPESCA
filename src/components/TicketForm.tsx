@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Ticket, supabase } from '../utils/supabaseClient';
 import PaymentMethodSelector from './PaymentMethodSelector';
+import { saveUserData, getUserData, hasUserData } from '../utils/userDataStorage';
 import toast from 'react-hot-toast';
 
 interface TicketFormProps {
@@ -30,6 +31,26 @@ const TicketForm: React.FC<TicketFormProps> = ({
   });
   const [loading, setLoading] = useState(false);
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
+  
+  // Cargar datos guardados del usuario al inicializar
+  React.useEffect(() => {
+    const savedUserData = getUserData();
+    if (savedUserData) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: savedUserData.firstName,
+        lastName: savedUserData.lastName,
+        phone: savedUserData.phone,
+        email: savedUserData.email,
+        state: savedUserData.state
+      }));
+      
+      toast.success('📍 Datos de ubicación recuperados de tu última participación', {
+        duration: 4000,
+        icon: '🏠'
+      });
+    }
+  }, []);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -91,6 +112,15 @@ const TicketForm: React.FC<TicketFormProps> = ({
       
       toast.success('¡Boletos reservados con éxito!');
       
+      // Guardar datos del usuario para futuras compras
+      saveUserData({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        email: formData.email,
+        state: formData.state
+      });
+      
       // Show payment methods
       setShowPaymentMethods(true);
       
@@ -147,6 +177,26 @@ const TicketForm: React.FC<TicketFormProps> = ({
           Total a pagar: ${totalAmount.toLocaleString()} MXN
         </p>
       </div>
+      
+      {/* Indicador de datos guardados */}
+      {hasUserData() && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 text-sm">🏠</span>
+              </div>
+            </div>
+            <div className="ml-3">
+              <h4 className="font-semibold text-blue-800 mb-1">Datos recuperados</h4>
+              <p className="text-sm text-blue-700">
+                Hemos recuperado tus datos de ubicación de tu última participación. 
+                Puedes modificarlos si es necesario.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
