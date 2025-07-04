@@ -25,6 +25,7 @@ export function generateWhatsAppLink(
 
 /**
  * Generates a comprehensive WhatsApp confirmation message for reserved tickets
+ * This message is sent TO THE CUSTOMER'S PHONE NUMBER
  */
 export function generateReservationConfirmationMessage(
   ticketNumbers: number[],
@@ -62,10 +63,37 @@ export function generateReservationConfirmationMessage(
   message += `1️⃣ *Pagar en línea con Mercado Pago (recomendado)*\n`;
   message += `🔗 *Enlace para pagar en línea:* ${baseUrl}/boletos?raffle=${raffleInfo.id}\n\n`;
   message += `2️⃣ *Pagar por WhatsApp*\n`;
+  message += `📞 *Contactar:* +52 668 688 9571\n`;
   message += `https://cdn.shopify.com/s/files/1/0205/5752/9188/files/f09af494-4c14-40e1-93b3-2aebe6e3ee50_1.jpg?v=1751326649\n\n`;
   message += `¡Gracias por participar en Sorteos Terrapesca! 🐟`;
   
   return message;
+}
+
+/**
+ * Sends WhatsApp message to customer's phone number
+ * @param customerPhone Customer's phone number
+ * @param message Message to send
+ */
+export function sendWhatsAppToCustomer(customerPhone: string, message: string): void {
+  // Clean the phone number (remove any non-digits)
+  const cleanPhone = customerPhone.replace(/\D/g, '');
+  
+  // Add Mexico country code if not present
+  let formattedPhone = cleanPhone;
+  if (cleanPhone.length === 10) {
+    formattedPhone = `52${cleanPhone}`;
+  } else if (cleanPhone.length === 12 && cleanPhone.startsWith('52')) {
+    formattedPhone = cleanPhone;
+  } else if (cleanPhone.length === 13 && cleanPhone.startsWith('521')) {
+    formattedPhone = cleanPhone;
+  }
+  
+  // Create WhatsApp link to customer's number
+  const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+  
+  // Open WhatsApp
+  window.open(whatsappUrl, '_blank');
 }
 
 /**

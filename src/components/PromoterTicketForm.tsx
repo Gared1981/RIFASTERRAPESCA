@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Ticket, supabase } from '../utils/supabaseClient';
 import { Tag, Gift, MessageSquare, ExternalLink, Clock, CheckCircle } from 'lucide-react';
 import PaymentMethodSelector from './PaymentMethodSelector';
-import { generateReservationConfirmationMessage } from '../utils/whatsappUtils';
+import { generateReservationConfirmationMessage, sendWhatsAppToCustomer } from '../utils/whatsappUtils';
 import toast from 'react-hot-toast';
 
 interface PromoterTicketFormProps {
@@ -89,13 +89,12 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
       raffleInfo, 
       initialPromoterCode
     );
-    const whatsappUrl = `https://wa.me/526686889571?text=${encodeURIComponent(message)}`;
     
-    // Abrir WhatsApp en una nueva ventana
-    window.open(whatsappUrl, '_blank');
+    // 🔥 CAMBIO PRINCIPAL: Enviar WhatsApp al número del CLIENTE
+    sendWhatsAppToCustomer(userInfo.phone, message);
     
     // Mostrar notificación al usuario
-    toast.success('¡Boletos reservados! Se ha enviado confirmación por WhatsApp', {
+    toast.success('¡Boletos reservados! Se ha enviado confirmación a tu WhatsApp', {
       duration: 5000,
     });
   };
@@ -179,7 +178,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
         await registerSaleWithPromoter(ticketIds, initialPromoterCode);
       }
       
-      // Send WhatsApp confirmation with payment link
+      // Send WhatsApp confirmation to CUSTOMER'S phone
       sendWhatsAppConfirmation(ticketNumbers, formData);
       
       setReservationComplete(true);
@@ -246,7 +245,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
             <span className="font-semibold">Tiempo de reserva: 3 horas</span>
           </div>
           <p className="text-sm text-green-600">
-            Se ha enviado un mensaje de WhatsApp con toda la información y opciones de pago.
+            Se ha enviado un mensaje de confirmación a tu WhatsApp con toda la información y opciones de pago.
           </p>
         </div>
 
@@ -313,7 +312,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
           <div>
             <h4 className="font-semibold text-green-800 mb-1">Confirmación automática</h4>
             <p className="text-sm text-green-700">
-              Al completar tu reserva, se enviará automáticamente un mensaje de WhatsApp con:
+              Al completar tu reserva, recibirás automáticamente un mensaje en tu WhatsApp con:
             </p>
             <ul className="text-xs text-green-600 mt-2 space-y-1">
               <li>• Confirmación de tus boletos reservados</li>
@@ -372,7 +371,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Se te contactará por WhatsApp para confirmar el pago.
+            Recibirás la confirmación directamente en este número de WhatsApp.
           </p>
         </div>
 
