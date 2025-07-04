@@ -47,10 +47,6 @@ const Navbar: React.FC = () => {
                       : link.path === '/'
                         ? 'text-white hover:bg-red-400'
                         : 'text-white hover:bg-primary-light'
-                        : 'bg-secondary text-white shadow-lg'
-                      : link.path === '/'
-                        ? 'text-white hover:bg-red-400 hover:shadow-md'
-                        : 'text-white hover:bg-primary-light hover:shadow-md'
                   }`}
                 >
                   {link.icon}
