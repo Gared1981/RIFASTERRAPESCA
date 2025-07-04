@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle, FileText } from 'lucide-react';
 import Footer from '../components/Footer';
-import SecurePaymentBadge from '../components/SecurePaymentBadge';
 
 const HomePage: React.FC = () => {
   return (
@@ -85,13 +84,22 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Secure Payment Badge Section - NUEVA SECCIÓN */}
+      {/* Manual Button Section - NUEVA SECCIÓN */}
       <section className="py-8 bg-gradient-to-r from-terrapesca-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <SecurePaymentBadge size="lg" showText={true} />
+            <Link
+              to="/manual-usuario"
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-terrapesca-blue-600 via-terrapesca-blue-700 to-terrapesca-blue-800 text-white rounded-xl shadow-xl hover:shadow-terrapesca-blue-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-terrapesca-blue-400/50 hover:border-terrapesca-blue-300 font-bold text-lg"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="relative flex items-center">
+                <FileText className="mr-3 h-6 w-6" />
+                📖 Manual del Usuario
+              </span>
+            </Link>
             <p className="mt-4 text-terrapesca-blue-600 font-medium">
-              Procesamos tus pagos de forma 100% segura con Mercado Pago
+              Aprende cómo participar en nuestros sorteos paso a paso
             </p>
           </div>
         </div>
