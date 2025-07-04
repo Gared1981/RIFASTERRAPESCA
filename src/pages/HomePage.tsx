@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, FileText } from 'lucide-react';
 import Footer from '../components/Footer';
+import SecurePaymentBadge from '../components/SecurePaymentBadge';
 
 const HomePage: React.FC = () => {
   return (
