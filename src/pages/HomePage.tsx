@@ -93,11 +93,8 @@ const HomePage: React.FC = () => {
               to="/manual-usuario"
               className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-terrapesca-blue-600 via-terrapesca-blue-700 to-terrapesca-blue-800 text-white rounded-xl shadow-xl hover:shadow-terrapesca-blue-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-terrapesca-blue-400/50 hover:border-terrapesca-blue-300 font-bold text-lg"
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-              <span className="relative flex items-center">
-                <FileText className="mr-3 h-6 w-6" />
-                📖 Manual del Usuario
-              </span>
+              <FileText className="mr-3 h-6 w-6" />
+              📖 Manual del Usuario
             </Link>
             <p className="mt-4 text-terrapesca-blue-600 font-medium">
               Aprende cómo participar en nuestros sorteos paso a paso

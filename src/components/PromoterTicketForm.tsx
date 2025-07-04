@@ -3,7 +3,6 @@ import { Ticket, supabase } from '../utils/supabaseClient';
 import { Tag, Gift, MessageSquare, ExternalLink, Clock, CheckCircle } from 'lucide-react';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import { generateReservationConfirmationMessage, sendWhatsAppToCustomer } from '../utils/whatsappUtils';
-import { saveUserData, getUserData, hasUserData } from '../utils/userDataStorage';
 import toast from 'react-hot-toast';
 
 interface PromoterTicketFormProps {
@@ -45,26 +44,6 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
   const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null);
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   const [reservationComplete, setReservationComplete] = useState(false);
-
-  // Cargar datos guardados del usuario al inicializar
-  useEffect(() => {
-    const savedUserData = getUserData();
-    if (savedUserData) {
-      setFormData(prev => ({
-        ...prev,
-        firstName: savedUserData.firstName,
-        lastName: savedUserData.lastName,
-        phone: savedUserData.phone,
-        email: savedUserData.email,
-        state: savedUserData.state
-      }));
-      
-      toast.success('📍 Datos de ubicación recuperados de tu última participación', {
-        duration: 4000,
-        icon: '🏠'
-      });
-    }
-  }, []);
 
   useEffect(() => {
     // Si hay código de promotor inicial, buscar información del promotor
@@ -201,15 +180,6 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
       
       // Send WhatsApp confirmation to CUSTOMER'S phone
       sendWhatsAppConfirmation(ticketNumbers, formData);
-      
-      // Guardar datos del usuario para futuras compras
-      saveUserData({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        email: formData.email,
-        state: formData.state
-      });
       
       setReservationComplete(true);
       toast.success('¡Boletos reservados con éxito!');
@@ -353,26 +323,6 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
           </div>
         </div>
       </div>
-          
-          {/* Indicador de datos guardados */}
-          {hasUserData() && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 text-sm">🏠</span>
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-semibold text-blue-800 mb-1">Datos recuperados</h4>
-                  <p className="text-sm text-blue-700">
-                    Hemos recuperado tus datos de ubicación de tu última participación. 
-                    Puedes modificarlos si es necesario.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
