@@ -218,6 +218,33 @@ const AdminPage: React.FC = () => {
     }
   };
   
+  const handleCleanupExpiredTickets = async () => {
+    try {
+      const { data, error } = await supabase.rpc('admin_cleanup_expired_tickets');
+      
+      if (error) {
+        console.error('Error cleaning up tickets:', error);
+        toast.error('Error al limpiar boletos expirados');
+        return;
+      }
+      
+      if (data.released_count > 0) {
+        toast.success(`${data.released_count} boletos expirados liberados`);
+        // Refresh data after cleanup
+        if (selectedRaffle && activeTab === 'tickets') {
+          await fetchTickets(selectedRaffle);
+        }
+      } else {
+        toast.info('No hay boletos expirados para liberar');
+      }
+      
+      console.log('Cleanup result:', data);
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+      toast.error('Error al ejecutar limpieza');
+    }
+  };
+  
   if (loading && !isAuthenticated) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -358,6 +385,13 @@ const AdminPage: React.FC = () => {
                 Gestión de Sorteos
               </button>
             </nav>
+            <button
+              onClick={handleCleanupExpiredTickets}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <Clock className="mr-2 h-4 w-4" />
+              Limpiar Expirados
+            </button>
           </div>
         </div>
 

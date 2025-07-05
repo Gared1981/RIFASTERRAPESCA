@@ -23,17 +23,25 @@ export function useReservationTimer(ticketIds: number[], reservationTimeMinutes 
     if (ticketIds.length === 0) return;
     
     try {
+      // Primero intentar con la función de limpieza automática
+      await supabase.rpc('auto_cleanup_tickets');
+      
+      // Luego liberar específicamente estos boletos si aún están reservados
       const { error } = await supabase
         .from('tickets')
         .update({ 
           status: 'available',
           user_id: null,
-          reserved_at: null
+          reserved_at: null,
+          promoter_code: null
         })
-        .in('id', ticketIds);
+        .in('id', ticketIds)
+        .eq('status', 'reserved'); // Solo liberar si aún están reservados
       
       if (error) throw error;
       setIsActive(false);
+      
+      console.log('Released tickets due to timer expiration:', ticketIds);
     } catch (error) {
       console.error('Error releasing tickets:', error);
     }

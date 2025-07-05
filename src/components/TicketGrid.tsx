@@ -25,12 +25,15 @@ const TicketGrid: React.FC<TicketGridProps> = ({
       try {
         setLoading(true);
         
-        // Only fetch available tickets to hide reserved/purchased ones from the grid
+        // Ejecutar limpieza automática antes de obtener boletos
+        await supabase.rpc('auto_cleanup_tickets');
+        
+        // Fetch available tickets after cleanup
         const { data, error } = await supabase
           .from('tickets')
           .select('*')
           .eq('raffle_id', raffleId)
-          .eq('status', 'available') // Only show available tickets
+          .eq('status', 'available')
           .order('number', { ascending: true });
           
         if (error) throw error;
@@ -67,14 +70,21 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   useEffect(() => {
     const cleanupInterval = setInterval(async () => {
       try {
-        await supabase.rpc('auto_cleanup_tickets');
+        const { data, error } = await supabase.rpc('auto_cleanup_tickets');
+        if (error) {
+          console.error('Error during auto cleanup:', error);
+        } else if (data > 0) {
+          console.log(`Auto-released ${data} expired tickets`);
+          // Refresh tickets if any were released
+          fetchTickets();
+        }
       } catch (error) {
         console.error('Error during auto cleanup:', error);
       }
-    }, 30000); // 30 seconds
+    }, 60000); // 60 seconds (más frecuente)
 
     return () => clearInterval(cleanupInterval);
-  }, []);
+  }, [fetchTickets]);
   
   const isSelected = (ticket: Ticket) => {
     return selectedTickets.some(t => t.id === ticket.id);
