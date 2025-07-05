@@ -7,7 +7,7 @@ import LuckyMachine from '../components/LuckyMachine';
 import Footer from '../components/Footer';
 import SecurePaymentBadge from '../components/SecurePaymentBadge';
 import { useReservationTimer } from '../hooks/useReservationTimer';
-import { Info, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Info, AlertTriangle, ArrowLeft, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const TicketsPage: React.FC = () => {
@@ -21,6 +21,7 @@ const TicketsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const raffleId = searchParams.get('raffle');
+  const promoterCode = searchParams.get('promoter');
   const [initialLoad, setInitialLoad] = useState(true);
 
   // Get reservation timer for UI feedback
@@ -369,3 +370,11 @@ const TicketsPage: React.FC = () => {
                 </div>
               )}
             </>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default TicketsPage;
