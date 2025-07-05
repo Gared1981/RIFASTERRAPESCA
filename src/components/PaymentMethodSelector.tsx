@@ -22,6 +22,7 @@ interface PaymentMethodSelectorProps {
   };
   onComplete: () => void;
   onCancel: () => void;
+  promoterCode?: string;
 }
 
 type PaymentMethod = 'whatsapp' | 'mercadopago';
@@ -32,6 +33,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   userInfo,
   onComplete,
   onCancel,
+  promoterCode
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [showMercadoPago, setShowMercadoPago] = useState(false);
@@ -46,6 +48,10 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     
     whatsappMessage += `\n\nPara el sorteo: ${raffleInfo.name}`;
     whatsappMessage += `\nTotal a pagar: $${totalAmount.toLocaleString()} MXN`;
+    
+    if (promoterCode) {
+      whatsappMessage += `\nCódigo de promotor: ${promoterCode}`;
+    }
     
     whatsappMessage += `\n\n¿Cómo puedo realizar el pago?`;
     
@@ -161,6 +167,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         userInfo={userInfo}
         onSuccess={handleMercadoPagoSuccess}
         onCancel={handleMercadoPagoCancel}
+        promoterCode={promoterCode}
       />
     );
   }

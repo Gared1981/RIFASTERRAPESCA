@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Ticket, supabase, Raffle } from '../utils/supabaseClient';
 import TicketGrid from '../components/TicketGrid';
 import TicketForm from '../components/TicketForm';
@@ -7,12 +7,11 @@ import LuckyMachine from '../components/LuckyMachine';
 import Footer from '../components/Footer';
 import SecurePaymentBadge from '../components/SecurePaymentBadge';
 import { useReservationTimer } from '../hooks/useReservationTimer';
-import { Info, AlertTriangle, ArrowLeft, Tag } from 'lucide-react';
+import { Info, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const TicketsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [selectedTickets, setSelectedTickets] = useState<Ticket[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [activeRaffles, setActiveRaffles] = useState<Raffle[]>([]);
@@ -20,9 +19,9 @@ const TicketsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Get promoter code from URL parameters (hidden from UI)
+  const promoterCode = searchParams.get('promo') || searchParams.get('promoter');
   const raffleId = searchParams.get('raffle');
-  const promoterCode = searchParams.get('promoter');
-  const [initialLoad, setInitialLoad] = useState(true);
 
   // Get reservation timer for UI feedback
   const reservedTicketIds = selectedTickets.map(t => t.id);
@@ -61,15 +60,8 @@ const TicketsPage: React.FC = () => {
             // If specified raffle not found, select first active raffle
             setSelectedRaffle(rafflesData[0]);
           }
-        } else if (initialLoad) {
-          // Only auto-select on initial load, not on subsequent updates
-          // But if there's only one active raffle, select it automatically
-          if (rafflesData.length === 1) {
-            setSelectedRaffle(rafflesData[0]);
-            // Update URL to include the raffle ID
-            navigate(`?raffle=${rafflesData[0].id}`, { replace: true });
-          }
         }
+        // If no raffle specified, don't select any (user must choose)
         
       } catch (err) {
         console.error('Error fetching raffles:', err);
@@ -78,7 +70,6 @@ const TicketsPage: React.FC = () => {
         setSelectedRaffle(null);
       } finally {
         setLoading(false);
-        setInitialLoad(false);
       }
     };
     
@@ -126,9 +117,6 @@ const TicketsPage: React.FC = () => {
     setSelectedRaffle(raffle);
     setSelectedTickets([]); // Clear selected tickets when changing raffle
     setShowForm(false); // Close form if open
-    
-    // Update URL to include raffle parameter while preserving promoter code
-    navigate(`?raffle=${raffle.id}`, { replace: true });
   };
   
   if (loading) {
@@ -304,6 +292,7 @@ const TicketsPage: React.FC = () => {
                   }}
                   onComplete={handleSubmitForm}
                   onCancel={() => setShowForm(false)}
+                  promoterCode={promoterCode || undefined}
                 />
               ) : (
                 <div className="space-y-6">
@@ -373,6 +362,8 @@ const TicketsPage: React.FC = () => {
           )}
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 };

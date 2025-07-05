@@ -40,6 +40,8 @@ export function generateReservationConfirmationMessage(
     name: string;
     price: number;
     draw_date: string;
+  },
+  promoterCode?: string
   }
 ): string {
   const totalAmount = ticketNumbers.length * raffleInfo.price;
@@ -52,6 +54,10 @@ export function generateReservationConfirmationMessage(
   message += `🎰 *Sorteo:* ${raffleInfo.name}\n`;
   message += `🎫 *Boletos reservados:* ${ticketNumbers.join(', ')}\n`;
   message += `💰 *Total a pagar:* $${totalAmount.toLocaleString()} MXN\n\n`;
+  
+  if (promoterCode) {
+    message += `👨‍💼 *Código de promotor:* ${promoterCode}\n\n`;
+  }
   
   message += `⏰ *IMPORTANTE:* Tus boletos están reservados por *3 horas*.\n\n`;
   message += `💳 *Para completar tu pago, puedes:*\n`;

@@ -18,6 +18,7 @@ interface MercadoPagoPaymentProps {
   };
   onSuccess: (paymentData: any) => void;
   onCancel: () => void;
+  promoterCode?: string;
 }
 
 interface PaymentMethod {
@@ -34,6 +35,7 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
   userInfo,
   onSuccess,
   onCancel,
+  promoterCode
 }) => {
   const [loading, setLoading] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<string>('credit_card');
@@ -128,6 +130,7 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
         metadata: {
           raffle_id: raffleInfo.id,
           ticket_ids: selectedTickets.map(t => t.id),
+          promoter_code: promoterCode || null,
           user_phone: userInfo.phone,
           user_email: userInfo.email,
           ticket_numbers: selectedTickets.map(t => t.number)
@@ -244,6 +247,10 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
     
     whatsappMessage += `\n\nPara el sorteo: ${raffleInfo.name}`;
     whatsappMessage += `\nTotal a pagar: $${totalAmount.toLocaleString()} MXN`;
+    
+    if (promoterCode) {
+      whatsappMessage += `\nCódigo de promotor: ${promoterCode}`;
+    }
     
     whatsappMessage += `\n\n¿Pueden ayudarme a completar el pago?`;
     

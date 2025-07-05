@@ -9,9 +9,11 @@ interface TicketFormProps {
     id: number;
     name: string;
     price: number;
+    draw_date: string;
   };
   onComplete: () => void;
   onCancel: () => void;
+  promoterCode?: string;
 }
 
 const TicketForm: React.FC<TicketFormProps> = ({
@@ -19,6 +21,7 @@ const TicketForm: React.FC<TicketFormProps> = ({
   raffleInfo,
   onComplete,
   onCancel
+  promoterCode
 }) => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -83,11 +86,33 @@ const TicketForm: React.FC<TicketFormProps> = ({
         .update({ 
           status: 'reserved',
           user_id: userData.id,
-          reserved_at: new Date().toISOString()
+          reserved_at: new Date().toISOString(),
+          promoter_code: promoterCode || null
         })
         .in('id', ticketIds);
         
       if (ticketError) throw ticketError;
+      
+      // If promoter code is provided, register the sales
+      if (promoterCode) {
+        for (const ticketId of ticketIds) {
+          try {
+            const { data: saleResult, error: saleError } = await supabase
+              .rpc('register_ticket_sale', {
+                p_ticket_id: ticketId,
+                p_promoter_code: promoterCode
+              });
+
+            if (saleError) {
+              console.error('Error registering promoter sale:', saleError);
+            } else {
+              console.log('Sale registered for promoter:', saleResult);
+            }
+          } catch (saleErr) {
+            console.error('Exception registering promoter sale:', saleErr);
+          }
+        }
+      }
       
       toast.success('¡Boletos reservados con éxito!');
       
@@ -122,9 +147,11 @@ const TicketForm: React.FC<TicketFormProps> = ({
           lastName: formData.lastName,
           phone: formData.phone,
           email: formData.email
+          state: formData.state
         }}
         onComplete={handlePaymentComplete}
         onCancel={handlePaymentCancel}
+        promoterCode={promoterCode}
       />
     );
   }

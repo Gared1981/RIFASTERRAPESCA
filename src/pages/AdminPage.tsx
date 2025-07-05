@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, Ticket, User, Raffle } from '../utils/supabaseClient';
 import AdminTicketTable from '../components/AdminTicketTable';
+import PromoterDashboard from '../components/PromoterDashboard';
 import RafflesPage from '../pages/RafflesPage';
-import { LogOut, RefreshCw, Ticket as TicketIcon, DollarSign, Clock, Gift } from 'lucide-react';
+import { LogOut, RefreshCw, Users, Ticket as TicketIcon, DollarSign, Clock, UserCheck, Gift } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CountdownTimer from '../components/CountdownTimer';
 
@@ -16,7 +17,7 @@ const AdminPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [raffles, setRaffles] = useState<Raffle[]>([]);
   const [selectedRaffle, setSelectedRaffle] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'tickets' | 'raffles'>('tickets');
+  const [activeTab, setActiveTab] = useState<'tickets' | 'promoters' | 'raffles'>('tickets');
   const [stats, setStats] = useState({
     totalTickets: 0,
     available: 0,
@@ -362,6 +363,17 @@ const AdminPage: React.FC = () => {
                 Gestión de Boletos
               </button>
               <button
+                onClick={() => setActiveTab('promoters')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'promoters'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <UserCheck className="inline-block mr-2 h-4 w-4" />
+                Promotores
+              </button>
+              <button
                 onClick={() => setActiveTab('raffles')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'raffles'
@@ -383,7 +395,9 @@ const AdminPage: React.FC = () => {
           </div>
         </div>
 
-        {activeTab === 'raffles' ? (
+        {activeTab === 'promoters' ? (
+          <PromoterDashboard />
+        ) : activeTab === 'raffles' ? (
           <RafflesPage />
         ) : (
           <>
@@ -452,7 +466,7 @@ const AdminPage: React.FC = () => {
                 <div className="p-5">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <TicketIcon className="h-6 w-6 text-gray-400" />
+                      <Users className="h-6 w-6 text-gray-400" />
                     </div>
                     <div className="ml-5 w-0 flex-1">
                       <dl>
