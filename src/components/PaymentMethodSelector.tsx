@@ -194,6 +194,12 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
               {selectedTickets.map(t => t.number).join(', ')}
             </span>
           </div>
+          {promoterCode && (
+            <div className="flex justify-between">
+              <span className="text-terrapesca-blue-600">Código promotor:</span>
+              <span className="font-medium text-terrapesca-green-600">{promoterCode}</span>
+            </div>
+          )}
           <div className="border-t border-terrapesca-blue-200 pt-2 mt-2">
             <div className="flex justify-between text-lg font-bold">
               <span className="text-terrapesca-blue-800">Total a pagar:</span>

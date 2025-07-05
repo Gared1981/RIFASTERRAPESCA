@@ -387,6 +387,12 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
               {selectedTickets.map(t => t.number).join(', ')}
             </span>
           </div>
+          {promoterCode && (
+            <div className="flex justify-between">
+              <span className="text-gray-600">Código promotor:</span>
+              <span className="font-medium text-green-600">{promoterCode}</span>
+            </div>
+          )}
           <div className="border-t pt-2 mt-2">
             <div className="flex justify-between text-lg font-bold">
               <span>Total a pagar:</span>
