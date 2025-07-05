@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useCallback } from 'react';
 import TicketCard from './TicketCard';
 import { Ticket, supabase } from '../utils/supabaseClient';
 
@@ -20,32 +21,33 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
 
+  const fetchTickets = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Ejecutar limpieza automática antes de obtener boletos
+      await supabase.rpc('auto_cleanup_tickets');
+      
+      // Fetch available tickets after cleanup
+      const { data, error } = await supabase
+        .from('tickets')
+        .select('*')
+        .eq('raffle_id', raffleId)
+        .eq('status', 'available')
+        .order('number', { ascending: true });
+        
+      if (error) throw error;
+      
+      setTickets(data as Ticket[]);
+    } catch (err) {
+      console.error('Error fetching tickets:', err);
+      setError('No pudimos cargar los boletos. Intenta de nuevo más tarde.');
+    } finally {
+      setLoading(false);
+    }
+  }, [raffleId]);
+
   useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        setLoading(true);
-        
-        // Ejecutar limpieza automática antes de obtener boletos
-        await supabase.rpc('auto_cleanup_tickets');
-        
-        // Fetch available tickets after cleanup
-        const { data, error } = await supabase
-          .from('tickets')
-          .select('*')
-          .eq('raffle_id', raffleId)
-          .eq('status', 'available')
-          .order('number', { ascending: true });
-          
-        if (error) throw error;
-        
-        setTickets(data as Ticket[]);
-      } catch (err) {
-        console.error('Error fetching tickets:', err);
-        setError('No pudimos cargar los boletos. Intenta de nuevo más tarde.');
-      } finally {
-        setLoading(false);
-      }
-    };
     
     fetchTickets();
     
@@ -64,7 +66,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [raffleId]);
+  }, [raffleId, fetchTickets]);
 
   // Auto-cleanup expired tickets every 30 seconds
   useEffect(() => {
@@ -84,7 +86,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
     }, 60000); // 60 seconds (más frecuente)
 
     return () => clearInterval(cleanupInterval);
-  }, [fetchTickets]);
+  }, []);
   
   const isSelected = (ticket: Ticket) => {
     return selectedTickets.some(t => t.id === ticket.id);
