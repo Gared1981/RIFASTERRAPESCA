@@ -333,9 +333,6 @@ const TicketsPage: React.FC = () => {
                                 <Tag className="h-4 w-4 mr-2" />
                                 <span className="font-medium">Código: {promoterCode}</span>
                               </div>
-                              <p className="text-xs text-terrapesca-green-600 mt-1">
-                                Comisión del promotor: ${(selectedTickets.length * 1000).toLocaleString()} MXN
-                              </p>
                             </div>
                           )}
                           

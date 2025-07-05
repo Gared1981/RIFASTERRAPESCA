@@ -342,9 +342,6 @@ const PromoterDashboard: React.FC = () => {
                   Ventas
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bonos Acumulados
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -380,9 +377,6 @@ const PromoterDashboard: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {promoter.total_sales}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${promoter.accumulated_bonus.toLocaleString()} MXN
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button

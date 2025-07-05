@@ -298,9 +298,6 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
             <p className="text-sm text-blue-600 mt-1">
               Código: {selectedPromoter.code}
             </p>
-            <p className="text-xs text-blue-500 mt-1">
-              El promotor recibirá ${(selectedTickets.length * 1000).toLocaleString()} MXN en bonos por esta venta
-            </p>
           </div>
         )}
       </div>
