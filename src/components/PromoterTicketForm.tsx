@@ -49,6 +49,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
     // Si hay código de promotor inicial, buscar información del promotor
     const fetchPromoterInfo = async () => {
       if (initialPromoterCode) {
+        console.log('Fetching promoter info for code:', initialPromoterCode);
         try {
           const { data, error } = await supabase
             .from('promoters')
@@ -59,9 +60,12 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
 
           if (error) {
             console.error('Error fetching promoter:', error);
+            // Si no se encuentra el promotor, mostrar mensaje pero continuar
+            console.warn(`Promoter with code ${initialPromoterCode} not found or inactive`);
             return;
           }
 
+          console.log('Promoter found:', data);
           setSelectedPromoter(data);
         } catch (error) {
           console.error('Error fetching promoter info:', error);

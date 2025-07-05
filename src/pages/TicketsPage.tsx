@@ -23,6 +23,13 @@ const TicketsPage: React.FC = () => {
   const promoterCode = searchParams.get('promo') || searchParams.get('promoter');
   const raffleId = searchParams.get('raffle');
   
+  // Debug: Log promoter code
+  useEffect(() => {
+    if (promoterCode) {
+      console.log('Promoter code detected:', promoterCode);
+    }
+  }, [promoterCode]);
+  
   // Get reservation timer for UI feedback
   const reservedTicketIds = selectedTickets.map(t => t.id);
   const { formattedTime, isActive } = useReservationTimer(reservedTicketIds);
