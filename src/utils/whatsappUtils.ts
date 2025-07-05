@@ -42,7 +42,6 @@ export function generateReservationConfirmationMessage(
     draw_date: string;
   },
   promoterCode?: string
-  }
 ): string {
   const totalAmount = ticketNumbers.length * raffleInfo.price;
   const baseUrl = window.location.origin;
