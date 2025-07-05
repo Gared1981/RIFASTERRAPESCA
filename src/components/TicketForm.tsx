@@ -20,7 +20,7 @@ const TicketForm: React.FC<TicketFormProps> = ({
   selectedTickets,
   raffleInfo,
   onComplete,
-  onCancel
+  onCancel,
   promoterCode
 }) => {
   const [formData, setFormData] = useState({
