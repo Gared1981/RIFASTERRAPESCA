@@ -111,6 +111,7 @@ serve(async (req) => {
           number: cleanPhone
         }
       },
+      back_urls: {
         success: `${origin}/payment/success`,
         failure: `${origin}/payment/failure`,
         pending: `${origin}/payment/pending`
