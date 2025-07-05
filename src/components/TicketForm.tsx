@@ -146,7 +146,7 @@ const TicketForm: React.FC<TicketFormProps> = ({
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone,
-          email: formData.email
+          email: formData.email,
           state: formData.state
         }}
         onComplete={handlePaymentComplete}
