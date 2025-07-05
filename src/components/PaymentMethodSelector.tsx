@@ -22,7 +22,6 @@ interface PaymentMethodSelectorProps {
   };
   onComplete: () => void;
   onCancel: () => void;
-  promoterCode?: string;
 }
 
 type PaymentMethod = 'whatsapp' | 'mercadopago';
@@ -33,7 +32,6 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   userInfo,
   onComplete,
   onCancel,
-  promoterCode
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [showMercadoPago, setShowMercadoPago] = useState(false);
@@ -48,10 +46,6 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     
     whatsappMessage += `\n\nPara el sorteo: ${raffleInfo.name}`;
     whatsappMessage += `\nTotal a pagar: $${totalAmount.toLocaleString()} MXN`;
-    
-    if (promoterCode) {
-      whatsappMessage += `\nCódigo de promotor: ${promoterCode}`;
-    }
     
     whatsappMessage += `\n\n¿Cómo puedo realizar el pago?`;
     
@@ -167,7 +161,6 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         userInfo={userInfo}
         onSuccess={handleMercadoPagoSuccess}
         onCancel={handleMercadoPagoCancel}
-        promoterCode={promoterCode}
       />
     );
   }
@@ -194,12 +187,6 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
               {selectedTickets.map(t => t.number).join(', ')}
             </span>
           </div>
-          {promoterCode && (
-            <div className="flex justify-between">
-              <span className="text-terrapesca-blue-600">Código promotor:</span>
-              <span className="font-medium text-terrapesca-green-600">{promoterCode}</span>
-            </div>
-          )}
           <div className="border-t border-terrapesca-blue-200 pt-2 mt-2">
             <div className="flex justify-between text-lg font-bold">
               <span className="text-terrapesca-blue-800">Total a pagar:</span>

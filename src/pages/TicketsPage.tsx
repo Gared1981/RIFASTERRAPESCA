@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Ticket, supabase, Raffle } from '../utils/supabaseClient';
 import TicketGrid from '../components/TicketGrid';
-import PromoterTicketForm from '../components/PromoterTicketForm';
+import TicketForm from '../components/TicketForm';
 import LuckyMachine from '../components/LuckyMachine';
 import Footer from '../components/Footer';
 import SecurePaymentBadge from '../components/SecurePaymentBadge';
 import { useReservationTimer } from '../hooks/useReservationTimer';
-import { Info, AlertTriangle, Tag, ArrowLeft } from 'lucide-react';
+import { Info, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const TicketsPage: React.FC = () => {
@@ -20,8 +20,6 @@ const TicketsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Get promoter code from URL parameters
-  const promoterCode = searchParams.get('promo') || searchParams.get('promoter');
   const raffleId = searchParams.get('raffle');
   const [initialLoad, setInitialLoad] = useState(true);
 
@@ -68,9 +66,7 @@ const TicketsPage: React.FC = () => {
           if (rafflesData.length === 1) {
             setSelectedRaffle(rafflesData[0]);
             // Update URL to include the raffle ID
-            const newSearchParams = new URLSearchParams(searchParams);
-            newSearchParams.set('raffle', rafflesData[0].id.toString());
-            navigate(`?${newSearchParams.toString()}`, { replace: true });
+            navigate(`?raffle=${rafflesData[0].id}`, { replace: true });
           }
         }
         
@@ -131,12 +127,7 @@ const TicketsPage: React.FC = () => {
     setShowForm(false); // Close form if open
     
     // Update URL to include raffle parameter while preserving promoter code
-    const newSearchParams = new URLSearchParams();
-    newSearchParams.set('raffle', raffle.id.toString());
-    if (promoterCode) {
-      newSearchParams.set('promo', promoterCode);
-    }
-    navigate(`?${newSearchParams.toString()}`, { replace: true });
+    navigate(`?raffle=${raffle.id}`, { replace: true });
   };
   
   if (loading) {
@@ -187,24 +178,6 @@ const TicketsPage: React.FC = () => {
               <div className="mb-8 flex justify-center">
                 <SecurePaymentBadge size="md" showText={true} />
               </div>
-
-              {promoterCode && (
-                <div className="bg-terrapesca-blue-50 border-l-4 border-terrapesca-blue-400 p-4 mb-6">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <Tag className="h-5 w-5 text-terrapesca-blue-400" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-terrapesca-blue-700">
-                        <strong>Código de promotor activo:</strong> {promoterCode}
-                      </p>
-                      <p className="text-xs text-terrapesca-blue-600 mt-1">
-                        Tu compra será registrada para este promotor y recibirá su comisión correspondiente.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {activeRaffles.map((raffle) => (
@@ -320,7 +293,7 @@ const TicketsPage: React.FC = () => {
               
               {/* Tickets Section */}
               {showForm ? (
-                <PromoterTicketForm
+                <TicketForm
                   selectedTickets={selectedTickets}
                   raffleInfo={{
                     id: selectedRaffle.id,
@@ -330,7 +303,6 @@ const TicketsPage: React.FC = () => {
                   }}
                   onComplete={handleSubmitForm}
                   onCancel={() => setShowForm(false)}
-                  promoterCode={promoterCode || undefined}
                 />
               ) : (
                 <div className="space-y-6">
@@ -365,18 +337,6 @@ const TicketsPage: React.FC = () => {
                             <span className="font-medium text-terrapesca-blue-700">Total a pagar:</span> 
                             <span className="text-terrapesca-green-600 font-bold"> ${(selectedTickets.length * selectedRaffle.price).toLocaleString()} MXN</span>
                           </p>
-                          {promoterCode && (
-                            <div className="mb-4 p-3 bg-terrapesca-green-50 border border-terrapesca-green-200 rounded-lg">
-                              <div className="flex items-center text-terrapesca-green-700">
-                                <Tag className="h-4 w-4 mr-2" />
-                                <span className="font-medium">Código: {promoterCode}</span>
-                              </div>
-                              <p className="text-xs text-terrapesca-green-600 mt-1">
-                                Comisión del promotor: ${(selectedTickets.length * 1000).toLocaleString()} MXN
-                              </p>
-                            </div>
-                          )}
-                          
                           {/* Badge de pago seguro en el resumen */}
                           <div className="mb-4">
                             <SecurePaymentBadge size="sm" showText={false} />
@@ -409,13 +369,3 @@ const TicketsPage: React.FC = () => {
                 </div>
               )}
             </>
-          )}
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default TicketsPage;
