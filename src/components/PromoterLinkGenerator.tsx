@@ -205,7 +205,7 @@ const PromoterLinkGenerator: React.FC = () => {
             <div className="mt-3 text-xs text-gray-600">
               <p><strong>Instrucciones:</strong></p>
               <ul className="list-disc list-inside mt-1 space-y-1">
-                <li>Comparte este enlace directamente con tus clientes</li>
+                <li>Comparte este enlace con tus clientes</li>
                 <li>Cuando compren boletos usando este enlace, se registrará automáticamente tu código</li>
                 <li>Recibirás $1,000 MXN de comisión por cada boleto vendido</li>
                 <li>Si tu boleto resulta ganador, recibirás $1,000 MXN adicionales</li>

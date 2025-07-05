@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useCallback } from 'react';
 import TicketCard from './TicketCard';
 import { Ticket, supabase } from '../utils/supabaseClient';
 
@@ -21,7 +20,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
 
-  const fetchTickets = useCallback(async () => {
+  const fetchTickets = async () => {
     try {
       setLoading(true);
       
@@ -45,7 +44,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [raffleId]);
+  };
 
   useEffect(() => {
     
@@ -66,7 +65,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [raffleId, fetchTickets]);
+  }, [raffleId]);
 
   // Auto-cleanup expired tickets every 30 seconds
   useEffect(() => {

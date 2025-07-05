@@ -430,12 +430,7 @@ const RafflePage: React.FC = () => {
                           </p>
                         </div>
                         <Link
-                          to={(() => {
-                            const searchParams = new URLSearchParams(window.location.search);
-                            const promoterCode = searchParams.get('promo') || searchParams.get('promoter');
-                            const baseUrl = `/boletos?raffle=${raffle.id}`;
-                            return promoterCode ? `${baseUrl}&promo=${promoterCode}` : baseUrl;
-                          })()}
+                          to={`/boletos?raffle=${raffle.id}`}
                           className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-terrapesca-green-600 hover:bg-terrapesca-green-700 shadow-sm transition-colors"
                         >
                           <Ticket className="mr-2 h-5 w-5" />

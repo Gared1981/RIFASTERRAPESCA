@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Ticket, supabase, Raffle } from '../utils/supabaseClient';
 import TicketGrid from '../components/TicketGrid';
 import PromoterTicketForm from '../components/PromoterTicketForm';
@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 
 const TicketsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [selectedTickets, setSelectedTickets] = useState<Ticket[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [activeRaffles, setActiveRaffles] = useState<Raffle[]>([]);
@@ -22,6 +23,7 @@ const TicketsPage: React.FC = () => {
   // Get promoter code from URL parameters
   const promoterCode = searchParams.get('promo') || searchParams.get('promoter');
   const raffleId = searchParams.get('raffle');
+  const [initialLoad, setInitialLoad] = useState(true);
 
   // Get reservation timer for UI feedback
   const reservedTicketIds = selectedTickets.map(t => t.id);
@@ -60,11 +62,15 @@ const TicketsPage: React.FC = () => {
             // If specified raffle not found, select first active raffle
             setSelectedRaffle(rafflesData[0]);
           }
-        } else {
-        // If no raffle specified, don't select any (user must choose)
+        } else if (initialLoad) {
+          // Only auto-select on initial load, not on subsequent updates
           // But if there's only one active raffle, select it automatically
           if (rafflesData.length === 1) {
             setSelectedRaffle(rafflesData[0]);
+            // Update URL to include the raffle ID
+            const newSearchParams = new URLSearchParams(searchParams);
+            newSearchParams.set('raffle', rafflesData[0].id.toString());
+            navigate(`?${newSearchParams.toString()}`, { replace: true });
           }
         }
         
@@ -75,6 +81,7 @@ const TicketsPage: React.FC = () => {
         setSelectedRaffle(null);
       } finally {
         setLoading(false);
+        setInitialLoad(false);
       }
     };
     
@@ -124,9 +131,12 @@ const TicketsPage: React.FC = () => {
     setShowForm(false); // Close form if open
     
     // Update URL to include raffle parameter while preserving promoter code
-    const newSearchParams = new URLSearchParams(searchParams);
+    const newSearchParams = new URLSearchParams();
     newSearchParams.set('raffle', raffle.id.toString());
-    window.history.replaceState({}, '', `${window.location.pathname}?${newSearchParams.toString()}`);
+    if (promoterCode) {
+      newSearchParams.set('promo', promoterCode);
+    }
+    navigate(`?${newSearchParams.toString()}`, { replace: true });
   };
   
   if (loading) {
@@ -173,15 +183,6 @@ const TicketsPage: React.FC = () => {
                 </p>
               </div>
               
-              {/* Mostrar mensaje si viene de enlace de promotor */}
-              {promoterCode && (
-                <div className="text-center mb-6">
-                  <p className="text-terrapesca-blue-600 font-medium">
-                    Enlace de promotor detectado: <span className="font-bold text-terrapesca-green-600">{promoterCode}</span>
-                  </p>
-                </div>
-              )}
-
               {/* Badge de pago seguro en la selección */}
               <div className="mb-8 flex justify-center">
                 <SecurePaymentBadge size="md" showText={true} />
@@ -237,10 +238,7 @@ const TicketsPage: React.FC = () => {
                       </div>
 
                       <button className="w-full bg-terrapesca-green-600 text-white py-2 px-4 rounded-md hover:bg-terrapesca-green-700 transition-colors font-medium">
-                        {promoterCode 
-                          ? `Comprar con código ${promoterCode}` 
-                          : 'Seleccionar este sorteo'
-                        }
+                        Seleccionar este sorteo
                       </button>
                     </div>
                   </div>
@@ -250,18 +248,6 @@ const TicketsPage: React.FC = () => {
           ) : (
             <>
               {/* Selected Raffle Header */}
-              {/* Mostrar información del promotor si está presente */}
-              {promoterCode && (
-                <div className="mb-6 bg-terrapesca-green-50 border-l-4 border-terrapesca-green-400 p-4">
-                  <div className="flex items-center">
-                    <Tag className="h-5 w-5 text-terrapesca-green-400 mr-2" />
-                    <p className="text-sm text-terrapesca-green-700">
-                      <strong>Código de promotor activo:</strong> {promoterCode} - Tu compra será registrada para este promotor.
-                    </p>
-                  </div>
-                </div>
-              )}
-              
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
                   <button
@@ -298,6 +284,23 @@ const TicketsPage: React.FC = () => {
                   </div>
                 </div>
 
+                {promoterCode && (
+                  <div className="bg-terrapesca-blue-50 border-l-4 border-terrapesca-blue-400 p-4 mb-6">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <Tag className="h-5 w-5 text-terrapesca-blue-400" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-terrapesca-blue-700">
+                          <strong>Código de promotor activo:</strong> {promoterCode}
+                        </p>
+                        <p className="text-xs text-terrapesca-blue-600 mt-1">
+                          Tu compra será registrada para este promotor y recibirá su comisión correspondiente.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 {isActive && (
                   <div className="bg-terrapesca-blue-50 border-l-4 border-terrapesca-blue-400 p-4 mb-6">
