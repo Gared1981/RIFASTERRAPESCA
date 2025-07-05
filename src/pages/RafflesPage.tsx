@@ -3,7 +3,6 @@ import { supabase } from '../utils/supabaseClient';
 import { Plus, Edit, Trash2, Eye, Users, Bug, BugOff, RefreshCw, AlertCircle } from 'lucide-react';
 import RaffleForm from '../components/RaffleForm';
 import RaffleEditForm from '../components/RaffleEditForm';
-import PromoterLinkGenerator from '../components/PromoterLinkGenerator';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
@@ -12,7 +11,6 @@ const RafflesPage = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingRaffle, setEditingRaffle] = useState(null);
-  const [showLinkGenerator, setShowLinkGenerator] = useState(false);
   const [debugMode, setDebugMode] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -265,13 +263,6 @@ const RafflesPage = () => {
             Debug {debugMode ? 'ON' : 'OFF'}
           </button>
           <button
-            onClick={() => setShowLinkGenerator(!showLinkGenerator)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-          >
-            <Users className="h-5 w-5 mr-2" />
-            Enlaces de Promotor
-          </button>
-          <button
             onClick={() => setShowForm(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
           >
@@ -322,12 +313,6 @@ const RafflesPage = () => {
         </div>
       )}
 
-      {showLinkGenerator && (
-        <div className="mb-6">
-          <PromoterLinkGenerator />
-        </div>
-      )}
-      
       {showForm ? (
         <RaffleForm
           onComplete={() => {

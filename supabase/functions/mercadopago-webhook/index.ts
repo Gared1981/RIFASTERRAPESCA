@@ -92,29 +92,6 @@ serve(async (req) => {
 
           console.log(`Tickets updated to purchased: ${ticketIds.join(', ')}`)
 
-          // Si hay código de promotor, registrar la venta
-          if (metadata.promoter_code) {
-            console.log(`Registering sales for promoter: ${metadata.promoter_code}`)
-            
-            for (const ticketId of ticketIds) {
-              try {
-                const { data: saleResult, error: saleError } = await supabaseClient
-                  .rpc('register_ticket_sale', {
-                    p_ticket_id: ticketId,
-                    p_promoter_code: metadata.promoter_code
-                  })
-
-                if (saleError) {
-                  console.error('Error registering promoter sale:', saleError)
-                } else {
-                  console.log('Sale registered for promoter:', saleResult)
-                }
-              } catch (saleErr) {
-                console.error('Exception registering promoter sale:', saleErr)
-              }
-            }
-          }
-
           // Log successful processing
           console.log(`Payment ${paymentData.id} processed successfully for tickets: ${metadata.ticket_numbers?.join(', ')}`)
         }
@@ -134,7 +111,6 @@ serve(async (req) => {
               status: 'available',
               user_id: null,
               reserved_at: null,
-              promoter_code: null
             })
             .in('id', ticketIds)
 

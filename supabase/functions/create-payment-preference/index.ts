@@ -27,7 +27,6 @@ interface PaymentPayer {
 interface PaymentMetadata {
   raffle_id: number;
   ticket_ids: number[];
-  promoter_code?: string;
   user_phone: string;
   user_email: string;
   ticket_numbers: number[];
@@ -112,7 +111,6 @@ serve(async (req) => {
           number: cleanPhone
         }
       },
-      back_urls: {
         success: `${origin}/payment/success`,
         failure: `${origin}/payment/failure`,
         pending: `${origin}/payment/pending`
