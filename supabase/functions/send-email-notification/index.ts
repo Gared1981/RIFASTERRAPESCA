@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { SmtpClient } from "https://deno.land/x/mail@v1.8.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -44,11 +43,8 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Email configuration
-    const smtpHost = "smtp.gmail.com"; // Replace with your SMTP server
-    const smtpPort = 587;
-    const smtpUsername = "ventasweb@terrapesca.com"; // Replace with your email
-    const smtpPassword = "your-app-password"; // Replace with your app password
+    // Resend API key
+    const RESEND_API_KEY = "re_UurBRH4T_7tgo3qyw6wipbkoDFVmXPM3Y";
     
     // Check if this is a direct email request or a ticket notification
     const requestBody = await req.json();
@@ -57,46 +53,55 @@ serve(async (req: Request) => {
       // This is a direct email request
       const { to, subject, body, cc, bcc, replyTo, isHtml } = requestBody as EmailNotificationRequest;
       
-      // Log the email that would be sent (for development/testing)
-      console.log(`Would send email to: ${to}`);
+      console.log(`Sending email to: ${to}`);
       console.log(`Subject: ${subject}`);
-      console.log(`Body: ${body.substring(0, 100)}...`);
       
-      // In production, uncomment this code to actually send emails
-      /*
-      const client = new SmtpClient();
-      await client.connect({
-        hostname: smtpHost,
-        port: smtpPort,
-        username: smtpUsername,
-        password: smtpPassword,
-      });
-      
-      await client.send({
-        from: smtpUsername,
-        to: [to],
-        cc: cc || [],
-        bcc: bcc || [],
-        subject: subject,
-        content: body,
-        html: isHtml === true,
-      });
-      
-      await client.close();
-      */
-      
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Email notification would be sent (disabled in development)",
-          to,
-          subject,
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
+      try {
+        // Send email using Resend API
+        const response = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: "Sorteos Terrapesca <ventasweb@terrapesca.com>",
+            to: [to],
+            subject: subject,
+            html: isHtml ? body : undefined,
+            text: !isHtml ? body : undefined,
+            cc: cc,
+            bcc: bcc,
+            reply_to: replyTo || "ventasweb@terrapesca.com"
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          console.error("Resend API error:", result);
+          throw new Error(`Resend API error: ${JSON.stringify(result)}`);
         }
-      );
+        
+        console.log("Email sent successfully:", result);
+        
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: "Email sent successfully",
+            to,
+            subject,
+            id: result.id
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          }
+        );
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        throw new Error(`Error sending email: ${emailError.message}`);
+      }
     } else {
       // This is a ticket notification request
       const { 
@@ -228,91 +233,75 @@ serve(async (req: Request) => {
         </html>
       `;
       
-      // 3. Prepare WhatsApp message for admin
-      const adminPhone = "+526686889571";
-      const adminWhatsappMessage = `
-🎫 *NUEVA VENTA DE BOLETOS* 🎫
-
-👤 *Cliente:* ${userName}
-📱 *Teléfono:* ${userPhone}
-📧 *Email:* ${userEmail}
-
-🎟️ *Boletos:* ${finalTicketNumbers.join(", ")}
-🎰 *Sorteo:* ${raffleName}
-💰 *Método de pago:* ${paymentMethod === 'mercadopago' ? 'Mercado Pago' : 'WhatsApp'}
-${promoterCode ? `👨‍💼 *Código promotor:* ${promoterCode}` : ''}
-
-⏰ *Fecha:* ${new Date().toLocaleString('es-MX')}
-🆔 *ID Transacción:* ${paymentId}
-      `;
-      
-      // 4. Prepare WhatsApp message for customer - new format
-      const customerWhatsappMessage = `🎉✨ ¡Hola ${userName.split(' ')[0]}!
-Tu boleto #${finalTicketNumbers.join(', ')} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
-¡Estás oficialmente dentro! 🙌🔥
-
-Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀🎁
-¡Gracias por participar y mucha, muuucha suerte! 💥🚀
-
-#EquipaTuAventura 🌊🐟
-
-${promoterCode ? `👨‍💼 *Código de promotor:* ${promoterCode}\n` : ""}
-📞 *Contacto:* +52 668 688 9571
-🌐 *Web:* ${supabaseUrl.replace('/functions/v1/send-email-notification', '')}`;
-      
-      console.log(`Would send customer email to: ${userEmail}`);
-      console.log(`Would send admin email to: ${adminEmail}`);
-      console.log(`Would send WhatsApp message to admin: ${adminPhone}`);
-      console.log(`Would send WhatsApp message to customer: ${userPhone}`);
-      
-      // In production, uncomment this code to actually send emails
-      /*
-      const client = new SmtpClient();
-      await client.connect({
-        hostname: smtpHost,
-        port: smtpPort,
-        username: smtpUsername,
-        password: smtpPassword,
-      });
-      
-      // Send customer email
-      await client.send({
-        from: smtpUsername,
-        to: [userEmail],
-        subject: customerSubject,
-        content: customerBody,
-        html: true,
-      });
-      
-      // Send admin email
-      await client.send({
-        from: smtpUsername,
-        to: [adminEmail],
-        subject: adminSubject,
-        content: adminBody,
-        html: true,
-      });
-      
-      await client.close();
-      */
-      
-      // For WhatsApp, you would typically use a WhatsApp Business API provider
-      // Here we're just logging what would be sent
-      
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Notifications would be sent (disabled in development)",
-          customerEmail: userEmail,
-          adminEmail: adminEmail,
-          adminWhatsapp: adminPhone,
-          ticketsProcessed: finalTicketNumbers.length,
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
+      try {
+        // Send customer email using Resend API
+        if (userEmail) {
+          const customerResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${RESEND_API_KEY}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              from: "Sorteos Terrapesca <ventasweb@terrapesca.com>",
+              to: [userEmail],
+              subject: customerSubject,
+              html: customerBody
+            })
+          });
+          
+          const customerResult = await customerResponse.json();
+          
+          if (!customerResponse.ok) {
+            console.error("Resend API error (customer email):", customerResult);
+          } else {
+            console.log("Customer email sent successfully:", customerResult);
+          }
         }
-      );
+        
+        // Send admin email using Resend API
+        const adminResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: "Sorteos Terrapesca <ventasweb@terrapesca.com>",
+            to: [adminEmail],
+            subject: adminSubject,
+            html: adminBody
+          })
+        });
+        
+        const adminResult = await adminResponse.json();
+        
+        if (!adminResponse.ok) {
+          console.error("Resend API error (admin email):", adminResult);
+        } else {
+          console.log("Admin email sent successfully:", adminResult);
+        }
+        
+        // For WhatsApp, you would typically use a WhatsApp Business API provider
+        // Here we're just logging what would be sent
+        
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: "Email notifications sent successfully",
+            customerEmail: userEmail,
+            adminEmail: adminEmail,
+            ticketsProcessed: finalTicketNumbers.length,
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          }
+        );
+      } catch (emailError) {
+        console.error("Error sending emails:", emailError);
+        throw new Error(`Error sending emails: ${emailError.message}`);
+      }
     }
   } catch (error) {
     console.error(`Error processing email notification: ${error.message}`);

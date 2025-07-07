@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { SmtpClient } from "https://deno.land/x/mail@v1.8.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,6 +25,9 @@ serve(async (req: Request) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Resend API key
+    const RESEND_API_KEY = "re_UurBRH4T_7tgo3qyw6wipbkoDFVmXPM3Y";
 
     const { ticketId, notificationType } = await req.json() as ManualNotificationRequest;
 
@@ -56,7 +58,7 @@ serve(async (req: Request) => {
     const raffleName = ticket.raffle?.name || "Sorteo Terrapesca";
     const rafflePrice = ticket.raffle?.price || 0;
 
-    if (notificationType === 'email') {
+    if (notificationType === 'email' && userEmail) {
       // Prepare email content
       const emailSubject = `Confirmación de Boleto #${ticketNumber} - ${raffleName}`;
       const emailBody = `
@@ -76,7 +78,6 @@ serve(async (req: Request) => {
               <p><strong>Número de boleto:</strong> ${ticketNumber}</p>
               <p><strong>Estado:</strong> ${ticket.status === 'purchased' ? 'Pagado' : 'Reservado'}</p>
               <p><strong>Fecha de compra:</strong> ${new Date(ticket.purchased_at || '').toLocaleString()}</p>
-              <p><strong>Precio:</strong> $${rafflePrice} MXN</p>
             </div>
             
             <p>Puedes verificar el estado de tu boleto en cualquier momento visitando <a href="https://sorteosterrapesca.com/verificar">nuestra página de verificación</a>.</p>
@@ -101,27 +102,49 @@ serve(async (req: Request) => {
         </html>
       `;
 
-      // Log the email that would be sent (for development/testing)
-      console.log(`Would send email to: ${userEmail}`);
-      console.log(`Subject: ${emailSubject}`);
-      console.log(`Body: ${emailBody.substring(0, 100)}...`);
-
-      // In production, you would use an email service here
-      // For now, we just log the email details
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Email notification would be sent (disabled in development)",
-          to: userEmail,
-          subject: emailSubject,
-          ticketNumber,
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
+      try {
+        // Send email using Resend API
+        const response = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: "Sorteos Terrapesca <ventasweb@terrapesca.com>",
+            to: [userEmail],
+            subject: emailSubject,
+            html: emailBody
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          console.error("Resend API error:", result);
+          throw new Error(`Resend API error: ${JSON.stringify(result)}`);
         }
-      );
+        
+        console.log("Email sent successfully:", result);
+        
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: "Email sent successfully",
+            to: userEmail,
+            subject: emailSubject,
+            ticketNumber,
+            id: result.id
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          }
+        );
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        throw new Error(`Error sending email: ${emailError.message}`);
+      }
     } else if (notificationType === 'whatsapp') {
       // Prepare WhatsApp message
       const whatsappMessage = `🎉✨ ¡Hola ${userName.split(' ')[0]}!
@@ -147,9 +170,10 @@ ${ticket.promoter_code ? `👨‍💼 *Código de promotor:* ${ticket.promoter_c
       return new Response(
         JSON.stringify({
           success: true,
-          message: "WhatsApp notification would be sent (disabled in development)",
+          message: "WhatsApp notification details prepared",
           to: userPhone,
           ticketNumber,
+          whatsappMessage
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
