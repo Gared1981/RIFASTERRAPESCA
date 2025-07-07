@@ -5,6 +5,7 @@ import MercadoPagoPayment from './MercadoPagoPayment';
 import PDFGenerator from './PDFGenerator';
 import SecurePaymentBadge from './SecurePaymentBadge';
 import { sendNotification } from '../utils/notificationUtils';
+import { sendNotification } from '../utils/notificationUtils';
 
 interface PaymentMethodSelectorProps {
   selectedTickets: Ticket[];
@@ -53,6 +54,12 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     whatsappMessage += `\nTeléfono: ${userInfo.phone}`;
     whatsappMessage += `\nEstado: ${userInfo.state}`;
     
+    // Incluir información del cliente en el mensaje
+    whatsappMessage += `\n\nNombre: ${userInfo.firstName} ${userInfo.lastName}`;
+    whatsappMessage += `\nEmail: ${userInfo.email}`;
+    whatsappMessage += `\nTeléfono: ${userInfo.phone}`;
+    whatsappMessage += `\nEstado: ${userInfo.state}`;
+    
     whatsappMessage += `\n\nPara el sorteo: ${raffleInfo.name}`;
     whatsappMessage += `\nTotal a pagar: $${totalAmount.toLocaleString()} MXN`;
     
@@ -64,6 +71,23 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     
     const whatsappLink = `https://wa.me/526686889571?text=${encodeURIComponent(whatsappMessage)}`;
     window.open(whatsappLink, '_blank');
+    
+    // Send notification to admin about WhatsApp payment
+    try {
+      await sendNotification({
+        ticketIds: selectedTickets.map(t => t.id),
+        userEmail: userInfo.email,
+        userPhone: userInfo.phone,
+        userName: `${userInfo.firstName} ${userInfo.lastName}`,
+        raffleName: raffleInfo.name,
+        promoterCode: promoterCode,
+        paymentMethod: 'whatsapp'
+      });
+      console.log('✅ Admin notification sent about WhatsApp payment');
+    } catch (error) {
+      console.error('❌ Error sending admin notification:', error);
+      // Continue even if notification fails
+    }
     
     // Send notification to admin about WhatsApp payment
     try {
@@ -119,6 +143,32 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   const handleMercadoPagoSuccess = (paymentData: any) => {
     console.log('Payment successful:', paymentData);
+    
+    // Enviar notificación de compra exitosa
+    try {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          paymentId: paymentData.id || `manual-${Date.now()}`,
+          ticketIds: selectedTickets.map(t => t.id),
+          ticketNumbers: selectedTickets.map(t => t.number),
+          userEmail: userInfo.email,
+          userPhone: userInfo.phone,
+          userName: `${userInfo.firstName} ${userInfo.lastName}`,
+          raffleName: raffleInfo.name,
+          raffleId: raffleInfo.id,
+          promoterCode: promoterCode
+        })
+      }).catch(err => {
+        console.warn('Error sending purchase notification:', err);
+      });
+    } catch (error) {
+      console.warn('Failed to send purchase notification:', error);
+    }
     
     // Enviar notificación de compra exitosa
     try {

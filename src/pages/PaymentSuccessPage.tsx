@@ -4,6 +4,7 @@ import { CheckCircle, Ticket, Calendar, User, ArrowRight, Download, Share2 } fro
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
 import { sendNotification } from '../utils/notificationUtils';
+import { sendNotification } from '../utils/notificationUtils';
 
 interface PaymentInfo {
   id: string;
@@ -20,6 +21,7 @@ const PaymentSuccessPage: React.FC = () => {
   const [paymentData, setPaymentData] = useState<PaymentInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [notificationSent, setNotificationSent] = useState(false);
+  const [notificationSent, setNotificationSent] = useState(false);
   
   const paymentId = searchParams.get('payment_id');
   const status = searchParams.get('status');
@@ -29,6 +31,31 @@ const PaymentSuccessPage: React.FC = () => {
   useEffect(() => {
     const fetchPaymentData = async () => {
       try {
+        // Enviar notificación de compra exitosa si no se ha enviado antes
+        if (paymentId || externalReference || preferenceId) {
+          try {
+            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-notification`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              },
+              body: JSON.stringify({
+                paymentId: paymentId || preferenceId || externalReference || `success-${Date.now()}`,
+                ticketIds: [], // Se obtendrán de los logs
+                ticketNumbers: [],
+                userEmail: '',
+                userPhone: '',
+                userName: '',
+                raffleName: '',
+                raffleId: 0
+              })
+            });
+          } catch (notifyError) {
+            console.warn('Error sending success notification:', notifyError);
+          }
+        }
+        
         // Enviar notificación de compra exitosa si no se ha enviado antes
         if (paymentId || externalReference || preferenceId) {
           try {
@@ -129,6 +156,29 @@ const PaymentSuccessPage: React.FC = () => {
             date: new Date().toLocaleDateString(),
             external_reference: externalReference || ''
           });
+        }
+        
+        // Send notification to admin if we have payment data
+        if (paymentId && !notificationSent) {
+          try {
+            const metadata = paymentLogs?.[0]?.metadata || {};
+            if (metadata.ticket_ids && metadata.user_email && metadata.user_phone) {
+              await sendNotification({
+                ticketIds: metadata.ticket_ids,
+                userEmail: metadata.user_email,
+                userPhone: metadata.user_phone,
+                userName: metadata.user_name || 'Cliente',
+                raffleName: raffleData?.name || 'Sorteo Terrapesca',
+                promoterCode: metadata.promoter_code,
+                paymentId: paymentId,
+                paymentMethod: 'mercadopago'
+              });
+              setNotificationSent(true);
+              console.log('✅ Payment success notification sent to admin');
+            }
+          } catch (notifyError) {
+            console.error('❌ Error sending success notification:', notifyError);
+          }
         }
         
         // Send notification to admin if we have payment data

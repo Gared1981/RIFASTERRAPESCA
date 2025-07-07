@@ -29,7 +29,7 @@ export async function sendNotification(payload: NotificationPayload): Promise<bo
     }
     
     // Call the notification edge function
-    const response = await fetch(`${supabaseUrl}/functions/v1/send-notification`, {
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-email-notification`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -85,4 +85,59 @@ export async function sendPaymentSuccessNotification(
     paymentId: paymentInfo.id,
     paymentMethod: paymentInfo.method
   });
+}
+
+/**
+ * Sends a direct email using the email notification edge function
+ */
+export async function sendDirectEmail(
+  to: string,
+  subject: string,
+  body: string,
+  options?: {
+    cc?: string[];
+    bcc?: string[];
+    replyTo?: string;
+    isHtml?: boolean;
+  }
+): Promise<boolean> {
+  try {
+    // Get Supabase URL from environment
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl) {
+      console.error('Supabase URL not found in environment variables');
+      return false;
+    }
+    
+    // Call the email notification edge function
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-email-notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({
+        to,
+        subject,
+        body,
+        ...options
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Error sending email:', errorData);
+      return false;
+    }
+    
+    const result = await response.json();
+    console.log('Email sent successfully:', result);
+    return true;
+    
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return false;
+  }
 }
