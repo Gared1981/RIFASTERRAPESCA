@@ -230,7 +230,7 @@ serve(async (req: Request) => {
       
       // 3. Prepare WhatsApp message for admin
       const adminPhone = "+526686889571";
-      const whatsappMessage = `
+      const adminWhatsappMessage = `
 🎫 *NUEVA VENTA DE BOLETOS* 🎫
 
 👤 *Cliente:* ${userName}
@@ -246,9 +246,24 @@ ${promoterCode ? `👨‍💼 *Código promotor:* ${promoterCode}` : ''}
 🆔 *ID Transacción:* ${paymentId}
       `;
       
+      // 4. Prepare WhatsApp message for customer - new format
+      const customerWhatsappMessage = `🎉✨ ¡Hola ${userName.split(' ')[0]}!
+Tu boleto #${finalTicketNumbers.join(', ')} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
+¡Estás oficialmente dentro! 🙌🔥
+
+Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀🎁
+¡Gracias por participar y mucha, muuucha suerte! 💥🚀
+
+#EquipaTuAventura 🌊🐟
+
+${promoterCode ? `👨‍💼 *Código de promotor:* ${promoterCode}\n` : ""}
+📞 *Contacto:* +52 668 688 9571
+🌐 *Web:* ${supabaseUrl.replace('/functions/v1/send-email-notification', '')}`;
+      
       console.log(`Would send customer email to: ${userEmail}`);
       console.log(`Would send admin email to: ${adminEmail}`);
-      console.log(`Would send WhatsApp message to: ${adminPhone}`);
+      console.log(`Would send WhatsApp message to admin: ${adminPhone}`);
+      console.log(`Would send WhatsApp message to customer: ${userPhone}`);
       
       // In production, uncomment this code to actually send emails
       /*

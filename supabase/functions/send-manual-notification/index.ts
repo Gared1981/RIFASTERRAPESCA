@@ -123,23 +123,18 @@ serve(async (req: Request) => {
       );
     } else if (notificationType === 'whatsapp') {
       // Prepare WhatsApp message
-      const whatsappMessage = `
-¡Hola ${userName}!
+      const whatsappMessage = `🎉✨ ¡Hola ${userName.split(' ')[0]}!
+Tu boleto #${ticketNumber} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
+¡Estás oficialmente dentro! 🙌🔥
 
-Te confirmamos que tu boleto #${ticketNumber} para el sorteo "${raffleName}" ha sido registrado correctamente.
+Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀🎁
+¡Gracias por participar y mucha, muuucha suerte! 💥🚀
 
-Detalles:
-- Número de boleto: ${ticketNumber}
-- Estado: ${ticket.status === 'purchased' ? 'Pagado' : 'Reservado'}
-- Fecha: ${new Date(ticket.purchased_at || '').toLocaleString()}
+#EquipaTuAventura 🌊🐟
 
-Puedes verificar el estado de tu boleto en cualquier momento en nuestra página web.
-
-¡Buena suerte en el sorteo!
-
-Atentamente,
-Equipo de Sorteos Terrapesca
-      `;
+${ticket.promoter_code ? `👨‍💼 *Código de promotor:* ${ticket.promoter_code}\n` : ""}
+📞 *Contacto:* +52 668 688 9571
+🌐 *Web:* ${supabaseUrl.replace('/functions/v1/send-manual-notification', '')}`;
 
       // Log the WhatsApp message that would be sent
       console.log(`Would send WhatsApp to: ${userPhone}`);

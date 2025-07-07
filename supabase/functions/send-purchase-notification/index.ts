@@ -154,7 +154,8 @@ serve(async (req: Request) => {
     const adminPhone = "+526686889571";
     
     // Prepare WhatsApp message
-    const whatsappMessage = `
+    // Admin notification
+    const adminWhatsappMessage = `
 🎫 *NUEVA VENTA DE BOLETOS* 🎫
 
 👤 *Cliente:* ${userName}
@@ -167,10 +168,27 @@ ${promoterCode ? `👨‍💼 *Promotor:* ${promoterCode}` : ""}
 
 💰 *ID de Pago:* ${paymentId}
 ⏰ *Fecha:* ${new Date().toLocaleString()}
-    `;
+`;
     
-    console.log(`Would send WhatsApp notification to ${adminPhone}`);
-    console.log(whatsappMessage);
+    // Customer notification - new format
+    const customerWhatsappMessage = `🎉✨ ¡Hola ${userName.split(' ')[0]}!
+Tu boleto #${finalTicketNumbers.join(', ')} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
+¡Estás oficialmente dentro! 🙌🔥
+
+Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀🎁
+¡Gracias por participar y mucha, muuucha suerte! 💥🚀
+
+#EquipaTuAventura 🌊🐟
+
+${promoterCode ? `👨‍💼 *Código de promotor:* ${promoterCode}\n` : ""}
+📞 *Contacto:* +52 668 688 9571
+🌐 *Web:* ${supabaseUrl.replace('/functions/v1/send-purchase-notification', '')}`;
+    
+    console.log(`Would send WhatsApp notification to admin: ${adminPhone}`);
+    console.log(adminWhatsappMessage);
+    
+    console.log(`Would send WhatsApp notification to customer: ${userPhone}`);
+    console.log(customerWhatsappMessage);
 
     // 7. Return success response
     return new Response(
@@ -183,6 +201,7 @@ ${promoterCode ? `👨‍💼 *Promotor:* ${promoterCode}` : ""}
         customerEmail: userEmail,
         adminEmail: adminEmail,
         adminWhatsapp: adminPhone,
+        customerWhatsapp: userPhone,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
