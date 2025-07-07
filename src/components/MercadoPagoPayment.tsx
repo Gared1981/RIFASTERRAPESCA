@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Ticket } from '../utils/supabaseClient';
 import { CreditCard, Smartphone, Building, Shield, ArrowLeft, CheckCircle, AlertCircle, Clock, RefreshCw, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { sendNotification } from '../utils/notificationUtils';
 
 interface MercadoPagoPaymentProps {
   selectedTickets: Ticket[];
@@ -138,6 +139,23 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
       };
 
       console.log('🚀 Creating payment preference...', preferenceData);
+      
+      // Send notification to admin about the purchase attempt
+      try {
+        await sendNotification({
+          ticketIds: selectedTickets.map(t => t.id),
+          userEmail: userInfo.email,
+          userPhone: userInfo.phone,
+          userName: `${userInfo.firstName} ${userInfo.lastName}`,
+          raffleName: raffleInfo.name,
+          promoterCode: promoterCode,
+          paymentMethod: 'mercadopago'
+        });
+        console.log('✅ Admin notification sent about purchase attempt');
+      } catch (notifyError) {
+        console.error('❌ Error sending admin notification:', notifyError);
+        // Continue with payment process even if notification fails
+      }
 
       // Llamar a la función de Supabase Edge Function con timeout extendido
       const controller = new AbortController();

@@ -4,6 +4,7 @@ import { CreditCard, MessageSquare, ArrowRight, Shield, Gift, Star } from 'lucid
 import MercadoPagoPayment from './MercadoPagoPayment';
 import PDFGenerator from './PDFGenerator';
 import SecurePaymentBadge from './SecurePaymentBadge';
+import { sendNotification } from '../utils/notificationUtils';
 
 interface PaymentMethodSelectorProps {
   selectedTickets: Ticket[];
@@ -42,7 +43,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   const totalAmount = selectedTickets.length * raffleInfo.price;
 
-  const handleWhatsAppPayment = () => {
+  const handleWhatsAppPayment = async () => {
     const ticketNumbers = selectedTickets.map(t => t.number);
     let whatsappMessage = `¡Hola! Me gustaría confirmar la reserva de mis boletos: ${ticketNumbers.join(', ')}`;
     
@@ -63,6 +64,23 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     
     const whatsappLink = `https://wa.me/526686889571?text=${encodeURIComponent(whatsappMessage)}`;
     window.open(whatsappLink, '_blank');
+    
+    // Send notification to admin about WhatsApp payment
+    try {
+      await sendNotification({
+        ticketIds: selectedTickets.map(t => t.id),
+        userEmail: userInfo.email,
+        userPhone: userInfo.phone,
+        userName: `${userInfo.firstName} ${userInfo.lastName}`,
+        raffleName: raffleInfo.name,
+        promoterCode: promoterCode,
+        paymentMethod: 'whatsapp'
+      });
+      console.log('✅ Admin notification sent about WhatsApp payment');
+    } catch (error) {
+      console.error('❌ Error sending admin notification:', error);
+      // Continue even if notification fails
+    }
     
     // Enviar notificación de reserva por WhatsApp
     try {
