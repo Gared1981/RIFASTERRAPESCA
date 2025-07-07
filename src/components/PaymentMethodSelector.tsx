@@ -5,7 +5,6 @@ import MercadoPagoPayment from './MercadoPagoPayment';
 import PDFGenerator from './PDFGenerator';
 import SecurePaymentBadge from './SecurePaymentBadge';
 import { sendNotification } from '../utils/notificationUtils';
-import { sendNotification } from '../utils/notificationUtils';
 
 interface PaymentMethodSelectorProps {
   selectedTickets: Ticket[];

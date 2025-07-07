@@ -3,7 +3,6 @@ import { Ticket } from '../utils/supabaseClient';
 import { CreditCard, Smartphone, Building, Shield, ArrowLeft, CheckCircle, AlertCircle, Clock, RefreshCw, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { sendNotification } from '../utils/notificationUtils';
-import { sendNotification } from '../utils/notificationUtils';
 
 interface MercadoPagoPaymentProps {
   selectedTickets: Ticket[];
