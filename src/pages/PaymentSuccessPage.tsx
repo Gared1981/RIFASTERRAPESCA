@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle, Ticket, Calendar, User, ArrowRight, Download, Share2 } from 'lucide-react';
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
+import { sendNotification } from '../utils/notificationUtils';
 
 interface PaymentInfo {
   id: string;
@@ -18,6 +19,7 @@ const PaymentSuccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [paymentData, setPaymentData] = useState<PaymentInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notificationSent, setNotificationSent] = useState(false);
   
   const paymentId = searchParams.get('payment_id');
   const status = searchParams.get('status');
@@ -127,6 +129,29 @@ const PaymentSuccessPage: React.FC = () => {
             date: new Date().toLocaleDateString(),
             external_reference: externalReference || ''
           });
+        }
+        
+        // Send notification to admin if we have payment data
+        if (paymentId && !notificationSent) {
+          try {
+            const metadata = paymentLogs?.[0]?.metadata || {};
+            if (metadata.ticket_ids && metadata.user_email && metadata.user_phone) {
+              await sendNotification({
+                ticketIds: metadata.ticket_ids,
+                userEmail: metadata.user_email,
+                userPhone: metadata.user_phone,
+                userName: metadata.user_name || 'Cliente',
+                raffleName: raffleData?.name || 'Sorteo Terrapesca',
+                promoterCode: metadata.promoter_code,
+                paymentId: paymentId,
+                paymentMethod: 'mercadopago'
+              });
+              setNotificationSent(true);
+              console.log('✅ Payment success notification sent to admin');
+            }
+          } catch (notifyError) {
+            console.error('❌ Error sending success notification:', notifyError);
+          }
         }
       } catch (error) {
         console.error('Error processing payment data:', error);
