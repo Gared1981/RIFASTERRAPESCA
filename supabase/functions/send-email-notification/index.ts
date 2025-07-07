@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { SmtpClient } from "npm:@orama/mailman@0.2.0";
+import { SmtpClient } from "https://deno.land/x/mail@v1.8.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
