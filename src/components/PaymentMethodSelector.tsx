@@ -46,6 +46,12 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     const ticketNumbers = selectedTickets.map(t => t.number);
     let whatsappMessage = `¡Hola! Me gustaría confirmar la reserva de mis boletos: ${ticketNumbers.join(', ')}`;
     
+    // Incluir información del cliente en el mensaje
+    whatsappMessage += `\n\nNombre: ${userInfo.firstName} ${userInfo.lastName}`;
+    whatsappMessage += `\nEmail: ${userInfo.email}`;
+    whatsappMessage += `\nTeléfono: ${userInfo.phone}`;
+    whatsappMessage += `\nEstado: ${userInfo.state}`;
+    
     whatsappMessage += `\n\nPara el sorteo: ${raffleInfo.name}`;
     whatsappMessage += `\nTotal a pagar: $${totalAmount.toLocaleString()} MXN`;
     
@@ -58,6 +64,32 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     const whatsappLink = `https://wa.me/526686889571?text=${encodeURIComponent(whatsappMessage)}`;
     window.open(whatsappLink, '_blank');
     
+    // Enviar notificación de reserva por WhatsApp
+    try {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          paymentId: `whatsapp-${Date.now()}`,
+          ticketIds: selectedTickets.map(t => t.id),
+          ticketNumbers: selectedTickets.map(t => t.number),
+          userEmail: userInfo.email,
+          userPhone: userInfo.phone,
+          userName: `${userInfo.firstName} ${userInfo.lastName}`,
+          raffleName: raffleInfo.name,
+          raffleId: raffleInfo.id,
+          promoterCode: promoterCode
+        })
+      }).catch(err => {
+        console.warn('Error sending WhatsApp notification:', err);
+      });
+    } catch (error) {
+      console.warn('Failed to send WhatsApp notification:', error);
+    }
+    
     // Mostrar generador de PDF para WhatsApp
     setPaymentMethod('whatsapp');
     setShowPDFGenerator(true);
@@ -69,6 +101,33 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   const handleMercadoPagoSuccess = (paymentData: any) => {
     console.log('Payment successful:', paymentData);
+    
+    // Enviar notificación de compra exitosa
+    try {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          paymentId: paymentData.id || `manual-${Date.now()}`,
+          ticketIds: selectedTickets.map(t => t.id),
+          ticketNumbers: selectedTickets.map(t => t.number),
+          userEmail: userInfo.email,
+          userPhone: userInfo.phone,
+          userName: `${userInfo.firstName} ${userInfo.lastName}`,
+          raffleName: raffleInfo.name,
+          raffleId: raffleInfo.id,
+          promoterCode: promoterCode
+        })
+      }).catch(err => {
+        console.warn('Error sending purchase notification:', err);
+      });
+    } catch (error) {
+      console.warn('Failed to send purchase notification:', error);
+    }
+    
     
     // Enviar notificación de compra exitosa
     try {
