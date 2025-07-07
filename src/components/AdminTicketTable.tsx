@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { supabase, Ticket, User } from '../utils/supabaseClient';
-import { Check, X, Download, Search } from 'lucide-react';
+import { Check, X, Download, Search, Mail, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { sendDirectEmail } from '../utils/notificationUtils';
 
 interface AdminTicketTableProps {
   tickets: Array<Ticket & { user?: User }>;
@@ -93,6 +94,107 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
       console.error('Error releasing tickets:', err);
       toast.error('Hubo un error al liberar los boletos');
     }
+  };
+  
+  const sendManualEmail = async (ticket: Ticket & { user?: User }) => {
+    if (!ticket.user) {
+      toast.error('No hay información de usuario para este boleto');
+      return;
+    }
+    
+    try {
+      // Get raffle information
+      const { data: raffle, error: raffleError } = await supabase
+        .from('raffles')
+        .select('name, price')
+        .eq('id', ticket.raffle_id)
+        .single();
+        
+      if (raffleError) throw raffleError;
+      
+      // Send email notification
+      const emailSent = await sendDirectEmail(
+        ticket.user.email || '',
+        `Confirmación de Boleto #${ticket.number} - ${raffle.name}`,
+        `
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #003B73; color: white; padding: 20px; text-align: center;">
+            <h1>¡Boleto Confirmado!</h1>
+          </div>
+          
+          <div style="padding: 20px;">
+            <p>Hola ${ticket.user.first_name} ${ticket.user.last_name},</p>
+            
+            <p>Tu boleto para el sorteo <strong>${raffle.name}</strong> ha sido confirmado.</p>
+            
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <h3>Detalles de tu boleto:</h3>
+              <p><strong>Número de boleto:</strong> ${ticket.number}</p>
+              <p><strong>Estado:</strong> ${ticket.status === 'purchased' ? 'Pagado' : 'Reservado'}</p>
+              <p><strong>Fecha de compra:</strong> ${new Date(ticket.purchased_at || '').toLocaleString()}</p>
+            </div>
+            
+            <p>Puedes verificar el estado de tu boleto en cualquier momento visitando <a href="https://sorteosterrapesca.com/verificar">nuestra página de verificación</a>.</p>
+            
+            <p>Si tienes alguna pregunta, no dudes en contactarnos:</p>
+            <ul>
+              <li>WhatsApp: +52 668 688 9571</li>
+              <li>Email: ventasweb@terrapesca.com</li>
+            </ul>
+            
+            <p>¡Buena suerte en el sorteo!</p>
+            
+            <p>Atentamente,<br>
+            Equipo de Sorteos Terrapesca</p>
+          </div>
+          
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+            <p>© ${new Date().getFullYear()} Sorteos Terrapesca. Todos los derechos reservados.</p>
+          </div>
+        </body>
+        </html>
+        `,
+        { isHtml: true }
+      );
+      
+      if (emailSent) {
+        toast.success(`Correo enviado a ${ticket.user.email}`);
+      } else {
+        toast.error('Error al enviar el correo');
+      }
+    } catch (err) {
+      console.error('Error sending email:', err);
+      toast.error('Error al enviar el correo');
+    }
+  };
+  
+  const sendManualWhatsApp = (ticket: Ticket & { user?: User }) => {
+    if (!ticket.user) {
+      toast.error('No hay información de usuario para este boleto');
+      return;
+    }
+    
+    // Clean the phone number (remove any non-digits)
+    const cleanPhone = ticket.user.phone.replace(/\D/g, '');
+    
+    // Add Mexico country code if not present
+    let formattedPhone = cleanPhone;
+    if (cleanPhone.length === 10) {
+      formattedPhone = `52${cleanPhone}`;
+    } else if (cleanPhone.length === 12 && cleanPhone.startsWith('52')) {
+      formattedPhone = cleanPhone;
+    }
+    
+    // Create message
+    const message = `¡Hola ${ticket.user.first_name}! Te confirmamos que tu boleto #${ticket.number} para el sorteo ha sido registrado correctamente. ¡Buena suerte!`;
+    
+    // Create WhatsApp link
+    const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+    
+    // Open WhatsApp
+    window.open(whatsappUrl, '_blank');
   };
   
   const exportToCSV = () => {
@@ -225,6 +327,9 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Fecha Reserva
               </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Acciones
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -263,6 +368,28 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {ticket.reserved_at ? new Date(ticket.reserved_at).toLocaleString() : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                    {ticket.status === 'purchased' && (
+                      <div className="flex space-x-2 justify-end">
+                        <button
+                          onClick={() => sendManualEmail(ticket)}
+                          className="inline-flex items-center px-2 py-1 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700"
+                          title="Enviar correo"
+                        >
+                          <Mail className="h-3 w-3 mr-1" />
+                          Email
+                        </button>
+                        <button
+                          onClick={() => sendManualWhatsApp(ticket)}
+                          className="inline-flex items-center px-2 py-1 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-green-600 hover:bg-green-700"
+                          title="Enviar WhatsApp"
+                        >
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          WhatsApp
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))

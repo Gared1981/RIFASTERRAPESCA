@@ -4,6 +4,7 @@ import { CheckCircle, Ticket, Calendar, User, ArrowRight, Download, Share2 } fro
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
 import { sendNotification } from '../utils/notificationUtils';
+import { sendNotification } from '../utils/notificationUtils';
 
 interface PaymentInfo {
   id: string;
@@ -19,7 +20,6 @@ const PaymentSuccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [paymentData, setPaymentData] = useState<PaymentInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [notificationSent, setNotificationSent] = useState(false);
   
   const paymentId = searchParams.get('payment_id');
   const status = searchParams.get('status');
@@ -29,6 +29,7 @@ const PaymentSuccessPage: React.FC = () => {
   useEffect(() => {
     const fetchPaymentData = async () => {
       try {
+        setLoading(true);
         // Enviar notificación de compra exitosa si no se ha enviado antes
         if (paymentId || externalReference || preferenceId) {
           try {
@@ -145,6 +146,7 @@ const PaymentSuccessPage: React.FC = () => {
           });
         } else {
           // Datos por defecto si no se encuentra información
+          // Datos por defecto si no se encuentra información
           setPaymentData({
             id: paymentId || 'N/A',
             status: status || 'approved',
@@ -155,6 +157,7 @@ const PaymentSuccessPage: React.FC = () => {
             external_reference: externalReference || ''
           });
         }
+        
         
         // Send notification to admin if we have payment data
         if (paymentId && !notificationSent) {
@@ -214,6 +217,7 @@ const PaymentSuccessPage: React.FC = () => {
   const handleShare = async () => {
     const shareText = `¡Acabo de comprar boletos para ${paymentData?.raffle}! 🎟️\nBoletos: ${paymentData?.tickets.join(', ')}\n¡Deséame suerte! 🍀`;
     
+    // Use Web Share API if available
     if (navigator.share) {
       try {
         await navigator.share({
@@ -268,6 +272,7 @@ const PaymentSuccessPage: React.FC = () => {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             {/* Header */}
+            {/* Header */}
             <div className={`px-6 py-8 text-center ${isPending ? 'bg-yellow-500' : 'bg-green-500'}`}>
               <CheckCircle className="h-16 w-16 text-white mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-white mb-2">
@@ -282,8 +287,10 @@ const PaymentSuccessPage: React.FC = () => {
             </div>
 
             {/* Payment Details */}
+            {/* Payment Details */}
             <div className="px-6 py-8">
               <div className="space-y-6">
+                {/* Payment Info */}
                 {/* Payment Info */}
                 <div className="border-b pb-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -314,6 +321,7 @@ const PaymentSuccessPage: React.FC = () => {
                 </div>
 
                 {/* Raffle Info */}
+                {/* Raffle Info */}
                 <div className="border-b pb-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <Calendar className="h-5 w-5 mr-2" />
@@ -322,6 +330,7 @@ const PaymentSuccessPage: React.FC = () => {
                   <p className="text-gray-700">{paymentData.raffle}</p>
                 </div>
 
+                {/* Tickets */}
                 {/* Tickets */}
                 {paymentData.tickets.length > 0 && (
                   <div className="border-b pb-6">
@@ -346,6 +355,7 @@ const PaymentSuccessPage: React.FC = () => {
                   </div>
                 )}
 
+                {/* Next Steps */}
                 {/* Next Steps */}
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -403,6 +413,7 @@ const PaymentSuccessPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Actions */}
               {/* Actions */}
               <div className="mt-8 space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4">
