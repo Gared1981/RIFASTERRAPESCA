@@ -20,7 +20,6 @@ const PaymentSuccessPage: React.FC = () => {
   const [paymentData, setPaymentData] = useState<PaymentInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [notificationSent, setNotificationSent] = useState(false);
-  const [notificationSent, setNotificationSent] = useState(false);
   
   const paymentId = searchParams.get('payment_id');
   const status = searchParams.get('status');
