@@ -111,6 +111,11 @@ export async function sendDirectEmail(
       return false;
     }
     
+    if (!to) {
+      console.error('No recipient email provided');
+      return false;
+    }
+    
     // Call the email notification edge function
     const response = await fetch(`${supabaseUrl}/functions/v1/send-email-notification`, {
       method: 'POST',

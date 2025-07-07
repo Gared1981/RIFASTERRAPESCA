@@ -25,6 +25,7 @@ interface TicketNotificationRequest {
   userPhone: string;
   userName: string;
   raffleName: string;
+  raffleId?: number;
   promoterCode?: string;
   paymentMethod?: 'mercadopago' | 'whatsapp';
 }
@@ -48,6 +49,8 @@ serve(async (req: Request) => {
     
     // Check if this is a direct email request or a ticket notification
     const requestBody = await req.json();
+    
+    console.log("Request body:", JSON.stringify(requestBody, null, 2));
     
     if (requestBody.to && requestBody.subject && requestBody.body) {
       // This is a direct email request
@@ -112,35 +115,42 @@ serve(async (req: Request) => {
         userPhone, 
         userName,
         raffleName,
+        raffleId,
         promoterCode,
         paymentMethod = 'mercadopago'
       } = requestBody as TicketNotificationRequest;
       
+      console.log(`Processing notification for payment ${paymentId}`);
+      console.log(`User email: ${userEmail}`);
+      console.log(`User name: ${userName}`);
+      
       // Get ticket numbers if not provided
-      let finalTicketNumbers = ticketNumbers;
-      if (!finalTicketNumbers || finalTicketNumbers.length === 0) {
+      let finalTicketNumbers = ticketNumbers || [];
+      if (!finalTicketNumbers.length && ticketIds && ticketIds.length > 0) {
         const { data: tickets, error: ticketsError } = await supabase
           .from("tickets")
           .select("number")
           .in("id", ticketIds);
           
         if (ticketsError) {
-          throw new Error(`Error fetching tickets: ${ticketsError.message}`);
+          console.warn(`Error fetching tickets: ${ticketsError.message}`);
+        } else if (tickets) {
+          finalTicketNumbers = tickets.map(t => t.number);
         }
-        
-        finalTicketNumbers = tickets.map(t => t.number);
       }
       
       // Mark notification as sent in payment_logs
-      const { error: logError } = await supabase
-        .from("payment_logs")
-        .update({
-          notification_sent: true,
-        })
-        .or(`payment_id.eq.${paymentId},preference_id.eq.${paymentId},external_reference.eq.${paymentId}`);
-      
-      if (logError) {
-        console.warn(`Warning: Could not update payment log: ${logError.message}`);
+      if (paymentId) {
+        const { error: logError } = await supabase
+          .from("payment_logs")
+          .update({
+            notification_sent: true,
+          })
+          .or(`payment_id.eq.${paymentId},preference_id.eq.${paymentId},external_reference.eq.${paymentId}`);
+        
+        if (logError) {
+          console.warn(`Warning: Could not update payment log: ${logError.message}`);
+        }
       }
       
       // 1. Prepare customer email
@@ -153,7 +163,7 @@ serve(async (req: Request) => {
           </div>
           
           <div style="padding: 20px;">
-            <p>Hola ${userName},</p>
+            <p>Hola ${userName.split(' ')[0]},</p>
             
             <p>¡Tu compra ha sido confirmada! Tus boletos para el sorteo <strong>${raffleName}</strong> han sido registrados exitosamente.</p>
             
@@ -234,8 +244,10 @@ serve(async (req: Request) => {
       `;
       
       try {
-        // Send customer email using Resend API
+        // Send customer email using Resend API if email is provided
         if (userEmail) {
+          console.log(`Sending customer email to: ${userEmail}`);
+          
           const customerResponse = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
@@ -257,9 +269,13 @@ serve(async (req: Request) => {
           } else {
             console.log("Customer email sent successfully:", customerResult);
           }
+        } else {
+          console.log("No customer email provided, skipping customer email");
         }
         
         // Send admin email using Resend API
+        console.log(`Sending admin email to: ${adminEmail}`);
+        
         const adminResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -289,7 +305,7 @@ serve(async (req: Request) => {
           JSON.stringify({
             success: true,
             message: "Email notifications sent successfully",
-            customerEmail: userEmail,
+            customerEmail: userEmail || "No email provided",
             adminEmail: adminEmail,
             ticketsProcessed: finalTicketNumbers.length,
           }),

@@ -15,7 +15,7 @@ interface NotificationRequest {
   userPhone: string;
   userName: string;
   raffleName: string;
-  raffleId: number;
+  raffleId?: number;
   promoterCode?: string;
 }
 
@@ -49,12 +49,14 @@ serve(async (req: Request) => {
     } = await req.json() as NotificationRequest;
 
     console.log(`Processing notification for payment ${paymentId}`);
+    console.log(`User email: ${userEmail}`);
+    console.log(`User name: ${userName}`);
 
     // If ticketIds is empty, try to get them from payment_logs
-    let finalTicketIds = ticketIds;
-    let finalTicketNumbers = ticketNumbers;
+    let finalTicketIds = ticketIds || [];
+    let finalTicketNumbers = ticketNumbers || [];
 
-    if (finalTicketIds.length === 0) {
+    if (finalTicketIds.length === 0 && paymentId) {
       // Try to get ticket IDs from payment logs
       const { data: paymentLog, error: logError } = await supabase
         .from("payment_logs")
@@ -76,13 +78,13 @@ serve(async (req: Request) => {
       }
     }
 
-    // If we still don't have ticket IDs, we can't proceed
-    if (finalTicketIds.length === 0) {
-      console.warn(`No ticket IDs found for payment ${paymentId}`);
+    // If we still don't have ticket IDs or numbers, we can't proceed
+    if (finalTicketIds.length === 0 && finalTicketNumbers.length === 0) {
+      console.warn(`No ticket information found for payment ${paymentId}`);
       return new Response(
         JSON.stringify({
           success: false,
-          message: "No ticket IDs found for this payment",
+          message: "No ticket information found for this payment",
           paymentId,
         }),
         {
@@ -92,33 +94,52 @@ serve(async (req: Request) => {
       );
     }
 
-    // 1. Update tickets to purchased status
-    const { error: ticketError } = await supabase
-      .from("tickets")
-      .update({
-        status: "purchased",
-        purchased_at: new Date().toISOString(),
-      })
-      .in("id", finalTicketIds);
+    // If we have ticket IDs but no numbers, get the numbers
+    if (finalTicketIds.length > 0 && finalTicketNumbers.length === 0) {
+      const { data: tickets, error: ticketsError } = await supabase
+        .from("tickets")
+        .select("number")
+        .in("id", finalTicketIds);
+        
+      if (ticketsError) {
+        console.warn(`Warning: Could not fetch ticket numbers: ${ticketsError.message}`);
+      } else if (tickets) {
+        finalTicketNumbers = tickets.map(t => t.number);
+      }
+    }
 
-    if (ticketError) {
-      console.warn(`Warning: Could not update tickets: ${ticketError.message}`);
+    // 1. Update tickets to purchased status if they're not already
+    if (finalTicketIds.length > 0) {
+      const { error: ticketError } = await supabase
+        .from("tickets")
+        .update({
+          status: "purchased",
+          purchased_at: new Date().toISOString(),
+        })
+        .in("id", finalTicketIds)
+        .eq("status", "reserved");
+
+      if (ticketError) {
+        console.warn(`Warning: Could not update tickets: ${ticketError.message}`);
+      }
     }
 
     // 2. Mark notification as sent in payment_logs
-    const { error: logError } = await supabase
-      .from("payment_logs")
-      .update({
-        notification_sent: true,
-      })
-      .or(`payment_id.eq.${paymentId},preference_id.eq.${paymentId},external_reference.eq.${paymentId}`);
+    if (paymentId) {
+      const { error: logError } = await supabase
+        .from("payment_logs")
+        .update({
+          notification_sent: true,
+        })
+        .or(`payment_id.eq.${paymentId},preference_id.eq.${paymentId},external_reference.eq.${paymentId}`);
 
-    if (logError) {
-      console.warn(`Warning: Could not update payment log: ${logError.message}`);
+      if (logError) {
+        console.warn(`Warning: Could not update payment log: ${logError.message}`);
+      }
     }
 
     // 3. If there's a promoter code, register the sales
-    if (promoterCode) {
+    if (promoterCode && finalTicketIds.length > 0) {
       console.log(`Registering sales for promoter: ${promoterCode}`);
       
       for (const ticketId of finalTicketIds) {
@@ -140,63 +161,7 @@ serve(async (req: Request) => {
       }
     }
 
-    // 4. Send email notification to customer using Resend
-    if (userEmail) {
-      try {
-        const customerSubject = `¡Boletos Confirmados! - Sorteo ${raffleName}`;
-        const customerBody = `
-          <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;">
-            <div style="background-color: #003B73; color: white; padding: 20px; text-align: center;">
-              <h1>¡Gracias por tu compra!</h1>
-            </div>
-            
-            <div style="padding: 20px;">
-              <p>Hola ${userName.split(' ')[0]},</p>
-              
-              <p>¡Tu compra ha sido confirmada! Tus boletos para el sorteo <strong>${raffleName}</strong> han sido registrados exitosamente.</p>
-              
-              <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <h3>Detalles de tu compra:</h3>
-                <p><strong>Boletos:</strong> ${finalTicketNumbers.join(", ")}</p>
-              </div>
-              
-              <p>¡Buena suerte en el sorteo!</p>
-              
-              <p>Atentamente,<br>
-              Equipo de Sorteos Terrapesca</p>
-            </div>
-          </body>
-          </html>
-        `;
-        
-        const customerResponse = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${RESEND_API_KEY}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            from: "Sorteos Terrapesca <ventasweb@terrapesca.com>",
-            to: [userEmail],
-            subject: customerSubject,
-            html: customerBody
-          })
-        });
-        
-        if (!customerResponse.ok) {
-          const errorData = await customerResponse.json();
-          console.error("Error sending customer email:", errorData);
-        } else {
-          console.log("Customer email sent successfully");
-        }
-      } catch (emailError) {
-        console.error("Error sending customer email:", emailError);
-      }
-    }
-
-    // 5. Send WhatsApp notification to customer
-    // Customer notification - new format
+    // 4. Send WhatsApp notification to customer with new format
     const customerWhatsappMessage = `🎉✨ ¡Hola ${userName.split(' ')[0]}!
 Tu boleto #${finalTicketNumbers.join(', ')} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
 ¡Estás oficialmente dentro! 🙌🔥
@@ -213,14 +178,14 @@ ${promoterCode ? `👨‍💼 *Código de promotor:* ${promoterCode}\n` : ""}
     console.log(`Would send WhatsApp notification to customer: ${userPhone}`);
     console.log(customerWhatsappMessage);
 
-    // 6. Send WhatsApp notification to admin
+    // 5. Send WhatsApp notification to admin
     const adminPhone = "+526686889571";
     const adminWhatsappMessage = `
 🎫 *NUEVA VENTA DE BOLETOS* 🎫
 
 👤 *Cliente:* ${userName}
 📱 *Teléfono:* ${userPhone}
-📧 *Email:* ${userEmail}
+📧 *Email:* ${userEmail || "No proporcionado"}
 
 🎟️ *Boletos:* ${finalTicketNumbers.join(", ")}
 🎰 *Sorteo:* ${raffleName}
@@ -233,15 +198,16 @@ ${promoterCode ? `👨‍💼 *Promotor:* ${promoterCode}` : ""}
     console.log(`Would send WhatsApp notification to admin: ${adminPhone}`);
     console.log(adminWhatsappMessage);
 
-    // 7. Return success response
+    // 6. Return success response
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Notification processed successfully",
+        message: "Purchase notification processed successfully",
         paymentId,
         ticketsUpdated: finalTicketIds.length,
+        ticketNumbers: finalTicketNumbers,
         notificationSent: true,
-        customerEmail: userEmail,
+        customerEmail: userEmail || "No email provided",
         customerWhatsapp: userPhone,
       }),
       {
@@ -250,7 +216,7 @@ ${promoterCode ? `👨‍💼 *Promotor:* ${promoterCode}` : ""}
       }
     );
   } catch (error) {
-    console.error(`Error processing notification: ${error.message}`);
+    console.error(`Error processing purchase notification: ${error.message}`);
     
     return new Response(
       JSON.stringify({ 

@@ -102,6 +102,11 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
       return;
     }
     
+    if (!ticket.user.email) {
+      toast.error('Este usuario no tiene email registrado');
+      return;
+    }
+    
     try {
       // Get raffle information
       const { data: raffle, error: raffleError } = await supabase
@@ -113,10 +118,11 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
       if (raffleError) throw raffleError;
       
       // Send email notification
-      const emailSent = await sendDirectEmail(
-        ticket.user.email || '',
-        `Confirmación de Boleto #${ticket.number} - ${raffle.name}`,
-        `
+      if (ticket.user.email) {
+        const emailSent = await sendDirectEmail(
+          ticket.user.email,
+          `Confirmación de Boleto #${ticket.number} - ${raffle.name}`,
+          `
         <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #003B73; color: white; padding: 20px; text-align: center;">
@@ -155,14 +161,17 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
           </div>
         </body>
         </html>
-        `,
-        { isHtml: true }
-      );
-      
-      if (emailSent) {
-        toast.success(`Correo enviado a ${ticket.user.email}`);
+          `,
+          { isHtml: true }
+        );
+        
+        if (emailSent) {
+          toast.success(`Correo enviado a ${ticket.user.email}`);
+        } else {
+          toast.error('Error al enviar el correo');
+        }
       } else {
-        toast.error('Error al enviar el correo');
+        toast.error('Este usuario no tiene email registrado');
       }
     } catch (err) {
       console.error('Error sending email:', err);
@@ -173,6 +182,11 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
   const sendManualWhatsApp = (ticket: Ticket & { user?: User }) => {
     if (!ticket.user) {
       toast.error('No hay información de usuario para este boleto');
+      return;
+    }
+    
+    if (!ticket.user.phone) {
+      toast.error('Este usuario no tiene teléfono registrado');
       return;
     }
     

@@ -31,6 +31,8 @@ serve(async (req: Request) => {
 
     const { ticketId, notificationType } = await req.json() as ManualNotificationRequest;
 
+    console.log(`Processing manual ${notificationType} notification for ticket ${ticketId}`);
+
     // Get ticket information with user details
     const { data: ticket, error: ticketError } = await supabase
       .from("tickets")
@@ -103,6 +105,8 @@ serve(async (req: Request) => {
       `;
 
       try {
+        console.log(`Sending email to: ${userEmail}`);
+        
         // Send email using Resend API
         const response = await fetch("https://api.resend.com/emails", {
           method: "POST",
@@ -145,7 +149,7 @@ serve(async (req: Request) => {
         console.error("Error sending email:", emailError);
         throw new Error(`Error sending email: ${emailError.message}`);
       }
-    } else if (notificationType === 'whatsapp') {
+    } else if (notificationType === 'whatsapp' && userPhone) {
       // Prepare WhatsApp message
       const whatsappMessage = `🎉✨ ¡Hola ${userName.split(' ')[0]}!
 Tu boleto #${ticketNumber} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
@@ -181,7 +185,7 @@ ${ticket.promoter_code ? `👨‍💼 *Código de promotor:* ${ticket.promoter_c
         }
       );
     } else {
-      throw new Error(`Invalid notification type: ${notificationType}`);
+      throw new Error(`Invalid notification type or missing contact information: ${notificationType}`);
     }
   } catch (error) {
     console.error(`Error processing manual notification: ${error.message}`);
