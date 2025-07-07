@@ -69,6 +69,33 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   const handleMercadoPagoSuccess = (paymentData: any) => {
     console.log('Payment successful:', paymentData);
+    
+    // Enviar notificación de compra exitosa
+    try {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          paymentId: paymentData.id || `manual-${Date.now()}`,
+          ticketIds: selectedTickets.map(t => t.id),
+          ticketNumbers: selectedTickets.map(t => t.number),
+          userEmail: userInfo.email,
+          userPhone: userInfo.phone,
+          userName: `${userInfo.firstName} ${userInfo.lastName}`,
+          raffleName: raffleInfo.name,
+          raffleId: raffleInfo.id,
+          promoterCode: promoterCode
+        })
+      }).catch(err => {
+        console.warn('Error sending purchase notification:', err);
+      });
+    } catch (error) {
+      console.warn('Failed to send purchase notification:', error);
+    }
+    
     // Mostrar generador de PDF para Mercado Pago
     setPaymentMethod('mercadopago');
     setShowPDFGenerator(true);

@@ -27,6 +27,31 @@ const PaymentSuccessPage: React.FC = () => {
   useEffect(() => {
     const fetchPaymentData = async () => {
       try {
+        // Enviar notificación de compra exitosa si no se ha enviado antes
+        if (paymentId || externalReference || preferenceId) {
+          try {
+            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              },
+              body: JSON.stringify({
+                paymentId: paymentId || preferenceId || externalReference || `success-${Date.now()}`,
+                ticketIds: [], // Se obtendrán de los logs
+                ticketNumbers: [],
+                userEmail: '',
+                userPhone: '',
+                userName: '',
+                raffleName: '',
+                raffleId: 0
+              })
+            });
+          } catch (notifyError) {
+            console.warn('Error sending success notification:', notifyError);
+          }
+        }
+        
         setLoading(true);
         
         // Buscar información del pago en los logs

@@ -143,6 +143,7 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 segundos timeout
 
+      // Primero crear la preferencia de pago
       try {
         const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-payment-preference`, {
           method: 'POST',
@@ -186,6 +187,35 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
         if (preference.init_point) {
           // Mostrar mensaje de redirección
           toast.success('Redirigiendo a Mercado Pago...');
+
+          // Enviar notificación de compra
+          try {
+            const notificationResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              },
+              body: JSON.stringify({
+                paymentId: preference.id,
+                ticketIds: selectedTickets.map(t => t.id),
+                ticketNumbers: selectedTickets.map(t => t.number),
+                userEmail: userInfo.email,
+                userPhone: userInfo.phone,
+                userName: `${userInfo.firstName} ${userInfo.lastName}`,
+                raffleName: raffleInfo.name,
+                raffleId: raffleInfo.id,
+                promoterCode: promoterCode
+              })
+            });
+            
+            if (!notificationResponse.ok) {
+              console.warn('Error sending purchase notification:', await notificationResponse.text());
+            }
+          } catch (notificationError) {
+            console.warn('Failed to send purchase notification:', notificationError);
+            // Continue with payment process even if notification fails
+          }
           
           // Pequeña pausa para que el usuario vea el mensaje
           setTimeout(() => {
