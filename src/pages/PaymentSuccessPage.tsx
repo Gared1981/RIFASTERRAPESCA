@@ -4,7 +4,6 @@ import { CheckCircle, Ticket, Calendar, User, ArrowRight, Download, Share2 } fro
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
 import { sendNotification } from '../utils/notificationUtils';
-import { sendNotification } from '../utils/notificationUtils';
 
 interface PaymentInfo {
   id: string;
