@@ -28,6 +28,7 @@ const AdminPage: React.FC = () => {
   
   useEffect(() => {
     const checkSession = async () => {
+      setLoading(true);
       try {
         const { data, error } = await supabase.auth.getSession();
         
@@ -38,6 +39,7 @@ const AdminPage: React.FC = () => {
         }
         
         setIsAuthenticated(!!data.session);
+        console.log('Session check:', !!data.session, data.session?.user?.email);
         
         if (data.session) {
           fetchRaffles();
@@ -54,10 +56,11 @@ const AdminPage: React.FC = () => {
     
     // Set up auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('Auth state change:', event, session?.user?.email);
         setIsAuthenticated(!!session);
         if (session) {
-          await fetchRaffles();
+          fetchRaffles();
         }
       }
     );
@@ -148,6 +151,7 @@ const AdminPage: React.FC = () => {
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login attempt with:', email);
     
     if (!email || !password) {
       toast.error('Por favor ingresa tu correo y contraseña');
@@ -158,6 +162,7 @@ const AdminPage: React.FC = () => {
       setLoginLoading(true);
       setError(null);
       
+      console.log('Attempting login with:', email);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -165,6 +170,7 @@ const AdminPage: React.FC = () => {
       
       if (error) {
         console.error('Login error:', error);
+        console.log('Login error details:', error.message);
         if (error.message.includes('Invalid login credentials')) {
           setError('Credenciales inválidas. Por favor verifica tu correo y contraseña.');
         } else if (error.message.includes('Failed to fetch')) {
@@ -176,6 +182,7 @@ const AdminPage: React.FC = () => {
       }
       
       toast.success('Inicio de sesión exitoso');
+      console.log('Login successful');
       
     } catch (err) {
       console.error('Error logging in:', err);
@@ -187,6 +194,7 @@ const AdminPage: React.FC = () => {
   
   const handleLogout = async () => {
     try {
+      console.log('Attempting logout');
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -196,6 +204,7 @@ const AdminPage: React.FC = () => {
       }
       
       toast.success('Sesión cerrada');
+      console.log('Logout successful');
       
     } catch (err) {
       console.error('Error logging out:', err);
@@ -248,7 +257,10 @@ const AdminPage: React.FC = () => {
   if (loading && !isAuthenticated) {
     return (
       <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        <p className="mt-4 text-gray-600">Verificando sesión...</p>
+        </div>
       </div>
     );
   }
@@ -266,6 +278,7 @@ const AdminPage: React.FC = () => {
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Correo Electrónico
+                  <span className="ml-1 text-xs text-gray-500">(admin@terrapesca.com)</span>
                 </label>
                 <input
                   id="email"
@@ -282,6 +295,7 @@ const AdminPage: React.FC = () => {
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Contraseña
+                  <span className="ml-1 text-xs text-gray-500">(Terrapesca2025!)</span>
                 </label>
                 <input
                   id="password"
@@ -297,7 +311,10 @@ const AdminPage: React.FC = () => {
               
               {error && (
                 <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                  {error}
+                  <p>{error}</p>
+                  <p className="mt-2 text-xs">Si continúas teniendo problemas, intenta con:</p>
+                  <p className="text-xs">Email: admin@terrapesca.com</p>
+                  <p className="text-xs">Contraseña: Terrapesca2025!</p>
                 </div>
               )}
               
@@ -319,8 +336,15 @@ const AdminPage: React.FC = () => {
                     </>
                   ) : (
                     'Iniciar Sesión'
+                    
                   )}
                 </button>
+              </div>
+              
+              <div className="mt-4 text-center text-sm text-gray-500">
+                <p>Credenciales por defecto:</p>
+                <p>Email: admin@terrapesca.com</p>
+                <p>Contraseña: Terrapesca2025!</p>
               </div>
             </form>
           </div>

@@ -1,22 +1,46 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Ticket, CheckSquare, Home, User, LogIn, FileText } from 'lucide-react';
+import { supabase } from '../utils/supabaseClient';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   
   const toggleMenu = () => setIsOpen(!isOpen);
+  
+  // Check if user is authenticated
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAdmin(!!data.session);
+    };
+    
+    checkAuth();
+    
+    // Listen for auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAdmin(!!session);
+    });
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
   
   const navLinks = [
     { path: '/', label: 'Inicio', icon: <Home size={20} /> },
     { path: '/boletos', label: 'Boletos', icon: <Ticket size={20} /> },
     { path: '/verificar', label: 'Verificar', icon: <CheckSquare size={20} /> },
     { path: '/contacto', label: 'Contacto', icon: <User size={20} /> },
-    { path: '/admin', label: 'Administración', icon: <LogIn size={20} /> },
+    { path: '/admin', label: 'Administración', icon: <LogIn size={20} />, adminOnly: true },
   ];
   
   const isActive = (path: string) => location.pathname === path;
+  
+  // Filter links based on admin status
+  const filteredLinks = navLinks.filter(link => !link.adminOnly || isAdmin);
 
   return (
     <nav className="bg-primary shadow-lg sticky top-0 z-50">
@@ -34,8 +58,8 @@ const Navbar: React.FC = () => {
           
           {/* Desktop menu */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-center space-x-6">
-              {navLinks.map((link) => (
+            <div className="px-4 pt-3 pb-4 space-y-2">
+              {filteredLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
