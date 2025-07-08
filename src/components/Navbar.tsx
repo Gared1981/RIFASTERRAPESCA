@@ -2,34 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Ticket, CheckSquare, Home, User, LogIn, FileText } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
-import { supabase } from '../utils/supabaseClient';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   
   const toggleMenu = () => setIsOpen(!isOpen);
-  
-  // Check if user is authenticated
-  React.useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAdmin(!!data.session);
-    };
-    
-    checkAuth();
-    
-    // Listen for auth changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAdmin(!!session);
-    });
-    
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
   
   useEffect(() => {
     // Check if user is authenticated
