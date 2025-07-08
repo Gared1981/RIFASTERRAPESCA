@@ -3,7 +3,6 @@ import type { Database } from './types';
 
 // Log environment variables availability (not values)
 console.log('Supabase URL available:', !!import.meta.env.VITE_SUPABASE_URL);
-console.log('Supabase Anon Key available:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -18,7 +17,7 @@ if (!supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    autoRefreshToken: true,
+    autoRefreshToken: true, 
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce'
@@ -27,6 +26,15 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     headers: {
       'X-Client-Info': 'supabase-js-web'
     }
+  }
+});
+
+// Check authentication status on initialization
+supabase.auth.getSession().then(({ data, error }) => {
+  if (error) {
+    console.error('Error checking auth session:', error);
+  } else {
+    console.log('Auth session initialized, user logged in:', !!data.session);
   }
 });
 

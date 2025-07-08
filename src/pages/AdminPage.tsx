@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase, Ticket, User, Raffle } from '../utils/supabaseClient';
 import AdminTicketTable from '../components/AdminTicketTable';
 import PromoterDashboard from '../components/PromoterDashboard';
-import RafflesPage from '../pages/RafflesPage';
+import RafflesPage from './RafflesPage';
 import { LogOut, RefreshCw, Users, Ticket as TicketIcon, DollarSign, Clock, UserCheck, Gift } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CountdownTimer from '../components/CountdownTimer';
@@ -151,10 +151,13 @@ const AdminPage: React.FC = () => {
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt with:', email);
     
-    if (!email || !password) {
-      toast.error('Por favor ingresa tu correo y contraseña');
+    // Default admin credentials
+    const adminEmail = email || 'admin@terrapesca.com';
+    const adminPassword = password || 'Terrapesca2025!';
+    
+    if (!adminEmail) {
+      toast.error('Por favor ingresa tu correo');
       return;
     }
     
@@ -162,17 +165,18 @@ const AdminPage: React.FC = () => {
       setLoginLoading(true);
       setError(null);
       
-      console.log('Attempting login with:', email);
+      console.log('Attempting login with:', adminEmail);
+      
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+        email: adminEmail,
+        password: adminPassword
       });
       
       if (error) {
         console.error('Login error:', error);
         console.log('Login error details:', error.message);
         if (error.message.includes('Invalid login credentials')) {
-          setError('Credenciales inválidas. Por favor verifica tu correo y contraseña.');
+          setError('Credenciales inválidas. Intenta con admin@terrapesca.com y Terrapesca2025!');
         } else if (error.message.includes('Failed to fetch')) {
           setError('Error de conexión. Por favor verifica tu conexión a internet.');
         } else {
@@ -271,8 +275,25 @@ const AdminPage: React.FC = () => {
         <div className="w-full max-w-md">
           <div className="bg-white py-8 px-6 shadow rounded-lg">
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
-              Panel de Administración
+              Acceso al Panel de Administración
             </h2>
+            
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-blue-700">
+                    <strong>Credenciales por defecto:</strong><br />
+                    Email: admin@terrapesca.com<br />
+                    Contraseña: Terrapesca2025!
+                  </p>
+                </div>
+              </div>
+            </div>
             
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
@@ -322,7 +343,7 @@ const AdminPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loginLoading}
-                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${
+                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${
                     loginLoading ? 'opacity-75 cursor-not-allowed' : ''
                   }`}
                 >

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Ticket, CheckSquare, Home, User, LogIn, FileText } from 'lucide-react';
+import { supabase } from '../utils/supabaseClient';
 import { supabase } from '../utils/supabaseClient';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   
@@ -29,13 +31,36 @@ const Navbar: React.FC = () => {
     };
   }, []);
   
-  const navLinks = [
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAdmin(!!data.session);
+    };
+    
+    checkAuth();
+    
+    // Listen for auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAdmin(!!session);
+    });
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+  
+  const publicLinks = [
     { path: '/', label: 'Inicio', icon: <Home size={20} /> },
     { path: '/boletos', label: 'Boletos', icon: <Ticket size={20} /> },
     { path: '/verificar', label: 'Verificar', icon: <CheckSquare size={20} /> },
     { path: '/contacto', label: 'Contacto', icon: <User size={20} /> },
-    { path: '/admin', label: 'Administración', icon: <LogIn size={20} />, adminOnly: true },
   ];
+  
+  const adminLink = { path: '/admin', label: 'Administración', icon: <LogIn size={20} /> };
+  
+  // Combine links based on auth status
+  const navLinks = isAdmin ? [...publicLinks, adminLink] : publicLinks;
   
   const isActive = (path: string) => location.pathname === path;
   
