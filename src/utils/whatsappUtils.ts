@@ -46,17 +46,17 @@ export function generateReservationConfirmationMessage(
   const totalAmount = ticketNumbers.length * raffleInfo.price;
   const baseUrl = window.location.origin;
   
-  let message = `🎉✨ ¡Hola ${userInfo.firstName}!
-Tu boleto #${ticketNumbers.join(', ')} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
-¡Estás oficialmente dentro! 🙌🔥
+  let message = `🎉 ¡Hola ${userInfo.firstName}!
+Tu boleto #${ticketNumbers.join(', ')} ha sido registrado con éxito en Sorteos Terrapesca 🎣
+¡Estás oficialmente dentro! 🙌
 
-Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀🎁
-¡Gracias por participar y mucha, muuucha suerte! 💥🚀
+Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀
+¡Gracias por participar y mucha suerte! 🎁
 
-#EquipaTuAventura 🌊🐟\n\n`;
+#EquipaTuAventura 🌊\n\n`;
   
   if (promoterCode) {
-    message += `👨‍💼 *Código de promotor:* ${promoterCode}\n`;
+    message += `👨 *Código de promotor:* ${promoterCode}\n`;
   }
   
   message += `📞 *Contacto:* +52 668 688 9571\n`;

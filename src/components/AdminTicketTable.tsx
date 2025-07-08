@@ -202,14 +202,14 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
     }
     
     // Create message
-    const message = `🎉✨ ¡Hola ${ticket.user.first_name}!
-Tu boleto #${ticket.number} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
-¡Estás oficialmente dentro! 🙌🔥
+    const message = `🎉 ¡Hola ${ticket.user.first_name}!
+Tu boleto #${ticket.number} ha sido registrado con éxito en Sorteos Terrapesca 🎣
+¡Estás oficialmente dentro! 🙌
 
-Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀🎁
-¡Gracias por participar y mucha, muuucha suerte! 💥🚀
+Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀
+¡Gracias por participar y mucha suerte! 🎁
 
-#EquipaTuAventura 🌊🐟`;
+#EquipaTuAventura 🌊`;
     
     // Create WhatsApp link
     const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;

@@ -32,31 +32,6 @@ const PaymentSuccessPage: React.FC = () => {
         // Enviar notificación de compra exitosa si no se ha enviado antes
         if (paymentId || externalReference || preferenceId) {
           try {
-            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-notification`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-              },
-              body: JSON.stringify({
-                paymentId: paymentId || preferenceId || externalReference || `success-${Date.now()}`,
-                ticketIds: [], // Se obtendrán de los logs
-                ticketNumbers: [],
-                userEmail: '',
-                userPhone: '',
-                userName: '',
-                raffleName: '',
-                raffleId: 0
-              })
-            });
-          } catch (notifyError) {
-            console.warn('Error sending success notification:', notifyError);
-          }
-        }
-        
-        // Enviar notificación de compra exitosa si no se ha enviado antes
-        if (paymentId || externalReference || preferenceId) {
-          try {
             await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
               method: 'POST',
               headers: {
@@ -78,33 +53,6 @@ const PaymentSuccessPage: React.FC = () => {
             console.warn('Error sending success notification:', notifyError);
           }
         }
-        
-        // Enviar notificación de compra exitosa si no se ha enviado antes
-        if (paymentId || externalReference || preferenceId) {
-          try {
-            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-              },
-              body: JSON.stringify({
-                paymentId: paymentId || preferenceId || externalReference || `success-${Date.now()}`,
-                ticketIds: [], // Se obtendrán de los logs
-                ticketNumbers: [],
-                userEmail: '',
-                userPhone: '',
-                userName: '',
-                raffleName: '',
-                raffleId: 0
-              })
-            });
-          } catch (notifyError) {
-            console.warn('Error sending success notification:', notifyError);
-          }
-        }
-        
-        setLoading(true);
         
         // Buscar información del pago en los logs
         let query = supabase.from('payment_logs').select('*');
@@ -155,53 +103,6 @@ const PaymentSuccessPage: React.FC = () => {
             date: new Date().toLocaleDateString(),
             external_reference: externalReference || ''
           });
-        }
-        
-        
-        // Send notification to admin if we have payment data
-        if (paymentId && !notificationSent) {
-          try {
-            const metadata = paymentLogs?.[0]?.metadata || {};
-            if (metadata.ticket_ids && metadata.user_email && metadata.user_phone) {
-              await sendNotification({
-                ticketIds: metadata.ticket_ids,
-                userEmail: metadata.user_email,
-                userPhone: metadata.user_phone,
-                userName: metadata.user_name || 'Cliente',
-                raffleName: raffleData?.name || 'Sorteo Terrapesca',
-                promoterCode: metadata.promoter_code,
-                paymentId: paymentId,
-                paymentMethod: 'mercadopago'
-              });
-              setNotificationSent(true);
-              console.log('✅ Payment success notification sent to admin');
-            }
-          } catch (notifyError) {
-            console.error('❌ Error sending success notification:', notifyError);
-          }
-        }
-        
-        // Send notification to admin if we have payment data
-        if (paymentId && !notificationSent) {
-          try {
-            const metadata = paymentLogs?.[0]?.metadata || {};
-            if (metadata.ticket_ids && metadata.user_email && metadata.user_phone) {
-              await sendNotification({
-                ticketIds: metadata.ticket_ids,
-                userEmail: metadata.user_email,
-                userPhone: metadata.user_phone,
-                userName: metadata.user_name || 'Cliente',
-                raffleName: raffleData?.name || 'Sorteo Terrapesca',
-                promoterCode: metadata.promoter_code,
-                paymentId: paymentId,
-                paymentMethod: 'mercadopago'
-              });
-              setNotificationSent(true);
-              console.log('✅ Payment success notification sent to admin');
-            }
-          } catch (notifyError) {
-            console.error('❌ Error sending success notification:', notifyError);
-          }
         }
       } catch (error) {
         console.error('Error processing payment data:', error);
@@ -271,7 +172,6 @@ const PaymentSuccessPage: React.FC = () => {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             {/* Header */}
-            {/* Header */}
             <div className={`px-6 py-8 text-center ${isPending ? 'bg-yellow-500' : 'bg-green-500'}`}>
               <CheckCircle className="h-16 w-16 text-white mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-white mb-2">
@@ -286,10 +186,8 @@ const PaymentSuccessPage: React.FC = () => {
             </div>
 
             {/* Payment Details */}
-            {/* Payment Details */}
             <div className="px-6 py-8">
               <div className="space-y-6">
-                {/* Payment Info */}
                 {/* Payment Info */}
                 <div className="border-b pb-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -320,7 +218,6 @@ const PaymentSuccessPage: React.FC = () => {
                 </div>
 
                 {/* Raffle Info */}
-                {/* Raffle Info */}
                 <div className="border-b pb-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <Calendar className="h-5 w-5 mr-2" />
@@ -329,7 +226,6 @@ const PaymentSuccessPage: React.FC = () => {
                   <p className="text-gray-700">{paymentData.raffle}</p>
                 </div>
 
-                {/* Tickets */}
                 {/* Tickets */}
                 {paymentData.tickets.length > 0 && (
                   <div className="border-b pb-6">
@@ -354,7 +250,6 @@ const PaymentSuccessPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Next Steps */}
                 {/* Next Steps */}
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -412,7 +307,6 @@ const PaymentSuccessPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Actions */}
               {/* Actions */}
               <div className="mt-8 space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4">

@@ -53,12 +53,6 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     whatsappMessage += `\nTeléfono: ${userInfo.phone}`;
     whatsappMessage += `\nEstado: ${userInfo.state}`;
     
-    // Incluir información del cliente en el mensaje
-    whatsappMessage += `\n\nNombre: ${userInfo.firstName} ${userInfo.lastName}`;
-    whatsappMessage += `\nEmail: ${userInfo.email}`;
-    whatsappMessage += `\nTeléfono: ${userInfo.phone}`;
-    whatsappMessage += `\nEstado: ${userInfo.state}`;
-    
     whatsappMessage += `\n\nPara el sorteo: ${raffleInfo.name}`;
     whatsappMessage += `\nTotal a pagar: $${totalAmount.toLocaleString()} MXN`;
     

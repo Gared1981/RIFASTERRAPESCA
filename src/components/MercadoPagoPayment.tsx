@@ -156,23 +156,6 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
         console.error('❌ Error sending admin notification:', notifyError);
         // Continue with payment process even if notification fails
       }
-      
-      // Send notification to admin about the purchase attempt
-      try {
-        await sendNotification({
-          ticketIds: selectedTickets.map(t => t.id),
-          userEmail: userInfo.email,
-          userPhone: userInfo.phone,
-          userName: `${userInfo.firstName} ${userInfo.lastName}`,
-          raffleName: raffleInfo.name,
-          promoterCode: promoterCode,
-          paymentMethod: 'mercadopago'
-        });
-        console.log('✅ Admin notification sent about purchase attempt');
-      } catch (notifyError) {
-        console.error('❌ Error sending admin notification:', notifyError);
-        // Continue with payment process even if notification fails
-      }
 
       // Llamar a la función de Supabase Edge Function con timeout extendido
       const controller = new AbortController();
@@ -253,36 +236,7 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
             // Continue with payment process even if notification fails
           }
           
-          // Enviar notificación de compra
-          try {
-            const notificationResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-              },
-              body: JSON.stringify({
-                paymentId: preference.id,
-                ticketIds: selectedTickets.map(t => t.id),
-                ticketNumbers: selectedTickets.map(t => t.number),
-                userEmail: userInfo.email,
-                userPhone: userInfo.phone,
-                userName: `${userInfo.firstName} ${userInfo.lastName}`,
-                raffleName: raffleInfo.name,
-                raffleId: raffleInfo.id,
-                promoterCode: promoterCode
-              })
-            });
-            
-            if (!notificationResponse.ok) {
-              console.warn('Error sending purchase notification:', await notificationResponse.text());
-            }
-          } catch (notificationError) {
-            console.warn('Failed to send purchase notification:', notificationError);
-            // Continue with payment process even if notification fails
-          }
-          
-          // Enviar notificación de compra
+          // Enviar notificación de compra por WhatsApp
           try {
             const notificationResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
               method: 'POST',

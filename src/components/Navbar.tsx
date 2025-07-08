@@ -62,7 +62,7 @@ const Navbar: React.FC = () => {
           
           {/* Desktop menu */}
           <div className="hidden md:block">
-            <div className="px-4 pt-3 pb-4 space-y-2">
+            <div className="ml-10 flex items-center space-x-6">
               {filteredLinks.map((link) => (
                 <Link
                   key={link.path}

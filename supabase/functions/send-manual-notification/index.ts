@@ -151,14 +151,14 @@ serve(async (req: Request) => {
       }
     } else if (notificationType === 'whatsapp' && userPhone) {
       // Prepare WhatsApp message
-      const whatsappMessage = `🎉✨ ¡Hola ${userName.split(' ')[0]}!
-Tu boleto #${ticketNumber} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
-¡Estás oficialmente dentro! 🙌🔥
+      const whatsappMessage = `🎉 ¡Hola ${userName.split(' ')[0]}!
+Tu boleto #${ticketNumber} ha sido registrado con éxito en Sorteos Terrapesca 🎣
+¡Estás oficialmente dentro! 🙌
 
-Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀🎁
-¡Gracias por participar y mucha, muuucha suerte! 💥🚀
+Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀
+¡Gracias por participar y mucha suerte! 🎁
 
-#EquipaTuAventura 🌊🐟
+#EquipaTuAventura 🌊
 
 ${ticket.promoter_code ? `👨‍💼 *Código de promotor:* ${ticket.promoter_code}\n` : ""}
 📞 *Contacto:* +52 668 688 9571

@@ -162,14 +162,14 @@ serve(async (req: Request) => {
     }
 
     // 4. Send WhatsApp notification to customer with new format
-    const customerWhatsappMessage = `🎉✨ ¡Hola ${userName.split(' ')[0]}!
-Tu boleto #${finalTicketNumbers.join(', ')} ha sido registrado con éxito en Sorteos Terrapesca 🎣🧢
-¡Estás oficialmente dentro! 🙌🔥
+    const customerWhatsappMessage = `🎉 ¡Hola ${userName.split(' ')[0]}!
+Tu boleto #${finalTicketNumbers.join(', ')} ha sido registrado con éxito en Sorteos Terrapesca 🎣
+¡Estás oficialmente dentro! 🙌
 
-Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀🎁
-¡Gracias por participar y mucha, muuucha suerte! 💥🚀
+Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 🍀
+¡Gracias por participar y mucha suerte! 🎁
 
-#EquipaTuAventura 🌊🐟
+#EquipaTuAventura 🌊
 
 ${promoterCode ? `👨‍💼 *Código de promotor:* ${promoterCode}\n` : ""}
 📞 *Contacto:* +52 668 688 9571
