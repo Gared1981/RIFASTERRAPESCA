@@ -31,8 +31,6 @@ const Navbar: React.FC = () => {
   
   const publicLinks = [
     { path: '/', label: 'Inicio', icon: <Home size={20} /> },
-    { path: '/boletos', label: 'Boletos', icon: <Ticket size={20} /> },
-    { path: '/verificar', label: 'Verificar', icon: <CheckSquare size={20} /> },
     { path: '/contacto', label: 'Contacto', icon: <User size={20} /> },
   ];
   
@@ -62,7 +60,7 @@ const Navbar: React.FC = () => {
           
           {/* Desktop menu */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-center space-x-6">
+            <div className="px-4 pt-3 pb-4 space-y-2">  
               {filteredLinks.map((link) => (
                 <Link
                   key={link.path}
