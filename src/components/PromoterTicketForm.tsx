@@ -297,11 +297,8 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
           <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center text-blue-700">
               <Gift className="h-4 w-4 mr-2" />
-              <span className="font-semibold">Promotor: {selectedPromoter.name}</span>
+              <span className="font-semibold">Código de promotor: {selectedPromoter.code}</span>
             </div>
-            <p className="text-sm text-blue-600 mt-1">
-              Código: {selectedPromoter.code}
-            </p>
           </div>
         )}
       </div>
