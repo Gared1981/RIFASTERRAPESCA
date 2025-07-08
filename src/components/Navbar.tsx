@@ -47,8 +47,8 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-primary shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-24">
-          <div className="flex items-center">
+        <div className="flex items-center justify-center h-24 relative">
+          <div className="absolute left-0">
             <Link to="/" className="flex-shrink-0">
               <img 
                 src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/Logo-Terrapesca-01_205270e5-d546-4e33-a8d1-db0a91f1e554.png?v=1700262873"
@@ -59,8 +59,8 @@ const Navbar: React.FC = () => {
           </div>
           
           {/* Desktop menu */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-center space-x-6">  
+          <div className="hidden md:block mx-auto">
+            <div className="flex items-center space-x-6">  
               {filteredLinks.map((link) => (
                 <Link
                   key={link.path}
@@ -83,7 +83,7 @@ const Navbar: React.FC = () => {
           </div>
           
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden absolute right-0">
             <button
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-3 rounded-lg text-white hover:text-white hover:bg-primary-light focus:outline-none"
