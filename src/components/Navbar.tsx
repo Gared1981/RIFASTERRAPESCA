@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Ticket, CheckSquare, Home, User, LogIn, FileText } from 'lucide-react';
+import { Menu, X, Home, User, LogIn } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
 
 const Navbar: React.FC = () => {
@@ -60,7 +60,7 @@ const Navbar: React.FC = () => {
           
           {/* Desktop menu */}
           <div className="hidden md:block">
-            <div className="px-4 pt-3 pb-4 space-y-2">  
+            <div className="ml-10 flex items-center space-x-6">  
               {filteredLinks.map((link) => (
                 <Link
                   key={link.path}
@@ -99,7 +99,7 @@ const Navbar: React.FC = () => {
       {/* Mobile menu */}
       {isOpen && (
         <div className="md:hidden bg-primary-dark">
-          <div className="px-4 pt-3 pb-4 space-y-2">
+          <div className="px-4 pt-3 pb-4 flex flex-col space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
