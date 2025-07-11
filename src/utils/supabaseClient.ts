@@ -3,28 +3,41 @@ import type { Database } from './types';
 
 // Log environment variables availability (not values)
 console.log('Supabase URL available:', !!import.meta.env.VITE_SUPABASE_URL);
+console.log('Supabase Anon Key available:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl) {
+  console.error('❌ VITE_SUPABASE_URL is not defined in environment variables');
   throw new Error('VITE_SUPABASE_URL is not defined in .env');
 }
 
 if (!supabaseAnonKey) {
+  console.error('❌ VITE_SUPABASE_ANON_KEY is not defined in environment variables');
   throw new Error('VITE_SUPABASE_ANON_KEY is not defined in .env');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true, 
     persistSession: true,
     detectSessionInUrl: true,
-    flowType: 'pkce'
+    flowType: 'pkce',
+    debug: false
   },
   global: {
     headers: {
-      'X-Client-Info': 'supabase-js-web'
+      'X-Client-Info': 'supabase-js-web',
+      'X-Client-Version': '2.39.7'
+    }
+  },
+  db: {
+    schema: 'public'
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
     }
   }
 });
@@ -32,19 +45,25 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // Check authentication status on initialization
 supabase.auth.getSession().then(({ data, error }) => {
   if (error) {
-    console.error('Error checking auth session:', error);
+    console.error('❌ Error checking auth session:', error);
   } else {
-    console.log('Auth session initialized, user logged in:', !!data.session);
+    console.log('✅ Auth session initialized, user logged in:', !!data.session);
+    if (data.session) {
+      console.log('👤 User ID:', data.session.user.id);
+      console.log('📧 User email:', data.session.user.email);
+    }
   }
 });
 
-// Log authentication status on initialization
-supabase.auth.getSession().then(({ data, error }) => {
+// Test database connection
+supabase.from('raffles').select('count', { count: 'exact', head: true }).then(({ error, count }) => {
   if (error) {
-    console.error('Error checking initial session:', error);
+    console.error('❌ Database connection test failed:', error);
   } else {
-    console.log('Initial session check:', !!data.session);
+    console.log('✅ Database connection successful, raffles count:', count);
   }
+}).catch(err => {
+  console.error('❌ Database connection error:', err);
 });
 
 export type User = {

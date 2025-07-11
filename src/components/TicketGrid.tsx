@@ -23,9 +23,16 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   const fetchTickets = async () => {
     try {
       setLoading(true);
+      console.log('🎫 Fetching tickets for raffle:', raffleId);
       
       // Ejecutar limpieza automática antes de obtener boletos
-      await supabase.rpc('auto_cleanup_tickets');
+      try {
+        await supabase.rpc('auto_cleanup_tickets');
+        console.log('🧹 Auto cleanup completed');
+      } catch (cleanupError) {
+        console.warn('⚠️ Auto cleanup failed:', cleanupError);
+        // Continue even if cleanup fails
+      }
       
       // Fetch available tickets after cleanup
       const { data, error } = await supabase
@@ -37,9 +44,10 @@ const TicketGrid: React.FC<TicketGridProps> = ({
         
       if (error) throw error;
       
+      console.log('✅ Available tickets fetched:', data?.length || 0);
       setTickets(data as Ticket[]);
     } catch (err) {
-      console.error('Error fetching tickets:', err);
+      console.error('❌ Error fetching tickets:', err);
       setError('No pudimos cargar los boletos. Intenta de nuevo más tarde.');
     } finally {
       setLoading(false);
@@ -57,13 +65,16 @@ const TicketGrid: React.FC<TicketGridProps> = ({
         { event: '*', schema: 'public', table: 'tickets', filter: `raffle_id=eq.${raffleId}` },
         (payload) => {
           // Refresh tickets when any ticket changes
+          console.log('🔄 Ticket change detected, refreshing...', payload);
           fetchTickets();
         }
       )
       .subscribe();
       
     return () => {
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, [raffleId]);
 
@@ -73,14 +84,14 @@ const TicketGrid: React.FC<TicketGridProps> = ({
       try {
         const { data, error } = await supabase.rpc('auto_cleanup_tickets');
         if (error) {
-          console.error('Error during auto cleanup:', error);
+          console.error('❌ Error during auto cleanup:', error);
         } else if (data > 0) {
-          console.log(`Auto-released ${data} expired tickets`);
+          console.log(`🧹 Auto-released ${data} expired tickets`);
           // Refresh tickets if any were released
           fetchTickets();
         }
       } catch (error) {
-        console.error('Error during auto cleanup:', error);
+        console.error('❌ Exception during auto cleanup:', error);
       }
     }, 60000); // 60 seconds (más frecuente)
 

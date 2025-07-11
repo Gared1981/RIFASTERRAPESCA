@@ -39,6 +39,7 @@ const TicketsPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
+        console.log('🎰 Fetching active raffles...');
         
         // Fetch all active raffles with real-time data
         const { data: rafflesData, error: rafflesError } = await supabase
@@ -48,14 +49,16 @@ const TicketsPage: React.FC = () => {
           .order('draw_date', { ascending: true });
           
         if (rafflesError) {
-          console.error('Supabase error:', rafflesError);
+          console.error('❌ Supabase error fetching raffles:', rafflesError);
           throw new Error(rafflesError.message);
         }
         
         if (!rafflesData || rafflesData.length === 0) {
+          console.warn('⚠️ No active raffles found');
           throw new Error('No active raffles found');
         }
         
+        console.log('✅ Active raffles fetched:', rafflesData.length);
         setActiveRaffles(rafflesData);
         
         // If raffle ID is specified in URL, select that raffle
@@ -63,15 +66,17 @@ const TicketsPage: React.FC = () => {
           const specificRaffle = rafflesData.find(r => r.id === parseInt(raffleId));
           if (specificRaffle) {
             setSelectedRaffle(specificRaffle);
+            console.log('🎯 Selected specific raffle:', specificRaffle.name);
           } else {
             // If specified raffle not found, select first active raffle
+            console.warn('⚠️ Specified raffle not found, selecting first active');
             setSelectedRaffle(rafflesData[0]);
           }
         }
         // If no raffle specified, don't select any (user must choose)
         
       } catch (err) {
-        console.error('Error fetching raffles:', err);
+        console.error('❌ Error fetching raffles:', err);
         setError(err instanceof Error ? err.message : 'An error occurred while fetching raffles');
         setActiveRaffles([]);
         setSelectedRaffle(null);
@@ -87,15 +92,18 @@ const TicketsPage: React.FC = () => {
       .channel('raffles-changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'raffles' },
-        () => {
+        (payload) => {
           // Refresh raffles when any raffle changes
+          console.log('🔄 Raffle change detected, refreshing...', payload);
           fetchRaffles();
         }
       )
       .subscribe();
       
     return () => {
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, [raffleId]);
   

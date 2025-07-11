@@ -13,19 +13,33 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     // Check if user is authenticated
     const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAdmin(!!data.session);
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('❌ Error checking auth in Navbar:', error);
+          setIsAdmin(false);
+          return;
+        }
+        setIsAdmin(!!data.session);
+        console.log('🔐 Navbar auth check:', !!data.session);
+      } catch (err) {
+        console.error('❌ Exception in Navbar auth check:', err);
+        setIsAdmin(false);
+      }
     };
     
     checkAuth();
     
     // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Auth state change in Navbar:', event, !!session);
       setIsAdmin(!!session);
     });
     
     return () => {
-      authListener.subscription.unsubscribe();
+      if (authListener?.subscription) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, []);
   

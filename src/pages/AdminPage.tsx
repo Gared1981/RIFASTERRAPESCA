@@ -33,20 +33,27 @@ const AdminPage: React.FC = () => {
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Session check error:', error);
+          console.error('❌ Session check error:', error);
           toast.error('Error al verificar la sesión');
+          setIsAuthenticated(false);
           return;
         }
         
         setIsAuthenticated(!!data.session);
-        console.log('Session check:', !!data.session, data.session?.user?.email);
+        console.log('🔐 Admin session check:', !!data.session, data.session?.user?.email);
         
         if (data.session) {
-          fetchRaffles();
+          try {
+            await fetchRaffles();
+          } catch (fetchError) {
+            console.error('❌ Error fetching raffles after auth:', fetchError);
+            toast.error('Error al cargar los sorteos');
+          }
         }
       } catch (err) {
-        console.error('Error checking session:', err);
+        console.error('❌ Exception checking session:', err);
         toast.error('Error al verificar la sesión');
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
@@ -57,41 +64,51 @@ const AdminPage: React.FC = () => {
     // Set up auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
+        console.log('🔄 Admin auth state change:', event, session?.user?.email);
         setIsAuthenticated(!!session);
         if (session) {
-          fetchRaffles();
+          fetchRaffles().catch(err => {
+            console.error('❌ Error fetching raffles on auth change:', err);
+          });
         }
       }
     );
     
     return () => {
-      authListener.subscription.unsubscribe();
+      if (authListener?.subscription) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, []);
   
   const fetchRaffles = async () => {
     try {
+      console.log('📊 Fetching raffles...');
       const { data, error } = await supabase
         .from('raffles')
         .select('*')
         .order('created_at', { ascending: false });
         
       if (error) {
-        console.error('Error fetching raffles:', error);
+        console.error('❌ Error fetching raffles:', error);
         toast.error('Error al cargar los sorteos');
         return;
       }
       
+      console.log('✅ Raffles fetched successfully:', data?.length || 0);
       setRaffles(data as Raffle[]);
       
       // Set first raffle as selected by default
       if (data && data.length > 0 && !selectedRaffle) {
         setSelectedRaffle(data[0].id);
-        fetchTickets(data[0].id);
+        try {
+          await fetchTickets(data[0].id);
+        } catch (ticketError) {
+          console.error('❌ Error fetching tickets for first raffle:', ticketError);
+        }
       }
     } catch (err) {
-      console.error('Error fetching raffles:', err);
+      console.error('❌ Exception fetching raffles:', err);
       toast.error('Error al cargar los sorteos');
     }
   };
@@ -99,6 +116,7 @@ const AdminPage: React.FC = () => {
   const fetchTickets = async (raffleId: number) => {
     try {
       setLoading(true);
+      console.log('🎫 Fetching tickets for raffle:', raffleId);
       
       const { data, error } = await supabase
         .from('tickets')
@@ -110,11 +128,12 @@ const AdminPage: React.FC = () => {
         .order('number', { ascending: true });
         
       if (error) {
-        console.error('Error fetching tickets:', error);
+        console.error('❌ Error fetching tickets:', error);
         toast.error('Error al cargar los boletos');
         return;
       }
       
+      console.log('✅ Tickets fetched successfully:', data?.length || 0);
       setTickets(data as Array<Ticket & { user?: User }>);
       
       // Calculate stats
