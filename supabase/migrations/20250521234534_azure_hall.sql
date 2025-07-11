@@ -1,15 +1,4 @@
-/*
-  # Initial Database Schema for Sorteos Terrapesca
-
-  1. New Tables
-    - `users` - Stores user information who purchase tickets
-    - `raffles` - Stores information about different raffles/contests
-    - `tickets` - Stores all tickets with their status and relationships
-
-  2. Security
-    - Enable RLS on all tables
-    - Create policies for authenticated users and anon access where needed
-*/
+-- Initial Database Schema for Sorteos Terrapesca
 
 -- Users table for storing customer information
 CREATE TABLE IF NOT EXISTS users (
@@ -57,7 +46,7 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE raffles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
 
--- Create policies for users table
+-- Policies for users table
 CREATE POLICY "Public users are viewable by everyone" 
   ON users FOR SELECT USING (true);
 
@@ -67,30 +56,30 @@ CREATE POLICY "Users can insert their own data"
 CREATE POLICY "Users can update own data" 
   ON users FOR UPDATE USING (auth.uid() = id);
 
--- Create policies for raffles table
+-- Policies for raffles table
 CREATE POLICY "Raffles are viewable by everyone" 
   ON raffles FOR SELECT USING (true);
 
 CREATE POLICY "Only admins can insert raffles" 
-  ON raffles FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+  ON raffles FOR INSERT WITH CHECK (current_setting('role', true) = 'authenticated');
 
 CREATE POLICY "Only admins can update raffles" 
-  ON raffles FOR UPDATE USING (auth.role() = 'authenticated');
+  ON raffles FOR UPDATE USING (current_setting('role', true) = 'authenticated');
 
--- Create policies for tickets table
+-- Policies for tickets table
 CREATE POLICY "Tickets are viewable by everyone" 
   ON tickets FOR SELECT USING (true);
 
 CREATE POLICY "Tickets can be updated by authenticated users" 
-  ON tickets FOR UPDATE USING (auth.role() = 'authenticated');
+  ON tickets FOR UPDATE USING (current_setting('role', true) = 'authenticated');
 
 CREATE POLICY "New ticket reservations can be created by anyone" 
   ON tickets FOR UPDATE USING (
     status = 'available' OR 
-    auth.role() = 'authenticated'
+    current_setting('role', true) = 'authenticated'
   );
 
--- Create a function to auto-release tickets after 3 hours
+-- Function to auto-release tickets after 3 hours
 CREATE OR REPLACE FUNCTION release_expired_tickets()
 RETURNS void AS $$
 BEGIN
@@ -106,7 +95,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create a function to seed initial data for testing
+-- Function to seed initial data for testing
 CREATE OR REPLACE FUNCTION seed_initial_data()
 RETURNS void AS $$
 DECLARE
@@ -115,8 +104,8 @@ BEGIN
   -- Insert a test raffle
   INSERT INTO raffles (name, description, image_url, price, draw_date, active)
   VALUES (
-    'Toyota Tacoma TRD 2024', 
-    'Sorteo de una Toyota Tacoma TRD 2024 completamente nueva',
+    'Sorteos Terrapesca', 
+    'Sorteo de equipo de trolling',
     'https://images.pexels.com/photos/12942781/pexels-photo-12942781.jpeg',
     500.00,
     NOW() + INTERVAL '1 year',
