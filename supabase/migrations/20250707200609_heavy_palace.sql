@@ -10,9 +10,7 @@
 -- Verificar que la tabla promoters existe y tiene la estructura correcta
 DO $$
 BEGIN
-  -- Verificar si la tabla existe
   IF NOT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'promoters') THEN
-    -- Crear tabla si no existe
     CREATE TABLE promoters (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       name TEXT NOT NULL,
@@ -24,13 +22,10 @@ BEGIN
       created_at TIMESTAMPTZ DEFAULT now(),
       updated_at TIMESTAMPTZ DEFAULT now()
     );
-    
-    -- Crear índices
+
     CREATE INDEX promoters_code_idx ON promoters (code);
-    
-    -- Habilitar RLS
     ALTER TABLE promoters ENABLE ROW LEVEL SECURITY;
-    
+
     RAISE NOTICE 'Tabla promoters creada';
   ELSE
     RAISE NOTICE 'Tabla promoters ya existe';
@@ -52,11 +47,11 @@ BEGIN
   END IF;
 END $$;
 
--- Limpiar políticas existentes y crear nuevas
+-- Limpiar políticas existentes
 DROP POLICY IF EXISTS "Promoters are viewable by everyone" ON promoters;
 DROP POLICY IF EXISTS "Allow authenticated users to manage promoters" ON promoters;
 
--- Crear políticas RLS para promoters
+-- Crear políticas RLS corregidas
 CREATE POLICY "Promoters are viewable by everyone"
   ON promoters FOR SELECT
   TO public
@@ -67,12 +62,10 @@ CREATE POLICY "Allow authenticated users to manage promoters"
   TO public
   USING (
     auth.uid() IS NOT NULL OR 
-    auth.role() = 'authenticated' OR
     current_setting('role', true) = 'authenticated'
   )
   WITH CHECK (
     auth.uid() IS NOT NULL OR 
-    auth.role() = 'authenticated' OR
     current_setting('role', true) = 'authenticated'
   );
 
@@ -87,12 +80,12 @@ DECLARE
   ticket_status TEXT;
   promoter_exists BOOLEAN;
 BEGIN
-  -- Verificar que el promotor existe y está activo
+  -- Verificar promotor activo
   SELECT EXISTS(
     SELECT 1 FROM promoters 
     WHERE code = p_promoter_code AND active = true
   ) INTO promoter_exists;
-  
+
   IF NOT promoter_exists THEN
     RETURN json_build_object(
       'success', false, 
@@ -100,10 +93,10 @@ BEGIN
       'promoter_code', p_promoter_code
     );
   END IF;
-  
-  -- Obtener estado actual del ticket
+
+  -- Obtener estatus del ticket
   SELECT status INTO ticket_status FROM tickets WHERE id = p_ticket_id;
-  
+
   IF ticket_status IS NULL THEN
     RETURN json_build_object(
       'success', false, 
@@ -111,13 +104,12 @@ BEGIN
       'ticket_id', p_ticket_id
     );
   END IF;
-  
-  -- Actualizar el ticket con el código del promotor (permitir en cualquier estado)
+
+  -- Asignar código de promotor
   UPDATE tickets 
   SET promoter_code = p_promoter_code
   WHERE id = p_ticket_id;
-  
-  -- Verificar que el ticket fue actualizado
+
   IF NOT FOUND THEN
     RETURN json_build_object(
       'success', false, 
@@ -125,8 +117,8 @@ BEGIN
       'ticket_id', p_ticket_id
     );
   END IF;
-  
-  -- Solo actualizar métricas del promotor si el ticket está pagado
+
+  -- Solo sumar ventas si el ticket está pagado
   IF ticket_status = 'purchased' THEN
     UPDATE promoters 
     SET 
@@ -135,7 +127,7 @@ BEGIN
       updated_at = now()
     WHERE code = p_promoter_code AND active = true;
   END IF;
-  
+
   RETURN json_build_object(
     'success', true, 
     'message', 'Sale registered successfully',
@@ -173,7 +165,7 @@ ON CONFLICT (code) DO UPDATE SET
   active = true,
   updated_at = now();
 
--- Función para verificar promotores (corregida)
+-- Función para verificar estado de promotores
 CREATE OR REPLACE FUNCTION check_promoters_status()
 RETURNS JSON AS $$
 DECLARE
@@ -182,23 +174,21 @@ DECLARE
   sample_codes TEXT[];
   result JSON;
 BEGIN
-  -- Contar promotores
   SELECT COUNT(*) INTO total_promoters FROM promoters;
   SELECT COUNT(*) INTO active_promoters FROM promoters WHERE active = true;
-  
-  -- Obtener algunos códigos de ejemplo (corregido)
+
   SELECT array_agg(code) INTO sample_codes 
   FROM (
     SELECT code FROM promoters WHERE active = true ORDER BY code LIMIT 5
   ) AS sample;
-  
+
   result := json_build_object(
     'total_promoters', total_promoters,
     'active_promoters', active_promoters,
     'sample_codes', sample_codes,
     'check_time', now()
   );
-  
+
   RETURN result;
 END;
 $$ LANGUAGE plpgsql;
