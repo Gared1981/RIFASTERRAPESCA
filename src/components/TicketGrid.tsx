@@ -112,7 +112,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
     
   const ticketStats = {
     available: tickets.length,
-    total: 1000 // Fixed total of 1000 tickets
+    total: tickets.length > 0 ? Math.max(...tickets.map(t => t.number)) + 1 : 1000 // Dynamic total based on highest ticket number + 1
   };
 
   return (

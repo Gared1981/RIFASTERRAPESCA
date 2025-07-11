@@ -111,10 +111,11 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
       if (raffleError) throw raffleError;
       
       // Generate tickets for the raffle (4-digit numbers)
+      // Generate tickets starting from 0000 up to the total number
       const tickets = Array.from(
         { length: parseInt(formData.total_tickets) }, 
         (_, i) => ({
-          number: 1001 + i,
+          number: i, // Start from 0 and count up
           status: 'available',
           raffle_id: raffleData.id
         })
@@ -407,12 +408,12 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
               onChange={handleChange}
               required
               min="1"
-              max="8999"
+              max="1001"
               className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-              placeholder="100"
+              placeholder="1001"
             />
             <p className="mt-1 text-sm text-gray-500">
-              Los números de boleto serán generados automáticamente desde 1001 hasta {formData.total_tickets ? (1000 + parseInt(formData.total_tickets)) : '9999'}
+              Los números de boleto serán generados automáticamente desde 0000 hasta {formData.total_tickets ? (parseInt(formData.total_tickets) - 1).toString().padStart(4, '0') : '1000'}
             </p>
           </div>
         </div>
