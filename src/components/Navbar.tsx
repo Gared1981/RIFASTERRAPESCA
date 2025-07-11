@@ -88,9 +88,10 @@ const Navbar: React.FC = () => {
                         ? 'text-white hover:bg-red-400'
                         : 'text-white hover:bg-primary-light'
                   }`}
+                  title={link.label}
                 >
                   {link.icon}
-                  <span className="ml-2">{link.label}</span>
+                  {link.path !== '/admin' && <span className="ml-2">{link.label}</span>}
                 </Link>
               ))}
             </div>
