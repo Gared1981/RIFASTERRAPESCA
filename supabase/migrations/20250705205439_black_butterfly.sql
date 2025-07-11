@@ -1,11 +1,4 @@
-/*
-  # Restaurar sistema de promotores completo
-
-  1. Recrear tabla de promotores si no existe
-  2. Recrear funciones de promotores
-  3. Recrear vista de estadísticas
-  4. Insertar promotores existentes
-*/
+-- Restaurar sistema de promotores completo
 
 -- Crear tabla de promotores si no existe
 CREATE TABLE IF NOT EXISTS promoters (
@@ -39,8 +32,8 @@ CREATE POLICY "Promoters are viewable by everyone"
 CREATE POLICY "Allow authenticated users to manage promoters"
   ON promoters FOR ALL
   TO public
-  USING (auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'authenticated');
+  USING (current_setting('role', true) = 'authenticated')
+  WITH CHECK (current_setting('role', true) = 'authenticated');
 
 -- Función para registrar venta con promotor
 CREATE OR REPLACE FUNCTION register_ticket_sale(
@@ -51,17 +44,14 @@ RETURNS JSON AS $$
 DECLARE
   result JSON;
 BEGIN
-  -- Actualizar el ticket con el código del promotor
   UPDATE tickets 
   SET promoter_code = p_promoter_code
   WHERE id = p_ticket_id AND status IN ('reserved', 'purchased');
   
-  -- Verificar que el ticket fue actualizado
   IF NOT FOUND THEN
     RETURN json_build_object('success', false, 'error', 'Ticket not found or not reserved/purchased');
   END IF;
   
-  -- Actualizar métricas del promotor
   UPDATE promoters 
   SET 
     total_sales = total_sales + 1,
@@ -69,7 +59,6 @@ BEGIN
     updated_at = now()
   WHERE code = p_promoter_code AND active = true;
   
-  -- Verificar que el promotor fue actualizado
   IF NOT FOUND THEN
     RETURN json_build_object('success', false, 'error', 'Promoter not found or inactive');
   END IF;
@@ -88,14 +77,12 @@ DECLARE
   winning_promoter_code TEXT;
   result JSON;
 BEGIN
-  -- Obtener el código del promotor del boleto ganador
   SELECT promoter_code INTO winning_promoter_code
   FROM tickets 
   WHERE raffle_id = p_raffle_id 
     AND number = p_winning_ticket_number 
     AND status = 'purchased';
   
-  -- Si no hay promotor asociado, no hay bono extra
   IF winning_promoter_code IS NULL THEN
     RETURN json_build_object(
       'success', true, 
@@ -103,7 +90,6 @@ BEGIN
     );
   END IF;
   
-  -- Asignar bono extra al promotor
   UPDATE promoters 
   SET 
     accumulated_bonus = accumulated_bonus + 1000,
@@ -119,7 +105,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Crear vista para estadísticas de promotores
+-- Vista para estadísticas de promotores
 DROP VIEW IF EXISTS promoter_stats;
 
 CREATE VIEW promoter_stats AS
