@@ -46,17 +46,16 @@ const Navbar: React.FC = () => {
   const publicLinks = [
     { path: '/', label: 'Inicio', icon: <Home size={20} /> },
     { path: '/contacto', label: 'Contacto', icon: <User size={20} /> },
+    { path: '/admin', label: 'Administración', icon: <LogIn size={20} /> },
   ];
   
-  const adminLink = { path: '/admin', label: 'Administración', icon: <LogIn size={20} /> };
-  
-  // Combine links based on auth status
-  const navLinks = isAdmin ? [...publicLinks, adminLink] : publicLinks;
+  // Admin link is now always visible in publicLinks
+  const navLinks = publicLinks;
   
   const isActive = (path: string) => location.pathname === path;
   
-  // Filter links based on admin status
-  const filteredLinks = navLinks.filter(link => !link.adminOnly || isAdmin);
+  // All links are now always visible
+  const filteredLinks = navLinks;
 
   return (
     <nav className="bg-primary shadow-lg sticky top-0 z-50">
@@ -83,10 +82,14 @@ const Navbar: React.FC = () => {
                     isActive(link.path)
                       ? link.path === '/' 
                         ? 'bg-red-500 text-white shadow-lg'
-                        : 'bg-secondary text-white shadow-lg'
+                        : link.path === '/admin'
+                          ? 'bg-blue-600 text-white shadow-lg'
+                          : 'bg-secondary text-white shadow-lg'
                       : link.path === '/'
                         ? 'text-white hover:bg-red-400'
-                        : 'text-white hover:bg-primary-light'
+                        : link.path === '/admin'
+                          ? 'text-white hover:bg-blue-500'
+                          : 'text-white hover:bg-primary-light'
                   }`}
                   title={link.label}
                 >
@@ -121,7 +124,9 @@ const Navbar: React.FC = () => {
                 to={link.path}
                 className={`block px-6 py-4 rounded-lg text-lg font-semibold flex items-center space-x-3 transition-colors ${
                   isActive(link.path)
-                    ? 'bg-secondary text-white shadow-lg'
+                    ? link.path === '/admin'
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'bg-secondary text-white shadow-lg'
                     : 'text-white hover:bg-primary-light'
                 }`}
                 onClick={() => setIsOpen(false)}
