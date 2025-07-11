@@ -198,7 +198,7 @@ const ContactPage: React.FC = () => {
                   <li>
                     <h4 className="font-medium text-green-700">¿Cómo puedo pagar mi boleto?</h4>
                     <p className="text-gray-600">
-                      Aceptamos transferencias bancarias, depósitos y pagos con tarjeta. Te contactaremos por WhatsApp para coordinar el método de pago.
+                      Aceptamos múltiples métodos de pago incluyendo Mercado Pago, transferencias bancarias y pagos en efectivo. Te contactaremos por WhatsApp para coordinar el método de pago.
                     </p>
                   </li>
                   <li>

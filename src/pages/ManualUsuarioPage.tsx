@@ -401,7 +401,7 @@ const ManualUsuarioPage: React.FC = () => {
                   <h3 className="font-semibold text-terrapesca-blue-800 mb-3">Precios Actuales</h3>
                   <div className="bg-terrapesca-green-50 p-4 rounded-lg border border-terrapesca-green-200">
                     <p className="text-terrapesca-green-800 font-bold text-lg">
-                      Sorteo Trolling: $150 MXN por boleto
+                      El costo depende del tipo de sorteo
                     </p>
                   </div>
                 </div>
