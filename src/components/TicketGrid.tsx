@@ -107,7 +107,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   };
   
   const filteredTickets = searchValue
-    ? tickets.filter(ticket => ticket.number.toString().includes(searchValue))
+    ? tickets.filter(ticket => ticket.number.includes(searchValue))
     : tickets;
 
   return (

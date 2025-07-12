@@ -12,10 +12,13 @@ const VerifyPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!ticketNumber || isNaN(parseInt(ticketNumber))) {
+    if (!ticketNumber || ticketNumber.trim() === '') {
       setError('Por favor, ingresa un número de boleto válido');
       return;
     }
+    
+    // Format the ticket number to 4 digits for search
+    const formattedTicketNumber = ticketNumber.padStart(4, '0');
     
     try {
       setLoading(true);
@@ -29,7 +32,7 @@ const VerifyPage: React.FC = () => {
           user:user_id(*),
           raffle:raffle_id(name)
         `)
-        .eq('number', parseInt(ticketNumber))
+        .eq('number', formattedTicketNumber)
         .single();
         
       if (ticketError) {

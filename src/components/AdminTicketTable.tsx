@@ -16,7 +16,7 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
   
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = 
-      ticket.number.toString().includes(searchTerm) ||
+      ticket.number.includes(searchTerm) ||
       ticket.user?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.user?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.user?.phone?.includes(searchTerm);
@@ -366,7 +366,7 @@ Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 
                     />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap font-medium">
-                    {ticket.number.toString().padStart(4, '0')}
+                    {ticket.number}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
