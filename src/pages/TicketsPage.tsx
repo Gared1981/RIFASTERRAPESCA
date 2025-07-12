@@ -272,7 +272,6 @@ const TicketsPage: React.FC = () => {
                         <span className="font-semibold text-terrapesca-green-600">
                           Precio: ${selectedRaffle.price.toLocaleString()} MXN
                         </span>
-                        <span>Boletos vendidos: {selectedRaffle.tickets_sold || 0}/{selectedRaffle.max_tickets || 0}</span>
                       </div>
                     </div>
                   </div>
