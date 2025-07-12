@@ -46,7 +46,9 @@ const TicketCard: React.FC<TicketCardProps> = ({
       `}
       onClick={handleClick}
     >
-      <span className="text-lg">{ticket.number}</span>
+      <span className="text-lg font-mono">
+        {ticket.number ? ticket.number : '----'}
+      </span>
     </div>
   );
 };

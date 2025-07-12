@@ -277,6 +277,70 @@ const AdminPage: React.FC = () => {
     }
   };
   
+  const handleRegenerateTickets = async () => {
+    if (!selectedRaffle) {
+      toast.error('Selecciona un sorteo primero');
+      return;
+    }
+    
+    if (!confirm('¿Estás seguro de regenerar todos los boletos? Esto eliminará las reservas existentes.')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Get raffle info
+      const { data: raffleData, error: raffleError } = await supabase
+        .from('raffles')
+        .select('total_tickets, name')
+        .eq('id', selectedRaffle)
+        .single();
+        
+      if (raffleError) throw raffleError;
+      
+      if (!raffleData.total_tickets || raffleData.total_tickets <= 0) {
+        toast.error('Este sorteo no tiene boletos configurados');
+        return;
+      }
+      
+      // Delete existing tickets for this raffle
+      const { error: deleteError } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('raffle_id', selectedRaffle);
+        
+      if (deleteError) throw deleteError;
+      
+      // Generate new tickets
+      const tickets = Array.from(
+        { length: raffleData.total_tickets }, 
+        (_, i) => ({
+          number: i.toString().padStart(4, '0'),
+          status: 'available',
+          raffle_id: selectedRaffle
+        })
+      );
+      
+      const { error: insertError } = await supabase
+        .from('tickets')
+        .insert(tickets);
+        
+      if (insertError) throw insertError;
+      
+      toast.success(`${raffleData.total_tickets} boletos regenerados exitosamente`);
+      
+      // Refresh tickets
+      await fetchTickets(selectedRaffle);
+      
+    } catch (error) {
+      console.error('Error regenerating tickets:', error);
+      toast.error('Error al regenerar boletos');
+    } finally {
+      setLoading(false);
+    }
+  };</parameter>
+  
   if (loading && !isAuthenticated) {
     return (
       <div className="flex justify-center items-center min-h-screen">

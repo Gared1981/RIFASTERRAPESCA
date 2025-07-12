@@ -39,13 +39,35 @@ const TicketGrid: React.FC<TicketGridProps> = ({
         .from('tickets')
         .select('*')
         .eq('raffle_id', raffleId)
+        .not('number', 'is', null)
         .eq('status', 'available')
         .order('number', { ascending: true });
         
       if (error) throw error;
       
       console.log('✅ Available tickets fetched:', data?.length || 0);
+      console.log('📊 Sample tickets:', data?.slice(0, 5));
       setTickets(data as Ticket[]);
+      
+      // If no tickets found, try to regenerate them
+      if (!data || data.length === 0) {
+        console.log('🔄 No tickets found, checking if raffle needs ticket generation...');
+        try {
+          // Get raffle info to see if it should have tickets
+          const { data: raffleData, error: raffleError } = await supabase
+            .from('raffles')
+            .select('total_tickets, name')
+            .eq('id', raffleId)
+            .single();
+            
+          if (!raffleError && raffleData && raffleData.total_tickets > 0) {
+            console.log(`🎫 Raffle "${raffleData.name}" should have ${raffleData.total_tickets} tickets but has none. Please regenerate tickets in admin panel.`);
+            setError(`Este sorteo debería tener ${raffleData.total_tickets} boletos pero no se encontraron. Por favor, contacta al administrador.`);
+          }
+        } catch (raffleCheckError) {
+          console.error('Error checking raffle info:', raffleCheckError);
+        }
+      }
     } catch (err) {
       console.error('❌ Error fetching tickets:', err);
       setError('No pudimos cargar los boletos. Intenta de nuevo más tarde.');
