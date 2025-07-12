@@ -77,7 +77,7 @@ export type User = {
 
 export type Ticket = {
   id: number;
-  number: string; // Changed to string to support 4-digit format with leading zeros
+  number: string;
   status: 'available' | 'reserved' | 'purchased';
   user_id?: string;
   raffle_id: number;
