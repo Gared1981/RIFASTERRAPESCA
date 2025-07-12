@@ -312,9 +312,6 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
               placeholder="https://youtube.com/watch?v=... o https://vimeo.com/..."
             />
           </div>
-          <p className="mt-1 text-sm text-gray-500">
-            Soporta YouTube, Vimeo y videos directos (.mp4, .webm, etc.)
-          </p>
         </div>
         
         <div>

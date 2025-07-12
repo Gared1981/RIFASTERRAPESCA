@@ -111,11 +111,11 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
       if (raffleError) throw raffleError;
       
       // Generate tickets for the raffle (4-digit numbers)
-      // Generate tickets starting from 0000 up to the total number
+      // Generate tickets starting from 0000 up to the total number - 1
       const tickets = Array.from(
         { length: parseInt(formData.total_tickets) }, 
         (_, i) => ({
-          number: i, // Start from 0 and count up
+          number: i, // Start from 0000 and count up: 0000, 0001, 0002, etc.
           status: 'available',
           raffle_id: raffleData.id
         })
@@ -230,9 +230,6 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
               placeholder="https://youtube.com/watch?v=... o https://vimeo.com/..."
             />
           </div>
-          <p className="mt-1 text-sm text-gray-500">
-            Soporta YouTube, Vimeo y videos directos (.mp4, .webm, etc.)
-          </p>
         </div>
         
         <div>
@@ -410,8 +407,11 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
               min="1"
               max="1001"
               className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-              placeholder="1001"
+              placeholder="1000"
             />
+            <p className="mt-1 text-sm text-gray-500">
+              Los números de boleto se generarán automáticamente desde 0000. Ejemplo: si ingresas 1000, los boletos serán 0000-0999
+            </p>
             <p className="mt-1 text-sm text-gray-500">
               Los números de boleto serán generados automáticamente desde 0000 hasta {formData.total_tickets ? (parseInt(formData.total_tickets) - 1).toString().padStart(4, '0') : '1000'}
             </p>
