@@ -111,15 +111,26 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
       if (raffleError) throw raffleError;
       
       // Generate tickets for the raffle (4-digit numbers)
-      // Generate tickets starting from 0000 up to the total number - 1
+      // Generate tickets starting from 0 up to the total number - 1 with validation
       const tickets = Array.from(
         { length: parseInt(formData.total_tickets) }, 
-        (_, i) => ({
-          number: i, // Start from 0 and count up: 0, 1, 2, etc. (displayed as 0000, 0001, 0002)
-          status: 'available',
-          raffle_id: raffleData.id
-        })
+        (_, i) => {
+          const ticketNumber = i; // Start from 0: 0, 1, 2, etc.
+          
+          // Validate ticket number
+          if (ticketNumber < 0) {
+            throw new Error(`Invalid ticket number: ${ticketNumber}. Must be >= 0`);
+          }
+          
+          return {
+            number: ticketNumber,
+            status: 'available',
+            raffle_id: raffleData.id
+          };
+        }
       );
+      
+      console.log(`Generating ${tickets.length} tickets from 0000 to ${(tickets.length - 1).toString().padStart(4, '0')}`);
       
       const { error: ticketsError } = await supabase
         .from('tickets')

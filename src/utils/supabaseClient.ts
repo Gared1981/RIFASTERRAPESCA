@@ -84,6 +84,7 @@ export type Ticket = {
   reserved_at?: string;
   purchased_at?: string;
   created_at?: string;
+  promoter_code?: string;
 };
 
 export type Raffle = {

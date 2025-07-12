@@ -366,7 +366,7 @@ Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 
                     />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap font-medium">
-                    {ticket.number}
+                    {ticket.number.toString().padStart(4, '0')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
