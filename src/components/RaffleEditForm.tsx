@@ -513,7 +513,11 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
               required
               min="1"
               className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+              placeholder="1000"
             />
+            <p className="mt-1 text-sm text-gray-500">
+              Los números de boleto se generan automáticamente desde 0000. Ejemplo: si hay 1000 boletos, serán 0000-0999
+            </p>
           </div>
         </div>
         
