@@ -109,15 +109,10 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   const filteredTickets = searchValue
     ? tickets.filter(ticket => ticket.number.toString().includes(searchValue))
     : tickets;
-    
-  const ticketStats = {
-    available: tickets.length,
-    total: tickets.length > 0 ? Math.max(...tickets.map(t => t.number)) + 1 : 1000 // Dynamic total based on highest ticket number + 1
-  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+      <div className="flex flex-col md:flex-row md:justify-center md:items-center gap-4">
         <div className="relative">
           <input
             type="text"
@@ -126,18 +121,6 @@ const TicketGrid: React.FC<TicketGridProps> = ({
             placeholder="Buscar boleto por número..."
             className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
           />
-        </div>
-        
-        <div className="flex flex-wrap gap-2 text-sm">
-          <div className="px-3 py-1 bg-white border border-green-500 text-green-700 rounded-md">
-            Disponibles: {ticketStats.available}
-          </div>
-          <div className="px-3 py-1 bg-gray-300 border border-gray-400 text-gray-700 rounded-md">
-            Vendidos: {ticketStats.total - ticketStats.available}
-          </div>
-          <div className="px-3 py-1 bg-blue-100 border border-blue-300 text-blue-700 rounded-md">
-            Total: {ticketStats.total}
-          </div>
         </div>
       </div>
       
