@@ -229,7 +229,6 @@ const TicketsPage: React.FC = () => {
                       
                       <div className="flex items-center justify-between text-sm text-terrapesca-blue-500 mb-4">
                         <span>Sorteo: {new Date(raffle.draw_date).toLocaleDateString()}</span>
-                        <span>Boletos: {raffle.tickets_sold || 0}/{raffle.max_tickets || 0}</span>
                       </div>
 
                       <button className="w-full bg-terrapesca-green-600 text-white py-2 px-4 rounded-md hover:bg-terrapesca-green-700 transition-colors font-medium">
