@@ -339,7 +339,7 @@ const AdminPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };</parameter>
+  };
   
   if (loading && !isAuthenticated) {
     return (
@@ -491,6 +491,14 @@ const AdminPage: React.FC = () => {
             >
               <Clock className="mr-2 h-4 w-4" />
               Limpiar Expirados
+            </button>
+            <button
+              onClick={handleRegenerateTickets}
+              disabled={!selectedRaffle || loading}
+              className="inline-flex items-center px-4 py-2 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Regenerar Boletos
             </button>
           </div>
         </div>
