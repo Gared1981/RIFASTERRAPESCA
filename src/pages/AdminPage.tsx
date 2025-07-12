@@ -283,7 +283,7 @@ const AdminPage: React.FC = () => {
       return;
     }
     
-    if (!confirm('¿Estás seguro de regenerar todos los boletos? Esto eliminará las reservas existentes.')) {
+    if (!confirm('¿Estás seguro de regenerar todos los boletos para este sorteo? Esto eliminará las reservas existentes.')) {
       return;
     }
     
@@ -304,38 +304,57 @@ const AdminPage: React.FC = () => {
         return;
       }
       
-      // Delete existing tickets for this raffle
-      const { error: deleteError } = await supabase
-        .from('tickets')
-        .delete()
-        .eq('raffle_id', selectedRaffle);
+      // Use the SQL function to regenerate tickets
+      const { data: result, error: regenerateError } = await supabase
+        .rpc('generate_raffle_tickets', {
+          raffle_id_param: selectedRaffle,
+          total_tickets_param: raffleData.total_tickets
+        });
         
-      if (deleteError) throw deleteError;
+      if (regenerateError) throw regenerateError;
       
-      // Generate new tickets
-      const tickets = Array.from(
-        { length: raffleData.total_tickets }, 
-        (_, i) => ({
-          number: i.toString().padStart(4, '0'),
-          status: 'available',
-          raffle_id: selectedRaffle
-        })
-      );
-      
-      const { error: insertError } = await supabase
-        .from('tickets')
-        .insert(tickets);
-        
-      if (insertError) throw insertError;
-      
-      toast.success(`${raffleData.total_tickets} boletos regenerados exitosamente`);
+      toast.success(`${result || raffleData.total_tickets} boletos regenerados exitosamente para "${raffleData.name}"`);
       
       // Refresh tickets
       await fetchTickets(selectedRaffle);
       
     } catch (error) {
       console.error('Error regenerating tickets:', error);
-      toast.error('Error al regenerar boletos');
+      toast.error(`Error al regenerar boletos: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleRegenerateAllTickets = async () => {
+    if (!confirm('¿Estás seguro de regenerar TODOS los boletos para TODOS los sorteos? Esto eliminará todas las reservas existentes.')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Call the regenerate function for all raffles
+      const { data: result, error: regenerateError } = await supabase
+        .rpc('regenerate_missing_tickets');
+        
+      if (regenerateError) throw regenerateError;
+      
+      if (result && result.length > 0) {
+        const totalTickets = result.reduce((sum, r) => sum + r.tickets_created, 0);
+        toast.success(`Regenerados ${totalTickets} boletos para ${result.length} sorteos`);
+      } else {
+        toast.info('No se encontraron sorteos que necesiten regeneración de boletos');
+      }
+      
+      // Refresh current raffle tickets if one is selected
+      if (selectedRaffle && activeTab === 'tickets') {
+        await fetchTickets(selectedRaffle);
+      }
+      
+    } catch (error) {
+      console.error('Error regenerating all tickets:', error);
+      toast.error(`Error al regenerar todos los boletos: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -499,6 +518,14 @@ const AdminPage: React.FC = () => {
             >
               <RefreshCw className="mr-2 h-4 w-4" />
               Regenerar Boletos
+            </button>
+            <button
+              onClick={handleRegenerateAllTickets}
+              disabled={loading}
+              className="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Regenerar TODOS los Boletos
             </button>
           </div>
         </div>
