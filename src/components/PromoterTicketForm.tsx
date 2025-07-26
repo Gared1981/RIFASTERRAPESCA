@@ -179,7 +179,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          state: formData.state
+          state: formData.state,
           email: formData.email
         })
         .select('id')
