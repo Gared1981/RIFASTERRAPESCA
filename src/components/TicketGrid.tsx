@@ -60,6 +60,17 @@ const TicketGrid: React.FC<TicketGridProps> = ({
             .eq('id', raffleId)
             .single();
             
+          if (raffleError) {
+            console.error('Error fetching raffle info:', raffleError);
+            setError('Error al verificar información del sorteo');
+            return;
+          }
+          
+          if (!raffleData || !raffleData.total_tickets || raffleData.total_tickets <= 0) {
+            setError('Este sorteo no tiene boletos configurados');
+            return;
+          }
+          
             // Try to auto-generate tickets
             try {
               const { data: generationResult, error: generationError } = await supabase
@@ -74,7 +85,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
               } else {
                 console.log('✅ Auto-generated tickets:', generationResult);
                 // Retry fetching tickets
-                setTimeout(() => {
+              setError(`Error al generar boletos automáticamente. Por favor, contacta al administrador para regenerar los ${raffleData.total_tickets} boletos faltantes.`);
                   fetchTickets();
                 }, 1000);
                 return;
@@ -83,11 +94,9 @@ const TicketGrid: React.FC<TicketGridProps> = ({
               console.error('❌ Exception during auto-generation:', autoGenError);
               setError(`Este sorteo debería tener ${raffleData.total_tickets} boletos pero no se encontraron. Por favor, contacta al administrador para regenerar los boletos.`);
             }
-          if (!raffleError && raffleData && raffleData.total_tickets > 0) {
-            console.log(`🎫 Raffle "${raffleData.name}" should have ${raffleData.total_tickets} tickets but has none. Please regenerate tickets in admin panel.`);
-          }
         } catch (raffleCheckError) {
           console.error('Error checking raffle info:', raffleCheckError);
+          setError('Error al verificar la configuración del sorteo');
         }
       }
     } catch (err) {
