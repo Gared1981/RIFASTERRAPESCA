@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Ticket, supabase } from '../utils/supabaseClient';
 import PaymentMethodSelector from './PaymentMethodSelector';
+import { saveUserData, getUserData } from '../utils/userDataStorage';
 import toast from 'react-hot-toast';
 
 interface TicketFormProps {
@@ -34,6 +35,21 @@ const TicketForm: React.FC<TicketFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   
+  // Load saved user data on component mount
+  React.useEffect(() => {
+    const savedData = getUserData();
+    if (savedData) {
+      setFormData({
+        firstName: savedData.firstName,
+        lastName: savedData.lastName,
+        phone: savedData.phone,
+        email: savedData.email,
+        state: savedData.state,
+        agree: false
+      });
+    }
+  }, []);
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
@@ -65,6 +81,15 @@ const TicketForm: React.FC<TicketFormProps> = ({
     try {
       setLoading(true);
       
+      // Save user data for future use
+      saveUserData({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        email: formData.email,
+        state: formData.state
+      });
+      
       // Create or update user
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -72,7 +97,8 @@ const TicketForm: React.FC<TicketFormProps> = ({
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          state: formData.state
+          state: formData.state,
+          email: formData.email
         })
         .select('id')
         .single();

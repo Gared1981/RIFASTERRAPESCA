@@ -126,7 +126,7 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         draw_date: drawDateTime
       });
 
-      // Método 1: Intentar actualización directa
+      // Direct update method
       const { data: directUpdate, error: directError } = await supabase
         .from('raffles')
         .update({
@@ -147,38 +147,8 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         .select();
 
       if (directError) {
-        console.error('❌ Direct update failed:', directError);
-        
-        // Método 2: Usar función de administrador
-        console.log('🔄 Trying admin update function...');
-        const { data: adminResult, error: adminError } = await supabase
-          .rpc('admin_update_raffle', {
-            raffle_id: raffle.id,
-            update_data: {
-              name: formData.name,
-              description: formData.description,
-              image_url: formData.image_url,
-              video_url: formData.video_url || null,
-              images: formData.images,
-              video_urls: formData.video_urls,
-              price: formData.price,
-              draw_date: drawDateTime,
-              total_tickets: formData.total_tickets,
-              status: formData.status,
-              prize_items: formData.prize_items
-            }
-          });
-          
-        if (adminError) {
-          console.error('❌ Admin update failed:', adminError);
-          throw new Error(`Error de actualización: ${adminError.message}`);
-        }
-        
-        console.log('✅ Admin update result:', adminResult);
-        
-        if (!adminResult.success) {
-          throw new Error(adminResult.error || 'Admin update failed');
-        }
+        console.error('❌ Update failed:', directError);
+        throw new Error(`Error de actualización: ${directError.message}`);
       } else {
         console.log('✅ Direct update successful:', directUpdate);
       }

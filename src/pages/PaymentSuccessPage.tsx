@@ -29,30 +29,6 @@ const PaymentSuccessPage: React.FC = () => {
     const fetchPaymentData = async () => {
       try {
         setLoading(true);
-        // Enviar notificación de compra exitosa si no se ha enviado antes
-        if (paymentId || externalReference || preferenceId) {
-          try {
-            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-purchase-notification`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-              },
-              body: JSON.stringify({
-                paymentId: paymentId || preferenceId || externalReference || `success-${Date.now()}`,
-                ticketIds: [], // Se obtendrán de los logs
-                ticketNumbers: [],
-                userEmail: '',
-                userPhone: '',
-                userName: '',
-                raffleName: '',
-                raffleId: 0
-              })
-            });
-          } catch (notifyError) {
-            console.warn('Error sending success notification:', notifyError);
-          }
-        }
         
         // Buscar información del pago en los logs
         let query = supabase.from('payment_logs').select('*');
@@ -92,7 +68,6 @@ const PaymentSuccessPage: React.FC = () => {
             external_reference: log.external_reference || ''
           });
         } else {
-          // Datos por defecto si no se encuentra información
           // Datos por defecto si no se encuentra información
           setPaymentData({
             id: paymentId || 'N/A',

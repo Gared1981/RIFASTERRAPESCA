@@ -103,19 +103,90 @@ export type Database = {
   public: {
     Tables: {
       raffles: {
-        Row: Raffle;
-        Insert: Omit<Raffle, 'id' | 'created_at'>;
-        Update: Partial<Omit<Raffle, 'id' | 'created_at'>>;
+        Row: {
+          id: number;
+          name: string;
+          description: string | null;
+          image_url: string | null;
+          video_url: string | null;
+          images: string[] | null;
+          video_urls: string[] | null;
+          prize_items: string[] | null;
+          price: number;
+          draw_date: string;
+          drawn_at: string | null;
+          winner_id: string | null;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+          slug: string | null;
+          total_tickets: number | null;
+          status: string;
+        };
+        Insert: Omit<Database['public']['Tables']['raffles']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Database['public']['Tables']['raffles']['Row'], 'id' | 'created_at'>>;
       };
       tickets: {
-        Row: Ticket;
-        Insert: Omit<Ticket, 'id' | 'created_at'>;
-        Update: Partial<Omit<Ticket, 'id' | 'created_at'>>;
+        Row: {
+          id: number;
+          number: string;
+          status: 'available' | 'reserved' | 'purchased';
+          user_id: string | null;
+          raffle_id: number;
+          reserved_at: string | null;
+          purchased_at: string | null;
+          created_at: string;
+          promoter_code: string | null;
+        };
+        Insert: Omit<Database['public']['Tables']['tickets']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Omit<Database['public']['Tables']['tickets']['Row'], 'id' | 'created_at'>>;
       };
       users: {
-        Row: User;
-        Insert: Omit<User, 'id' | 'created_at'>;
-        Update: Partial<Omit<User, 'id' | 'created_at'>>;
+        Row: {
+          id: string;
+          first_name: string;
+          last_name: string;
+          phone: string;
+          state: string;
+          email: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['users']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Omit<Database['public']['Tables']['users']['Row'], 'id' | 'created_at'>>;
+      };
+      promoters: {
+        Row: {
+          id: string;
+          name: string;
+          code: string;
+          total_sales: number;
+          accumulated_bonus: number;
+          extra_prize: boolean;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['promoters']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Database['public']['Tables']['promoters']['Row'], 'id' | 'created_at'>>;
+      };
+      payment_logs: {
+        Row: {
+          id: number;
+          preference_id: string | null;
+          payment_id: string | null;
+          external_reference: string | null;
+          status: string | null;
+          status_detail: string | null;
+          amount: number | null;
+          ticket_ids: number[] | null;
+          metadata: any | null;
+          webhook_data: any | null;
+          created_at: string;
+          updated_at: string;
+          notification_sent: boolean;
+        };
+        Insert: Omit<Database['public']['Tables']['payment_logs']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Database['public']['Tables']['payment_logs']['Row'], 'id' | 'created_at'>>;
       };
     };
   };

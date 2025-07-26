@@ -118,7 +118,7 @@ const RafflesPage = () => {
         console.log('🔄 Attempting status change:', { raffleId, newStatus });
       }
 
-      // Método 1: Actualización directa
+      // Direct update method
       const { data: directUpdate, error: directError } = await supabase
         .from('raffles')
         .update({ 
@@ -129,26 +129,8 @@ const RafflesPage = () => {
         .select();
         
       if (directError) {
-        console.error('❌ Direct update failed:', directError);
-        
-        // Método 2: Usar función de administrador
-        console.log('🔄 Trying admin update function...');
-        const { data: adminResult, error: adminError } = await supabase
-          .rpc('admin_update_raffle', {
-            raffle_id: raffleId,
-            update_data: { status: newStatus }
-          });
-          
-        if (adminError) {
-          console.error('❌ Admin update failed:', adminError);
-          throw adminError;
-        }
-        
-        console.log('✅ Admin update result:', adminResult);
-        
-        if (!adminResult.success) {
-          throw new Error(adminResult.error || 'Admin update failed');
-        }
+        console.error('❌ Update failed:', directError);
+        throw directError;
       } else {
         console.log('✅ Direct update successful:', directUpdate);
       }

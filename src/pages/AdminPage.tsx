@@ -304,16 +304,31 @@ const AdminPage: React.FC = () => {
         return;
       }
       
-      // Use the SQL function to regenerate tickets
-      const { data: result, error: regenerateError } = await supabase
-        .rpc('generate_raffle_tickets', {
-          raffle_id_param: selectedRaffle,
-          total_tickets_param: raffleData.total_tickets
-        });
+      // Delete existing tickets for this raffle
+      const { error: deleteError } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('raffle_id', selectedRaffle);
         
-      if (regenerateError) throw regenerateError;
+      if (deleteError) throw deleteError;
       
-      toast.success(`${result || raffleData.total_tickets} boletos regenerados exitosamente para "${raffleData.name}"`);
+      // Generate new tickets
+      const tickets = Array.from(
+        { length: raffleData.total_tickets }, 
+        (_, i) => ({
+          number: i.toString().padStart(4, '0'),
+          status: 'available',
+          raffle_id: selectedRaffle
+        })
+      );
+      
+      const { error: insertError } = await supabase
+        .from('tickets')
+        .insert(tickets);
+        
+      if (insertError) throw insertError;
+      
+      toast.success(`${raffleData.total_tickets} boletos regenerados exitosamente para "${raffleData.name}"`);
       
       // Refresh tickets
       await fetchTickets(selectedRaffle);
@@ -334,18 +349,51 @@ const AdminPage: React.FC = () => {
     try {
       setLoading(true);
       
-      // Call the regenerate function for all raffles
-      const { data: result, error: regenerateError } = await supabase
-        .rpc('regenerate_missing_tickets');
+      // Get all raffles with their ticket requirements
+      const { data: allRaffles, error: rafflesError } = await supabase
+        .from('raffles')
+        .select('id, name, total_tickets')
+        .not('total_tickets', 'is', null)
+        .gt('total_tickets', 0);
         
-      if (regenerateError) throw regenerateError;
+      if (rafflesError) throw rafflesError;
       
-      if (result && result.length > 0) {
-        const totalTickets = result.reduce((sum, r) => sum + r.tickets_created, 0);
-        toast.success(`Regenerados ${totalTickets} boletos para ${result.length} sorteos`);
-      } else {
+      if (!allRaffles || allRaffles.length === 0) {
         toast.info('No se encontraron sorteos que necesiten regeneración de boletos');
+        return;
       }
+      
+      let totalTicketsCreated = 0;
+      
+      for (const raffle of allRaffles) {
+        // Delete existing tickets for this raffle
+        await supabase
+          .from('tickets')
+          .delete()
+          .eq('raffle_id', raffle.id);
+        
+        // Generate new tickets
+        const tickets = Array.from(
+          { length: raffle.total_tickets }, 
+          (_, i) => ({
+            number: i.toString().padStart(4, '0'),
+            status: 'available',
+            raffle_id: raffle.id
+          })
+        );
+        
+        const { error: insertError } = await supabase
+          .from('tickets')
+          .insert(tickets);
+          
+        if (insertError) {
+          console.error(`Error creating tickets for raffle ${raffle.id}:`, insertError);
+        } else {
+          totalTicketsCreated += raffle.total_tickets;
+        }
+      }
+      
+      toast.success(`Regenerados ${totalTicketsCreated} boletos para ${allRaffles.length} sorteos`);
       
       // Refresh current raffle tickets if one is selected
       if (selectedRaffle && activeTab === 'tickets') {

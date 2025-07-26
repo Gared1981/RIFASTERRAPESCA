@@ -3,6 +3,7 @@ import { Ticket, supabase } from '../utils/supabaseClient';
 import { Tag, Gift, MessageSquare, ExternalLink, Clock, CheckCircle } from 'lucide-react';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import { generateReservationConfirmationMessage, sendWhatsAppToCustomer } from '../utils/whatsappUtils';
+import { saveUserData, getUserData } from '../utils/userDataStorage';
 import toast from 'react-hot-toast';
 
 interface PromoterTicketFormProps {
@@ -44,6 +45,21 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
   const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null);
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   const [reservationComplete, setReservationComplete] = useState(false);
+
+  // Load saved user data on component mount
+  useEffect(() => {
+    const savedData = getUserData();
+    if (savedData) {
+      setFormData({
+        firstName: savedData.firstName,
+        lastName: savedData.lastName,
+        phone: savedData.phone,
+        email: savedData.email,
+        state: savedData.state,
+        agree: false
+      });
+    }
+  }, []);
 
   useEffect(() => {
     // Si hay código de promotor inicial, buscar información del promotor
@@ -147,6 +163,15 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
     try {
       setLoading(true);
       
+      // Save user data for future use
+      saveUserData({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        email: formData.email,
+        state: formData.state
+      });
+      
       // Create or update user
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -155,6 +180,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
           last_name: formData.lastName,
           phone: formData.phone,
           state: formData.state
+          email: formData.email
         })
         .select('id')
         .single();

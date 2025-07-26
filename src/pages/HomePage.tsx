@@ -15,13 +15,13 @@ const HomePage: React.FC = () => {
             {/* Mobile version */}
             <source 
               media="(max-width: 768px)" 
-              srcSet="/Mobile-03.jpg" 
+              srcSet="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/Mobile-03.jpg?v=1750806041" 
             />
             
             {/* Tablet version */}
             <source 
               media="(max-width: 1024px)" 
-              srcSet="/tablet-02.jpg" 
+              srcSet="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/tablet-02.jpg?v=1750806041" 
             />
             
             {/* Desktop version */}

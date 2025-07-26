@@ -39,7 +39,6 @@ const TicketGrid: React.FC<TicketGridProps> = ({
         .from('tickets')
         .select('*')
         .eq('raffle_id', raffleId)
-        .not('number', 'is', null)
         .eq('status', 'available')
         .order('number', { ascending: true });
         
@@ -71,29 +70,37 @@ const TicketGrid: React.FC<TicketGridProps> = ({
             return;
           }
           
-            // Try to auto-generate tickets
-            try {
-              const { data: generationResult, error: generationError } = await supabase
-                .rpc('generate_raffle_tickets', {
-                  raffle_id_param: raffleId,
-                  total_tickets_param: raffleData.total_tickets
-                });
-                
-              if (generationError) {
-                console.error('❌ Auto-generation failed:', generationError);
-                setError(`Este sorteo debería tener ${raffleData.total_tickets} boletos pero no se encontraron. Error al generar automáticamente: ${generationError.message}`);
-              } else {
-                console.log('✅ Auto-generated tickets:', generationResult);
-                // Retry fetching tickets
-                setTimeout(() => {
-                  fetchTickets();
-                }, 1000);
-                return;
-              }
-            } catch (autoGenError) {
-              console.error('❌ Exception during auto-generation:', autoGenError);
-              setError(`Este sorteo debería tener ${raffleData.total_tickets} boletos pero no se encontraron. Por favor, contacta al administrador para regenerar los boletos.`);
+          // Try to auto-generate tickets using direct SQL
+          try {
+            // Generate tickets directly
+            const tickets = Array.from(
+              { length: raffleData.total_tickets }, 
+              (_, i) => ({
+                number: i.toString().padStart(4, '0'),
+                status: 'available',
+                raffle_id: raffleId
+              })
+            );
+            
+            const { error: insertError } = await supabase
+              .from('tickets')
+              .insert(tickets);
+              
+            if (insertError) {
+              console.error('❌ Auto-generation failed:', insertError);
+              setError(`Este sorteo debería tener ${raffleData.total_tickets} boletos pero no se encontraron. Error al generar automáticamente: ${insertError.message}`);
+            } else {
+              console.log('✅ Auto-generated tickets:', raffleData.total_tickets);
+              // Retry fetching tickets
+              setTimeout(() => {
+                fetchTickets();
+              }, 1000);
+              return;
             }
+          } catch (autoGenError) {
+            console.error('❌ Exception during auto-generation:', autoGenError);
+            setError(`Este sorteo debería tener ${raffleData.total_tickets} boletos pero no se encontraron. Por favor, contacta al administrador para regenerar los boletos.`);
+          }
         } catch (raffleCheckError) {
           console.error('Error checking raffle info:', raffleCheckError);
           setError('Error al verificar la configuración del sorteo');

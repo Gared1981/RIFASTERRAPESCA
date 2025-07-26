@@ -30,17 +30,20 @@ const VerifyPage: React.FC = () => {
         .select(`
           *,
           user:user_id(*),
-          raffle:raffle_id(name)
+          raffle:raffle_id(name, price, draw_date)
         `)
         .eq('number', formattedTicketNumber)
-        .single();
+        .maybeSingle();
         
       if (ticketError) {
-        if (ticketError.code === 'PGRST116') {
-          setError('Boleto no encontrado. Verifica el número e intenta de nuevo.');
-        } else {
-          throw ticketError;
-        }
+        console.error('Error fetching ticket:', ticketError);
+        setError('Error al verificar el boleto. Intenta de nuevo.');
+        setTicketInfo(null);
+        return;
+      }
+      
+      if (!ticketData) {
+        setError('Boleto no encontrado. Verifica el número e intenta de nuevo.');
         setTicketInfo(null);
         return;
       }
