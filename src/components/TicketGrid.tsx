@@ -85,7 +85,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
               } else {
                 console.log('✅ Auto-generated tickets:', generationResult);
                 // Retry fetching tickets
-              setError(`Error al generar boletos automáticamente. Por favor, contacta al administrador para regenerar los ${raffleData.total_tickets} boletos faltantes.`);
+                setTimeout(() => {
                   fetchTickets();
                 }, 1000);
                 return;
