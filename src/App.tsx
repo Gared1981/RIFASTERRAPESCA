@@ -12,6 +12,7 @@ import RafflesListPage from './pages/RafflesListPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentFailurePage from './pages/PaymentFailurePage';
 import ManualUsuarioPage from './pages/ManualUsuarioPage';
+import ManualPromotoresPage from './pages/ManualPromotoresPage';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="/payment/failure" element={<PaymentFailurePage />} />
             <Route path="/payment/pending" element={<PaymentSuccessPage />} />
             <Route path="/manual-usuario" element={<ManualUsuarioPage />} />
+            <Route path="/manual-promotores" element={<ManualPromotoresPage />} />
           </Routes>
         </div>
         <Toaster position="top-right" />

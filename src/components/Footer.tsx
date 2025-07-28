@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Facebook, Instagram, Youtube, Home, Ticket, CheckSquare, User, FileText } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram, Youtube, Home, Ticket, CheckSquare, User, FileText, Users } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -69,6 +69,12 @@ const Footer: React.FC = () => {
                 <Link to="/manual-usuario" className="text-accent hover:text-white transition-colors flex items-center">
                   <FileText size={18} className="mr-2" />
                   Manual de Usuario
+                </Link>
+              </li>
+              <li>
+                <Link to="/manual-promotores" className="text-accent hover:text-white transition-colors flex items-center">
+                  <Users size={18} className="mr-2" />
+                  Manual de Promotores
                 </Link>
               </li>
             </ul>
