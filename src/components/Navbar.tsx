@@ -45,8 +45,6 @@ const Navbar: React.FC = () => {
   
   const publicLinks = [
     { path: '/', label: 'Inicio', icon: <Home size={20} /> },
-    { path: '/sorteos', label: 'Sorteos', icon: <TicketIcon size={20} /> },
-    { path: '/verificar', label: 'Verificar', icon: <CheckSquare size={20} /> },
     { path: '/contacto', label: 'Contacto', icon: <User size={20} /> },
     { path: '/admin', label: 'Administración', icon: <LogIn size={20} /> },
   ];
