@@ -5,7 +5,7 @@ import {
   CreditCard, Shield, Gift, CheckCircle, AlertTriangle, Users, 
   TrendingUp, DollarSign, Trophy, Star, Copy, ExternalLink, 
   Target, Zap, Award, BarChart3, Calendar, Smartphone, Share2,
-  Eye, Heart, ThumbsUp, Send, Megaphone, Crown, Gem
+  Eye, Heart, ThumbsUp, Send, Megaphone, Crown, Gem, Calculator, X
 } from 'lucide-react';
 import Footer from '../components/Footer';
 import toast from 'react-hot-toast';
@@ -66,8 +66,8 @@ const ManualPromotoresPage: React.FC = () => {
         <div class="commission">
           <h3>💵 GANANCIAS GARANTIZADAS</h3>
           <ul>
-            <li><strong>$1,000 MXN por cada boleto vendido</strong></li>
-            <li><strong>$1,000 MXN adicionales si tu cliente gana</strong></li>
+            <li><strong>10% por cada boleto vendido</strong></li>
+            <li><strong>$500 MXN adicionales si tu cliente gana</strong></li>
             <li><strong>Pagos semanales</strong></li>
             <li><strong>Sin límite de ventas</strong></li>
           </ul>
@@ -76,10 +76,10 @@ const ManualPromotoresPage: React.FC = () => {
         <h3>📊 EJEMPLOS DE GANANCIAS</h3>
         <table>
           <tr><th>Boletos Vendidos</th><th>Comisión Base</th><th>Si 1 Cliente Gana</th><th>Total Posible</th></tr>
-          <tr><td>10</td><td>$10,000</td><td>+$1,000</td><td>$11,000</td></tr>
-          <tr><td>25</td><td>$25,000</td><td>+$1,000</td><td>$26,000</td></tr>
-          <tr><td>50</td><td>$50,000</td><td>+$1,000</td><td>$51,000</td></tr>
-          <tr><td>100</td><td>$100,000</td><td>+$1,000</td><td>$101,000</td></tr>
+          <tr><td>10</td><td>$150</td><td>+$500</td><td>$650</td></tr>
+          <tr><td>25</td><td>$375</td><td>+$500</td><td>$875</td></tr>
+          <tr><td>50</td><td>$750</td><td>+$500</td><td>$1,250</td></tr>
+          <tr><td>100</td><td>$1,500</td><td>+$500</td><td>$2,000</td></tr>
         </table>
 
         <h2>🚀 CÓMO EMPEZAR (3 PASOS)</h2>
@@ -149,7 +149,7 @@ const ManualPromotoresPage: React.FC = () => {
         <p>No hay límite. Mientras más vendas, más ganas.</p>
 
         <h3>¿Qué pasa si mi cliente gana?</h3>
-        <p>Recibes $1,000 MXN adicionales como bonus por haber traído al ganador.</p>
+        <p>Recibes $500 MXN adicionales como bonus por haber traído al ganador.</p>
 
         <h3>¿Puedo promocionar en redes sociales?</h3>
         <p>¡Sí! Te proporcionamos material gráfico y mensajes prediseñados.</p>
@@ -348,60 +348,65 @@ Equipos profesionales de pesca
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div className="bg-white p-6 rounded-lg shadow-lg border border-green-300">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg border border-green-200">
                   <div className="flex items-center mb-4">
-                    <TrendingUp className="h-8 w-8 text-green-600 mr-3" />
-                    <h3 className="text-xl font-bold text-green-800">GANANCIAS GARANTIZADAS</h3>
+                    <DollarSign className="h-8 w-8 text-green-600 mr-3" />
+                    <h3 className="text-xl font-bold text-green-800">Comisión por Venta</h3>
                   </div>
-                  <ul className="space-y-3">
-                    <li className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-                      <span className="font-semibold">$1,000 MXN por cada boleto vendido</span>
-                    </li>
-                    <li className="flex items-center">
-                      <Trophy className="h-5 w-5 text-yellow-600 mr-2" />
-                      <span className="font-semibold">$1,000 MXN adicionales si tu cliente gana</span>
-                    </li>
-                    <li className="flex items-center">
-                      <Calendar className="h-5 w-5 text-blue-600 mr-2" />
-                      <span className="font-semibold">Pagos semanales (viernes)</span>
-                    </li>
-                    <li className="flex items-center">
-                      <Zap className="h-5 w-5 text-purple-600 mr-2" />
-                      <span className="font-semibold">Sin límite de ventas</span>
-                    </li>
-                  </ul>
+                  <div className="text-3xl font-bold text-green-700 mb-2">10%</div>
+                  <p className="text-green-600">Del precio de cada boleto vendido</p>
+                  <div className="mt-3 text-sm text-green-700">
+                    <p><strong>Ejemplo:</strong> Boleto $150 = $15 comisión</p>
+                  </div>
                 </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-lg border border-green-300">
-                  <h3 className="text-xl font-bold text-green-800 mb-4">📊 EJEMPLOS DE GANANCIAS</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <span className="font-medium">10 boletos vendidos:</span>
-                      <span className="font-bold text-green-600">$10,000 MXN</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <span className="font-medium">25 boletos vendidos:</span>
-                      <span className="font-bold text-green-600">$25,000 MXN</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <span className="font-medium">50 boletos vendidos:</span>
-                      <span className="font-bold text-green-600">$50,000 MXN</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-300">
-                      <span className="font-medium">+ Si 1 cliente gana:</span>
-                      <span className="font-bold text-yellow-600">+$1,000 MXN</span>
-                    </div>
+                
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200">
+                  <div className="flex items-center mb-4">
+                    <Trophy className="h-8 w-8 text-blue-600 mr-3" />
+                    <h3 className="text-xl font-bold text-blue-800">Bonus por Premio</h3>
+                  </div>
+                  <div className="text-3xl font-bold text-blue-700 mb-2">$500 MXN</div>
+                  <p className="text-blue-600">Si tu cliente gana el sorteo</p>
+                  <div className="mt-3 text-sm text-blue-700">
+                    <p><strong>Adicional</strong> a la comisión del 10%</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-                <div className="flex items-center text-yellow-800">
-                  <Star className="h-5 w-5 mr-2" />
-                  <span className="font-semibold">
-                    Ejemplo: Si vendes 30 boletos y uno de tus clientes gana, recibes $31,000 MXN ese mes
-                  </span>
+              <div className="bg-white p-6 rounded-lg shadow-lg border border-green-300">
+                <h3 className="text-xl font-bold text-green-800 mb-4">📊 EJEMPLOS DE GANANCIAS</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                    <div className="text-2xl font-bold text-green-600">10 boletos</div>
+                    <div className="text-lg text-gray-700">$150 MXN</div>
+                    <div className="text-sm text-gray-500">por mes</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                    <div className="text-2xl font-bold text-green-600">25 boletos</div>
+                    <div className="text-lg text-gray-700">$375 MXN</div>
+                    <div className="text-sm text-gray-500">por mes</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                    <div className="text-2xl font-bold text-green-600">50 boletos</div>
+                    <div className="text-lg text-gray-700">$750 MXN</div>
+                    <div className="text-sm text-gray-500">por mes</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                    <div className="text-2xl font-bold text-green-600">100 boletos</div>
+                    <div className="text-lg text-gray-700">$1,500 MXN</div>
+                    <div className="text-sm text-gray-500">por mes</div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-center text-yellow-800">
+                    <Calculator className="h-5 w-5 mr-2" />
+                    <span className="font-semibold">Cálculo automático:</span>
+                  </div>
+                  <p className="text-yellow-700 text-sm mt-1">
+                    Las comisiones se calculan automáticamente como el 10% del precio de cada boleto. 
+                    Para boletos de $150 MXN = $15 MXN de comisión por boleto vendido.
+                  </p>
                 </div>
               </div>
             </section>
@@ -413,51 +418,59 @@ Equipos profesionales de pesca
                 🚀 CÓMO EMPEZAR (3 PASOS SIMPLES)
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-6 bg-terrapesca-blue-50 rounded-lg border border-terrapesca-blue-200">
-                  <div className="bg-terrapesca-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4">
+              <div className="space-y-6">
+                <div className="flex items-start">
+                  <div className="bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 mt-1">
                     1
                   </div>
-                  <h3 className="text-lg font-bold text-terrapesca-blue-800 mb-2">CONTACTAR</h3>
-                  <p className="text-terrapesca-blue-600 mb-4">
-                    Envía WhatsApp para obtener tu código único de promotor
-                  </p>
-                  <a
-                    href="https://wa.me/526686889571?text=Hola,%20quiero%20ser%20promotor%20de%20Sorteos%20Terrapesca"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 bg-terrapesca-blue-600 text-white rounded-lg hover:bg-terrapesca-blue-700 transition-colors"
-                  >
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Contactar Ahora
-                  </a>
+                  <div>
+                    <h3 className="font-semibold text-terrapesca-blue-800 mb-2">Contactar para Código</h3>
+                    <p className="text-terrapesca-blue-600 mb-3">
+                      Envía un WhatsApp solicitando tu código de promotor único. Es completamente gratis.
+                    </p>
+                    <a
+                      href="https://wa.me/526686889571?text=¡Hola!%20Quiero%20ser%20promotor%20de%20Sorteos%20Terrapesca.%20¿Pueden%20asignarme%20un%20código%20único?"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-4 py-2 bg-terrapesca-green-600 text-white rounded-lg hover:bg-terrapesca-green-700 transition-colors text-sm"
+                    >
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Solicitar Código
+                    </a>
+                  </div>
                 </div>
 
-                <div className="text-center p-6 bg-terrapesca-orange-50 rounded-lg border border-terrapesca-orange-200">
-                  <div className="bg-terrapesca-orange-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                <div className="flex items-start">
+                  <div className="bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 mt-1">
                     2
                   </div>
-                  <h3 className="text-lg font-bold text-terrapesca-orange-800 mb-2">RECIBIR</h3>
-                  <p className="text-terrapesca-orange-600 mb-4">
-                    Obtén tu enlace personalizado y material promocional
-                  </p>
-                  <div className="inline-flex items-center px-4 py-2 bg-terrapesca-orange-100 text-terrapesca-orange-800 rounded-lg">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Enlace Único
+                  <div>
+                    <h3 className="font-semibold text-terrapesca-blue-800 mb-2">Recibir Material</h3>
+                    <p className="text-terrapesca-blue-600 mb-3">
+                      Te enviaremos tu enlace personalizado, acceso al dashboard y material promocional.
+                    </p>
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <p className="text-sm text-blue-700">
+                        <strong>Incluye:</strong> Enlace único, dashboard de comisiones, mensajes prediseñados e imágenes.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-center p-6 bg-green-50 rounded-lg border border-green-200">
-                  <div className="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                <div className="flex items-start">
+                  <div className="bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 mt-1">
                     3
                   </div>
-                  <h3 className="text-lg font-bold text-green-800 mb-2">PROMOCIONAR</h3>
-                  <p className="text-green-600 mb-4">
-                    Comparte tu enlace y comienza a ganar dinero inmediatamente
-                  </p>
-                  <div className="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-lg">
-                    <DollarSign className="mr-2 h-4 w-4" />
-                    Ganar Dinero
+                  <div>
+                    <h3 className="font-semibold text-terrapesca-blue-800 mb-2">Comenzar a Ganar</h3>
+                    <p className="text-terrapesca-blue-600 mb-3">
+                      Comparte tu enlace y gana el 10% por cada boleto vendido + bonus si ganan.
+                    </p>
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <p className="text-sm text-green-700">
+                        <strong>¡Automático!</strong> Las comisiones se calculan y muestran en tiempo real.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -778,38 +791,76 @@ Equipos profesionales de pesca
                 ❓ PREGUNTAS FRECUENTES
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="bg-terrapesca-blue-50 p-4 rounded-lg border border-terrapesca-blue-200">
-                    <h3 className="font-bold text-terrapesca-blue-800 mb-2">¿Cuándo recibo mis comisiones?</h3>
-                    <p className="text-terrapesca-blue-700">Las comisiones se pagan semanalmente los viernes, directamente a tu cuenta bancaria o método preferido.</p>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 mt-1">
+                    1
                   </div>
-
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <h3 className="font-bold text-green-800 mb-2">¿Hay límite en las ventas?</h3>
-                    <p className="text-green-700">No hay límite. Mientras más vendas, más ganas. El cielo es el límite.</p>
-                  </div>
-
-                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                    <h3 className="font-bold text-yellow-800 mb-2">¿Qué pasa si mi cliente gana?</h3>
-                    <p className="text-yellow-700">Recibes $1,000 MXN adicionales como bonus por haber traído al ganador. ¡Doble celebración!</p>
+                  <div>
+                    <h4 className="font-medium text-terrapesca-blue-800">¿Cuándo recibo mis comisiones?</h4>
+                    <p className="text-terrapesca-blue-600 text-sm">
+                      Las comisiones se pagan semanalmente. Mínimo $100 MXN acumulado.
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                    <h3 className="font-bold text-purple-800 mb-2">¿Puedo promocionar en redes sociales?</h3>
-                    <p className="text-purple-700">¡Absolutamente! Te proporcionamos material gráfico y mensajes prediseñados para todas las plataformas.</p>
+                <div className="flex items-start">
+                  <div className="bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 mt-1">
+                    2
                   </div>
-
-                  <div className="bg-pink-50 p-4 rounded-lg border border-pink-200">
-                    <h3 className="font-bold text-pink-800 mb-2">¿Necesito experiencia en ventas?</h3>
-                    <p className="text-pink-700">No es necesario. Te capacitamos y proporcionamos todas las herramientas para que tengas éxito.</p>
+                  <div>
+                    <h4 className="font-medium text-terrapesca-blue-800">¿Hay límite en las ventas?</h4>
+                    <p className="text-terrapesca-blue-600 text-sm">
+                      No hay límite. El 10% se aplica a todos los boletos sin excepción.
+                    </p>
                   </div>
+                </div>
 
-                  <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
-                    <h3 className="font-bold text-indigo-800 mb-2">¿Hay costos para ser promotor?</h3>
-                    <p className="text-indigo-700">¡Completamente GRATIS! No hay costos de inscripción, mensualidades ni comisiones ocultas.</p>
+                <div className="flex items-start">
+                  <div className="bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 mt-1">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-terrapesca-blue-800">¿Qué pasa si mi cliente gana?</h4>
+                    <p className="text-terrapesca-blue-600 text-sm">
+                      Recibes $500 MXN adicionales por cada boleto ganador, además del 10% ya ganado.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 mt-1">
+                    4
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-terrapesca-blue-800">¿Puedo promocionar en redes sociales?</h4>
+                    <p className="text-terrapesca-blue-600 text-sm">
+                      Sí, te proporcionamos material gráfico y mensajes optimizados para todas las redes sociales.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 mt-1">
+                    5
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-terrapesca-blue-800">¿Necesito experiencia en ventas?</h4>
+                    <p className="text-terrapesca-blue-600 text-sm">
+                      No. Te damos capacitación completa, dashboard de seguimiento y soporte 24/7.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="bg-terrapesca-green-100 text-terrapesca-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 mt-1">
+                    6
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-terrapesca-blue-800">¿Hay algún costo para ser promotor?</h4>
+                    <p className="text-terrapesca-blue-600 text-sm">
+                      No. Es 100% gratis. Solo necesitas ganas de promocionar y ganar dinero.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -983,6 +1034,60 @@ Equipos profesionales de pesca
                   <span>✅ Sin experiencia requerida</span>
                   <span>✅ Soporte completo</span>
                   <span>✅ Ganancias inmediatas</span>
+                </div>
+              </div>
+            </section>
+
+            {/* Sección de promotores */}
+            <section className="bg-gradient-to-r from-terrapesca-green-500 to-terrapesca-green-600 rounded-xl shadow-terrapesca p-8 text-white">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  🚀 ¡Comienza a Ganar 10% por Cada Boleto!
+                </h2>
+                <p className="text-green-100 mb-6">
+                  Únete a nuestro equipo de promotores y genera ingresos con comisiones automáticas del 10%.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                  <div>
+                    <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                      <div className="text-2xl font-bold mb-2">📱</div>
+                      <h3 className="font-semibold mb-2">1. Contactar</h3>
+                      <p className="text-sm">Solicita tu código único por WhatsApp</p>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                      <div className="text-2xl font-bold mb-2">🔗</div>
+                      <h3 className="font-semibold mb-2">2. Recibir</h3>
+                      <p className="text-sm">Enlace personalizado y dashboard</p>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                      <div className="text-2xl font-bold mb-2">💰</div>
+                      <h3 className="font-semibold mb-2">3. Ganar</h3>
+                      <p className="text-sm">10% automático por boleto</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <a
+                    href="https://wa.me/526686889571?text=¡Hola!%20Quiero%20ser%20promotor%20de%20Sorteos%20Terrapesca%20y%20ganar%2010%25%20de%20comisión%20por%20cada%20boleto%20vendido.%20¿Pueden%20asignarme%20un%20código%20único?"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-8 py-4 bg-white text-terrapesca-green-600 rounded-lg hover:bg-gray-100 transition-colors font-bold text-lg shadow-lg"
+                  >
+                    <MessageSquare className="mr-3 h-6 w-6" />
+                    💬 ¡Quiero ser Promotor YA!
+                  </a>
+                  <div className="text-green-100 text-sm">
+                    ✅ Sin costos • ✅ Sin experiencia requerida • ✅ Soporte 24/7
+                  </div>
+                  <div className="text-green-100 text-xs">
+                    🔥 Comisiones automáticas del 10% + Dashboard en tiempo real
+                  </div>
                 </div>
               </div>
             </section>
