@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { Users, DollarSign, Trophy, TrendingUp, Plus, Edit, Trash2, Copy, ExternalLink } from 'lucide-react';
+import { Users, DollarSign, Trophy, TrendingUp, Plus, Edit, Trash2, Copy, ExternalLink, Percent, Calculator, Target, Award } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Promoter {
@@ -15,6 +15,11 @@ interface Promoter {
   confirmed_sales: number;
   created_at: string;
   updated_at: string;
+  total_commission_earned: number;
+  pending_commission: number;
+  average_ticket_price: number;
+  active_raffles_count: number;
+  total_raffles_participated: number;
 }
 
 interface PromoterFormData {
@@ -153,8 +158,10 @@ const PromoterDashboard: React.FC = () => {
   };
 
   const totalSales = promoters.reduce((sum, p) => sum + p.total_sales, 0);
-  const totalBonus = promoters.reduce((sum, p) => sum + p.accumulated_bonus, 0);
+  const totalCommissionEarned = promoters.reduce((sum, p) => sum + (p.total_commission_earned || 0), 0);
+  const totalPendingCommission = promoters.reduce((sum, p) => sum + (p.pending_commission || 0), 0);
   const activePromoters = promoters.filter(p => p.active).length;
+  const averageCommissionPerPromoter = activePromoters > 0 ? totalCommissionEarned / activePromoters : 0;
 
   if (loading) {
     return (
@@ -227,15 +234,15 @@ const PromoterDashboard: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <DollarSign className="h-6 w-6 text-green-400" />
+                <Calculator className="h-6 w-6 text-green-400" />
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Total Bonos
+                    Comisiones Pagadas
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    ${totalBonus.toLocaleString()} MXN
+                    ${totalCommissionEarned.toLocaleString()} MXN
                   </dd>
                 </dl>
               </div>
@@ -247,15 +254,35 @@ const PromoterDashboard: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Trophy className="h-6 w-6 text-yellow-400" />
+                <DollarSign className="h-6 w-6 text-yellow-400" />
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Premios Extra
+                    Comisiones Pendientes
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {promoters.filter(p => p.extra_prize).length}
+                    ${totalPendingCommission.toLocaleString()} MXN
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <Percent className="h-6 w-6 text-blue-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Promedio por Promotor
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    ${averageCommissionPerPromoter.toLocaleString()} MXN
                   </dd>
                 </dl>
               </div>
@@ -324,9 +351,15 @@ const PromoterDashboard: React.FC = () => {
       {/* Promoters Table */}
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Lista de Promotores
-          </h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              Lista de Promotores - Sistema de Comisiones 10%
+            </h3>
+            <div className="text-sm text-gray-500">
+              <Percent className="inline h-4 w-4 mr-1" />
+              Comisión: 10% por boleto vendido
+            </div>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -339,7 +372,13 @@ const PromoterDashboard: React.FC = () => {
                   Código
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ventas
+                  Boletos Vendidos
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Comisiones Ganadas
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Comisiones Pendientes
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
@@ -361,10 +400,13 @@ const PromoterDashboard: React.FC = () => {
                         <div className="text-sm font-medium text-gray-900">
                           {promoter.name}
                         </div>
-                        {promoter.extra_prize && (
-                          <div className="flex items-center text-xs text-yellow-600">
-                            <Trophy className="h-3 w-3 mr-1" />
-                            Premio Extra
+                        <div className="text-xs text-gray-500">
+                          Miembro desde: {new Date(promoter.created_at).toLocaleDateString()}
+                        </div>
+                        {(promoter.total_commission_earned || 0) > 5000 && (
+                          <div className="flex items-center text-xs text-green-600">
+                            <Award className="h-3 w-3 mr-1" />
+                            Top Performer
                           </div>
                         )}
                       </div>
@@ -376,7 +418,30 @@ const PromoterDashboard: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {promoter.total_sales}
+                    <div className="flex flex-col">
+                      <span className="font-medium">{promoter.confirmed_sales || 0} confirmados</span>
+                      <span className="text-xs text-gray-500">{promoter.pending_sales || 0} pendientes</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-green-600">
+                        ${(promoter.total_commission_earned || 0).toLocaleString()} MXN
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {promoter.confirmed_sales || 0} boletos × 10%
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-yellow-600">
+                        ${(promoter.pending_commission || 0).toLocaleString()} MXN
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {promoter.pending_sales || 0} boletos reservados
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
@@ -394,19 +459,17 @@ const PromoterDashboard: React.FC = () => {
                     <div className="flex space-x-2">
                       <button
                         onClick={() => copyPromoterLink(promoter.code)}
-                        className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        className="inline-flex items-center px-2 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         title="Copiar enlace"
                       >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copiar
+                        <Copy className="h-3 w-3" />
                       </button>
                       <button
                         onClick={() => openPromoterLink(promoter.code)}
-                        className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        className="inline-flex items-center px-2 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         title="Abrir enlace"
                       >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        Abrir
+                        <ExternalLink className="h-3 w-3" />
                       </button>
                     </div>
                   </td>
@@ -430,6 +493,25 @@ const PromoterDashboard: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Commission Calculation Info */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="flex items-start">
+          <Calculator className="h-6 w-6 text-blue-600 mr-3 mt-1" />
+          <div>
+            <h3 className="text-lg font-semibold text-blue-800 mb-2">
+              Cómo se Calculan las Comisiones
+            </h3>
+            <div className="space-y-2 text-sm text-blue-700">
+              <p><strong>• Comisión por boleto:</strong> 10% del precio del boleto</p>
+              <p><strong>• Ejemplo:</strong> Boleto de $150 MXN = $15 MXN de comisión</p>
+              <p><strong>• Cuándo se paga:</strong> Cuando el cliente confirma el pago</p>
+              <p><strong>• Frecuencia de pago:</strong> Semanal (mínimo $100 MXN acumulado)</p>
+              <p><strong>• Seguimiento:</strong> En tiempo real en este dashboard</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
