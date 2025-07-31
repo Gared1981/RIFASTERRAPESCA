@@ -358,9 +358,6 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
               <div style="text-align: center; margin-bottom: 20px;">
                 <img src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/Logo-Terrapesca-01_205270e5-d546-4e33-a8d1-db0a91f1e554.png?v=1700262873" alt="Terrapesca" style="height: 80px; width: auto; margin: 0 auto;" />
               </div>
-              <div style="text-align: center; margin-bottom: 20px;">
-                <img src="https://cdn.shopify.com/s/files/1/0205/5752/9188/files/Logo-Terrapesca-01_205270e5-d546-4e33-a8d1-db0a91f1e554.png?v=1700262873" alt="Terrapesca" style="height: 80px; width: auto; margin: 0 auto;" />
-              </div>
               <div class="logo">🎣 SORTEOS TERRAPESCA</div>
               <div class="subtitle">Comprobante de Participación Oficial</div>
             </div>

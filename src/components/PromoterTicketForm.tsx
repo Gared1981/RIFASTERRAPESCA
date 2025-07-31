@@ -104,19 +104,10 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
   };
 
   const sendWhatsAppConfirmation = (ticketNumbers: number[], userInfo: any) => {
-    const message = generateReservationConfirmationMessage(
-      ticketNumbers, 
-      userInfo, 
-      raffleInfo, 
-      initialPromoterCode
-    );
-    
-    // Enviar WhatsApp al número del CLIENTE
-    sendWhatsAppToCustomer(userInfo.phone, message);
-    
-    // Mostrar notificación al usuario
-    toast.success('¡Boletos reservados! Se ha enviado confirmación a tu WhatsApp', {
-      duration: 5000,
+    // Ya no enviamos confirmación automática por WhatsApp
+    // Solo mostrar notificación de reserva exitosa
+    toast.success('¡Boletos reservados exitosamente!', {
+      duration: 3000,
     });
   };
 
@@ -278,7 +269,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
             <span className="font-semibold">Tiempo de reserva: 3 horas</span>
           </div>
           <p className="text-sm text-green-600">
-            Se ha enviado un mensaje de confirmación a tu WhatsApp con toda la información y opciones de pago.
+            Tus boletos han sido reservados exitosamente. Procede al pago para confirmar tu participación.
           </p>
         </div>
 
@@ -317,15 +308,15 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
         </div>
         <p className="text-lg font-bold mt-2">
           Total a pagar: ${totalAmount.toLocaleString()} MXN
-        </p>
+              <h4 className="font-semibold text-green-800 mb-1">Proceso de reserva</h4>
         <p className="text-sm text-gray-600 mt-1">
-          Precio por boleto: ${raffleInfo.price} MXN
+                Al completar tu reserva:
         </p>
         
-        {selectedPromoter && (
-          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center text-blue-700">
-              <Gift className="h-4 w-4 mr-2" />
+                <li>• Tus boletos se reservarán por 3 horas</li>
+                <li>• Podrás elegir tu método de pago preferido</li>
+                <li>• Recibirás tu comprobante de participación</li>
+                <li>• Podrás verificar tus boletos en cualquier momento</li>
               <span className="font-semibold">Código de promotor: {selectedPromoter.code}</span>
             </div>
           </div>
