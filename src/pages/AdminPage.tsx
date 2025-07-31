@@ -646,7 +646,7 @@ const AdminPage: React.FC = () => {
                           Ingresos Totales
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Comisiones Pagadas
+                          Comisiones Pagadas (15%)
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Ganancia Neta
@@ -694,7 +694,7 @@ const AdminPage: React.FC = () => {
                                 ${raffle.total_commissions?.toLocaleString()} MXN
                               </span>
                               <span className="text-xs text-gray-500">
-                                15% de comisiones
+                                15% de comisiones de promotores
                               </span>
                             </div>
                           </td>
@@ -750,25 +750,25 @@ const AdminPage: React.FC = () => {
               {raffleAnalytics.length > 0 && (
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="text-sm font-medium text-green-800">Ingresos Totales</div>
+                    <div className="text-sm font-medium text-green-800">💰 Ingresos Totales</div>
                     <div className="text-2xl font-bold text-green-600">
                       ${raffleAnalytics.reduce((sum, r) => sum + (r.total_revenue || 0), 0).toLocaleString()} MXN
                     </div>
                   </div>
                   <div className="bg-orange-50 p-4 rounded-lg">
-                    <div className="text-sm font-medium text-orange-800">Comisiones Pagadas</div>
+                    <div className="text-sm font-medium text-orange-800">🎯 Comisiones Pagadas (15%)</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${raffleAnalytics.reduce((sum, r) => sum + (r.total_commissions || 0), 0).toLocaleString()} MXN
                     </div>
                   </div>
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="text-sm font-medium text-blue-800">Ganancia Neta</div>
+                    <div className="text-sm font-medium text-blue-800">💎 Ganancia Neta</div>
                     <div className="text-2xl font-bold text-blue-600">
                       ${raffleAnalytics.reduce((sum, r) => sum + (r.net_profit || 0), 0).toLocaleString()} MXN
                     </div>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">
-                    <div className="text-sm font-medium text-purple-800">Boletos Vendidos</div>
+                    <div className="text-sm font-medium text-purple-800">🎫 Boletos Vendidos</div>
                     <div className="text-2xl font-bold text-purple-600">
                       {raffleAnalytics.reduce((sum, r) => sum + (r.tickets_sold || 0), 0).toLocaleString()}
                     </div>
