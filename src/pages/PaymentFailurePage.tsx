@@ -103,3 +103,5 @@ const PaymentFailurePage: React.FC = () => {
     </div>
   )
 }
+
+export default PaymentFailurePage;
