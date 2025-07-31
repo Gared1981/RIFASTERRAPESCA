@@ -28,6 +28,8 @@ const RafflesListPage: React.FC = () => {
     const fetchRaffles = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
         // Solo mostrar sorteos activos
         const { data, error } = await supabase
           .from('public_raffles')
@@ -35,11 +37,15 @@ const RafflesListPage: React.FC = () => {
           .eq('status', 'active')
           .order('draw_date', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching raffles:', error);
+          throw new Error(`Error al cargar sorteos: ${error.message}`);
+        }
+        
         setRaffles(data || []);
       } catch (err) {
-        console.error('Error fetching raffles:', err);
-        setError('No se pudieron cargar los sorteos');
+        console.error('Error in fetchRaffles:', err);
+        setError(err instanceof Error ? err.message : 'No se pudieron cargar los sorteos');
       } finally {
         setLoading(false);
       }

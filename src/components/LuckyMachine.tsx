@@ -15,11 +15,14 @@ const LuckyMachine: React.FC<LuckyMachineProps> = ({ raffleId, onTicketsSelected
   const [displayNumbers, setDisplayNumbers] = useState<string[]>(['0000']);
   const spinTimeout = useRef<NodeJS.Timeout>();
   
+  useEffect(() => {
+    setDisplayNumbers(Array(quantity).fill('0000'));
+  }, [quantity]);
+  
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0 && value <= 50) {
       setQuantity(value);
-      setDisplayNumbers(Array(value).fill('0000'));
     }
   };
   
@@ -59,12 +62,18 @@ const LuckyMachine: React.FC<LuckyMachineProps> = ({ raffleId, onTicketsSelected
         .from('tickets')
         .select('*')
         .eq('raffle_id', raffleId)
-        .eq('status', 'available');
+        .eq('status', 'available')
+        .limit(quantity * 2); // Get more tickets than needed for better randomization
         
       if (error) throw error;
       
       if (!data || data.length === 0) {
         setError('No hay boletos disponibles para seleccionar.');
+        return;
+      }
+      
+      if (data.length < quantity) {
+        setError(`Solo hay ${data.length} boletos disponibles. Reduce la cantidad.`);
         return;
       }
       

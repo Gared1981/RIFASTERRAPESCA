@@ -10,6 +10,11 @@ export function generateWhatsAppLink(
   tickets: number[],
   raffleInfo?: { name: string; price: number }
 ): string {
+  if (!phone || tickets.length === 0) {
+    console.error('Invalid parameters for WhatsApp link generation');
+    return 'https://wa.me/526686889571';
+  }
+  
   let message = `¡Hola! Me gustaría confirmar la reserva de mis boletos: ${tickets.join(', ')}`;
   
   if (raffleInfo) {
@@ -20,7 +25,12 @@ export function generateWhatsAppLink(
   }
   
   // Use the fixed WhatsApp number
-  return `https://wa.me/526686889571?text=${encodeURIComponent(message)}`;
+  try {
+    return `https://wa.me/526686889571?text=${encodeURIComponent(message)}`;
+  } catch (error) {
+    console.error('Error encoding WhatsApp message:', error);
+    return 'https://wa.me/526686889571';
+  }
 }
 
 /**
@@ -71,8 +81,18 @@ Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 
  * @param message Message to send
  */
 export function sendWhatsAppToCustomer(customerPhone: string, message: string): void {
+  if (!customerPhone || !message) {
+    console.error('Invalid parameters for WhatsApp customer message');
+    return;
+  }
+  
   // Clean the phone number (remove any non-digits)
   const cleanPhone = customerPhone.replace(/\D/g, '');
+  
+  if (cleanPhone.length < 10) {
+    console.error('Invalid phone number format:', customerPhone);
+    return;
+  }
   
   // Add Mexico country code if not present
   let formattedPhone = cleanPhone;
@@ -85,7 +105,17 @@ export function sendWhatsAppToCustomer(customerPhone: string, message: string): 
   }
   
   // Create WhatsApp link to customer's number
-  const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+  try {
+    const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+    
+    // Open WhatsApp
+    window.open(whatsappUrl, '_blank');
+  } catch (error) {
+    console.error('Error creating WhatsApp URL:', error);
+    // Fallback to basic WhatsApp
+    window.open('https://wa.me/526686889571', '_blank');
+  }
+}
   
   // Open WhatsApp
   window.open(whatsappUrl, '_blank');

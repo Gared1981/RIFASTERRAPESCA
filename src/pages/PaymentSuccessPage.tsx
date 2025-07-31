@@ -30,6 +30,20 @@ const PaymentSuccessPage: React.FC = () => {
       try {
         setLoading(true);
         
+        if (!paymentId && !externalReference && !preferenceId) {
+          console.warn('No payment identifiers provided');
+          setPaymentData({
+            id: 'N/A',
+            status: 'unknown',
+            amount: 0,
+            tickets: [],
+            raffle: 'Sorteo Terrapesca',
+            date: new Date().toLocaleDateString(),
+            external_reference: ''
+          });
+          return;
+        }
+        
         // Buscar información del pago en los logs
         let query = supabase.from('payment_logs').select('*');
         

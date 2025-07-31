@@ -21,7 +21,6 @@ const Navbar: React.FC = () => {
           return;
         }
         setIsAdmin(!!data.session);
-        console.log('🔐 Navbar auth check:', !!data.session);
       } catch (err) {
         console.error('❌ Exception in Navbar auth check:', err);
         setIsAdmin(false);
@@ -32,7 +31,6 @@ const Navbar: React.FC = () => {
     
     // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔄 Auth state change in Navbar:', event, !!session);
       setIsAdmin(!!session);
     });
     

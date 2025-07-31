@@ -96,7 +96,7 @@ const PaymentFailurePage: React.FC = () => {
                 </Link>
               </div>
             </div>
-          </div>
+                  href="https://wa.me/526686889571?text=Hola%2C%20tuve%20problemas%20con%20el%20pago%20de%20mis%20boletos.%20%C2%BFPueden%20ayudarme%3F"
 
           {/* Help Section */}
           <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">

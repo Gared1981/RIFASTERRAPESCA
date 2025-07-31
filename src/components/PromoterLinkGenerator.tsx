@@ -111,6 +111,11 @@ const PromoterLinkGenerator: React.FC = () => {
   };
 
   const openLink = () => {
+    if (!generatedLink) {
+      toast.error('Primero genera un enlace');
+      return;
+    }
+    
     window.open(generatedLink, '_blank');
   };
 

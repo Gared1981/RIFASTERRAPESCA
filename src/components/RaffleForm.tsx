@@ -24,6 +24,21 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
     prize_items: [] as string[]
   });
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        setIsAuthenticated(!!data.session);
+      } catch (err) {
+        console.error('Error checking auth:', err);
+        setIsAuthenticated(false);
+      }
+    };
+    
+    checkAuth();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -83,6 +98,31 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      toast.error('Debes estar autenticado para crear sorteos');
+      return;
+    }
+    
+    if (!formData.name.trim()) {
+      toast.error('El nombre del sorteo es requerido');
+      return;
+    }
+    
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      toast.error('El precio debe ser mayor a 0');
+      return;
+    }
+    
+    if (!formData.total_tickets || parseInt(formData.total_tickets) <= 0) {
+      toast.error('El número de boletos debe ser mayor a 0');
+      return;
+    }
+    
+    if (parseInt(formData.total_tickets) > 10000) {
+      toast.error('El número máximo de boletos es 10,000');
+      return;
+    }
     
     try {
       setLoading(true);

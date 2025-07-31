@@ -43,9 +43,9 @@ const CollapsiblePrizeList: React.FC<CollapsiblePrizeListProps> = ({
           }
           
           // Determinar si es un título principal (empieza con emoji y está en mayúsculas)
-          const isMainTitle = /^[🎯🌊💡🐠🐟⚡🧲🛸🔱🌀🐬🛶💰]/.test(item) && 
+          const isMainTitle = /^[🎯🌊💡🐠🐟⚡🧲🛸🔱🌀🐬🛶💰🎣🏆🎁⭐🔥💎🌟]/.test(item) && 
                              !item.startsWith('•') && 
-                             item.includes(item.toUpperCase().slice(0, 10));
+                             (item.length > 10 && item.slice(2, 12).toUpperCase() === item.slice(2, 12));
           
           // Determinar si es un sub-item (empieza con •)
           const isSubItem = item.startsWith('•');

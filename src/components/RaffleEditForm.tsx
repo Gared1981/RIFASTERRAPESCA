@@ -40,6 +40,21 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        setIsAuthenticated(!!data.session);
+      } catch (err) {
+        console.error('Error checking auth:', err);
+        setIsAuthenticated(false);
+      }
+    };
+    
+    checkAuth();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -105,6 +120,12 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      setError('Debes estar autenticado para editar sorteos');
+      toast.error('Debes estar autenticado para editar sorteos');
+      return;
+    }
     
     if (raffle.status === 'completed') {
       toast.error('No se puede editar un sorteo finalizado');
