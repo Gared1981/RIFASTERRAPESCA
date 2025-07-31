@@ -95,5 +95,11 @@ const PaymentFailurePage: React.FC = () => {
                   Volver al inicio
                 </Link>
               </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
   )
 }
