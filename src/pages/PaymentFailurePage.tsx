@@ -118,3 +118,5 @@ const PaymentFailurePage: React.FC = () => {
 };
 
 export default PaymentFailurePage;
+  )
+}
