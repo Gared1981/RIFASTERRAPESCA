@@ -259,11 +259,11 @@ Equipos profesionales de pesca
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header */}
           <div className="mb-8">
-            <Link
+                <li>• Promocionar en redes sociales personales con tu código</li>
               to="/"
-              className="inline-flex items-center text-terrapesca-green-600 hover:text-terrapesca-green-700 font-medium mb-4"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
+                <li>• Explicar el sistema de comisiones del 15% honestamente</li>
+                <li>• Usar material gráfico proporcionado por Terrapesca</li>
+                <li>• Ganar comisiones y bonos por ventas legítimas</li>
               Volver al inicio
             </Link>
             
@@ -273,7 +273,7 @@ Equipos profesionales de pesca
                   👥 Manual para Promotores
                 </h1>
                 <p className="text-xl text-terrapesca-blue-600">
-                  Guía completa para maximizar tus ganancias con Sorteos Terrapesca
+                <p className="font-bold text-terrapesca-green-600">15% base</p>
                 </p>
               </div>
               
@@ -307,23 +307,24 @@ Equipos profesionales de pesca
                 </div>
               </div>
               <div className="flex items-center">
-                <Mail className="h-6 w-6 mr-3" />
-                <div>
+                <p className="font-bold text-terrapesca-green-600">15% + soporte</p>
+                <p className="text-xs text-terrapesca-blue-500">Capacitación premium</p>
                   <p className="font-semibold">Email</p>
                   <button
                     onClick={() => copyToClipboard('ventasweb@terrapesca.com', 'Email')}
                     className="text-green-100 hover:text-white transition-colors underline"
                   >
                     ventasweb@terrapesca.com {copiedText === 'Email' && '✓'}
-                  </button>
-                </div>
+                <p className="font-bold text-terrapesca-green-600">15% + prioridad</p>
+                <p className="text-xs text-terrapesca-blue-500">Soporte prioritario</p>
               </div>
               <div className="flex items-center">
                 <Clock className="h-6 w-6 mr-3" />
                 <div>
                   <p className="font-semibold">Horario</p>
-                  <p className="text-green-100">Lun-Vie 9AM-6PM</p>
-                </div>
+                <div className="text-lg font-semibold text-terrapesca-green-700">$2,250</div>
+                <p className="font-bold text-terrapesca-green-600">15% + eventos</p>
+                <p className="text-xs text-terrapesca-blue-500">Bonos especiales</p>
               </div>
             </div>
             <div className="mt-4 text-center">
