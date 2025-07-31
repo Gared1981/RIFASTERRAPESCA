@@ -193,9 +193,6 @@ const TicketsPage: React.FC = () => {
                       <p className="text-sm text-terrapesca-blue-700">
                         <strong>Código de promotor activo:</strong> {promoterCode}
                       </p>
-                      <p className="text-xs text-terrapesca-blue-600 mt-1">
-                        Tu compra será registrada para este promotor y recibirá su comisión correspondiente.
-                      </p>
                     </div>
                   </div>
                 </div>

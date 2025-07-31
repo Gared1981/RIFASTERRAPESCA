@@ -18,6 +18,7 @@ const AdminPage: React.FC = () => {
   const [raffles, setRaffles] = useState<Raffle[]>([]);
   const [selectedRaffle, setSelectedRaffle] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'tickets' | 'promoters' | 'raffles'>('tickets');
+  const [raffleAnalytics, setRaffleAnalytics] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalTickets: 0,
     available: 0,
@@ -45,6 +46,7 @@ const AdminPage: React.FC = () => {
         if (data.session) {
           try {
             await fetchRaffles();
+            await fetchRaffleAnalytics();
           } catch (fetchError) {
             console.error('❌ Error fetching raffles after auth:', fetchError);
             toast.error('Error al cargar los sorteos');
@@ -69,6 +71,9 @@ const AdminPage: React.FC = () => {
         if (session) {
           fetchRaffles().catch(err => {
             console.error('❌ Error fetching raffles on auth change:', err);
+          });
+          fetchRaffleAnalytics().catch(err => {
+            console.error('❌ Error fetching analytics on auth change:', err);
           });
         }
       }
@@ -110,6 +115,26 @@ const AdminPage: React.FC = () => {
     } catch (err) {
       console.error('❌ Exception fetching raffles:', err);
       toast.error('Error al cargar los sorteos');
+    }
+  };
+  
+  const fetchRaffleAnalytics = async () => {
+    try {
+      console.log('📊 Fetching raffle analytics...');
+      const { data, error } = await supabase
+        .from('raffle_analytics')
+        .select('*')
+        .order('total_revenue', { ascending: false });
+        
+      if (error) {
+        console.error('❌ Error fetching analytics:', error);
+        return;
+      }
+      
+      console.log('✅ Analytics fetched successfully:', data?.length || 0);
+      setRaffleAnalytics(data || []);
+    } catch (err) {
+      console.error('❌ Exception fetching analytics:', err);
     }
   };
   
@@ -539,6 +564,14 @@ const AdminPage: React.FC = () => {
               >
                 <UserCheck className="inline-block mr-2 h-4 w-4" />
                 Promotores
+                <a
+                  href="/manual-promotores"
+                  target="_blank"
+                  className="ml-2 text-xs text-blue-600 hover:text-blue-800 underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  📖 Manual
+                </a>
               </button>
               <button
                 onClick={() => setActiveTab('raffles')}
@@ -550,6 +583,17 @@ const AdminPage: React.FC = () => {
               >
                 <Gift className="inline-block mr-2 h-4 w-4" />
                 Gestión de Sorteos
+              </button>
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'analytics'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <DollarSign className="inline-block mr-2 h-4 w-4" />
+                Análisis de Ganancias
               </button>
             </nav>
             <button
@@ -582,6 +626,157 @@ const AdminPage: React.FC = () => {
           <PromoterDashboard />
         ) : activeTab === 'raffles' ? (
           <RafflesPage />
+        ) : activeTab === 'analytics' ? (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Análisis de Ganancias por Sorteo</h2>
+              
+              {raffleAnalytics.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Sorteo
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Boletos Vendidos
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Ingresos Totales
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Comisiones Pagadas
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Ganancia Neta
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Margen %
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Estado
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {raffleAnalytics.map((raffle) => (
+                        <tr key={raffle.raffle_id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {raffle.raffle_name}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              ID: {raffle.raffle_id}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="flex flex-col">
+                              <span className="font-medium">{raffle.tickets_sold}</span>
+                              <span className="text-xs text-gray-500">
+                                de {raffle.total_tickets} disponibles
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="flex flex-col">
+                              <span className="font-medium text-green-600">
+                                ${raffle.total_revenue?.toLocaleString()} MXN
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                ${raffle.ticket_price} × {raffle.tickets_sold}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="flex flex-col">
+                              <span className="font-medium text-orange-600">
+                                ${raffle.total_commissions?.toLocaleString()} MXN
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                15% de comisiones
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="flex flex-col">
+                              <span className="font-medium text-blue-600">
+                                ${raffle.net_profit?.toLocaleString()} MXN
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                Después de comisiones
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              raffle.profit_margin >= 80 
+                                ? 'bg-green-100 text-green-800'
+                                : raffle.profit_margin >= 70
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                            }`}>
+                              {raffle.profit_margin?.toFixed(1)}%
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              raffle.raffle_status === 'completed'
+                                ? 'bg-gray-100 text-gray-800'
+                                : raffle.raffle_status === 'active'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {raffle.raffle_status === 'completed' ? 'Finalizado' : 
+                               raffle.raffle_status === 'active' ? 'Activo' : 'Borrador'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <DollarSign className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No hay datos de análisis</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Los datos aparecerán cuando haya sorteos con ventas.
+                  </p>
+                </div>
+              )}
+              
+              {/* Resumen general */}
+              {raffleAnalytics.length > 0 && (
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-green-800">Ingresos Totales</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${raffleAnalytics.reduce((sum, r) => sum + (r.total_revenue || 0), 0).toLocaleString()} MXN
+                    </div>
+                  </div>
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-orange-800">Comisiones Pagadas</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${raffleAnalytics.reduce((sum, r) => sum + (r.total_commissions || 0), 0).toLocaleString()} MXN
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-blue-800">Ganancia Neta</div>
+                    <div className="text-2xl font-bold text-blue-600">
+                      ${raffleAnalytics.reduce((sum, r) => sum + (r.net_profit || 0), 0).toLocaleString()} MXN
+                    </div>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-purple-800">Boletos Vendidos</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {raffleAnalytics.reduce((sum, r) => sum + (r.tickets_sold || 0), 0).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         ) : (
           <>
             <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
