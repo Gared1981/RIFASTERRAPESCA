@@ -162,6 +162,8 @@ const PromoterDashboard: React.FC = () => {
   const totalPendingCommission = promoters.reduce((sum, p) => sum + (p.pending_commission || 0), 0);
   const activePromoters = promoters.filter(p => p.active).length;
   const averageCommissionPerPromoter = activePromoters > 0 ? totalCommissionEarned / activePromoters : 0;
+  const promotersNear100 = promoters.filter(p => p.total_sales >= 80 && p.total_sales < 100).length;
+  const promotersOver100 = promoters.filter(p => p.total_sales >= 100).length;
 
   if (loading) {
     return (
@@ -274,15 +276,35 @@ const PromoterDashboard: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Percent className="h-6 w-6 text-blue-400" />
+                <Target className="h-6 w-6 text-purple-400" />
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Promedio por Promotor
+                    Cerca de 100 Boletos
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    ${averageCommissionPerPromoter.toLocaleString()} MXN
+                    {promotersNear100} promotores
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <Award className="h-6 w-6 text-gold-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Calificados para Bono Extra
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {promotersOver100} promotores
                   </dd>
                 </dl>
               </div>
@@ -353,11 +375,11 @@ const PromoterDashboard: React.FC = () => {
         <div className="px-4 py-5 sm:px-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Lista de Promotores - Sistema de Comisiones 10%
+              Lista de Promotores - Sistema de Comisiones 15%
             </h3>
             <div className="text-sm text-gray-500">
               <Percent className="inline h-4 w-4 mr-1" />
-              Comisión: 10% por boleto vendido
+              Comisión: 15% por boleto vendido
             </div>
           </div>
         </div>
@@ -379,6 +401,9 @@ const PromoterDashboard: React.FC = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Comisiones Pendientes
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Progreso a 100
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
@@ -409,6 +434,12 @@ const PromoterDashboard: React.FC = () => {
                             Top Performer
                           </div>
                         )}
+                        {promoter.total_sales >= 100 && (
+                          <div className="flex items-center text-xs text-purple-600">
+                            <Target className="h-3 w-3 mr-1" />
+                            Bono Extra Calificado
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
@@ -429,7 +460,7 @@ const PromoterDashboard: React.FC = () => {
                         ${(promoter.total_commission_earned || 0).toLocaleString()} MXN
                       </span>
                       <span className="text-xs text-gray-500">
-                        {promoter.confirmed_sales || 0} boletos × 10%
+                        {promoter.confirmed_sales || 0} boletos × 15%
                       </span>
                     </div>
                   </td>
@@ -441,6 +472,38 @@ const PromoterDashboard: React.FC = () => {
                       <span className="text-xs text-gray-500">
                         {promoter.pending_sales || 0} boletos reservados
                       </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex flex-col">
+                      <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                        <div 
+                          className={`h-2 rounded-full ${
+                            promoter.total_sales >= 100 
+                              ? 'bg-purple-600' 
+                              : promoter.total_sales >= 80 
+                                ? 'bg-yellow-500' 
+                                : 'bg-blue-500'
+                          }`}
+                          style={{ 
+                            width: `${Math.min((promoter.total_sales / 100) * 100, 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                      <span className={`text-xs font-medium ${
+                        promoter.total_sales >= 100 
+                          ? 'text-purple-600' 
+                          : promoter.total_sales >= 80 
+                            ? 'text-yellow-600' 
+                            : 'text-blue-600'
+                      }`}>
+                        {promoter.total_sales}/100 boletos
+                      </span>
+                      {promoter.total_sales >= 100 && (
+                        <span className="text-xs text-purple-600 font-bold">
+                          ✨ Bono Extra Activo
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -502,14 +565,35 @@ const PromoterDashboard: React.FC = () => {
           <Calculator className="h-6 w-6 text-blue-600 mr-3 mt-1" />
           <div>
             <h3 className="text-lg font-semibold text-blue-800 mb-2">
-              Cómo se Calculan las Comisiones
+              Sistema de Comisiones y Bonos Especiales
             </h3>
             <div className="space-y-2 text-sm text-blue-700">
-              <p><strong>• Comisión por boleto:</strong> 10% del precio del boleto</p>
-              <p><strong>• Ejemplo:</strong> Boleto de $150 MXN = $15 MXN de comisión</p>
+              <p><strong>• Comisión por boleto:</strong> 15% del precio del boleto</p>
+              <p><strong>• Ejemplo:</strong> Boleto de $150 MXN = $22.50 MXN de comisión</p>
               <p><strong>• Cuándo se paga:</strong> Cuando el cliente confirma el pago</p>
+              <p><strong>• Bono por ganador:</strong> $2,000 MXN si tu cliente gana</p>
+              <p><strong>• Bono extra especial:</strong> $1,000 MXN adicionales si vendiste 100+ boletos Y tu cliente gana</p>
               <p><strong>• Frecuencia de pago:</strong> Semanal (mínimo $100 MXN acumulado)</p>
               <p><strong>• Seguimiento:</strong> En tiempo real en este dashboard</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bonus System Info */}
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+        <div className="flex items-start">
+          <Award className="h-6 w-6 text-purple-600 mr-3 mt-1" />
+          <div>
+            <h3 className="text-lg font-semibold text-purple-800 mb-2">
+              Sistema de Bonos por Ganador
+            </h3>
+            <div className="space-y-2 text-sm text-purple-700">
+              <p><strong>🏆 Bono Base:</strong> $2,000 MXN si tu cliente gana el sorteo</p>
+              <p><strong>💎 Bono Extra:</strong> $1,000 MXN adicionales si vendiste 100+ boletos</p>
+              <p><strong>💰 Total máximo:</strong> $3,000 MXN por ganador (para promotores con 100+ ventas)</p>
+              <p><strong>📊 Progreso:</strong> Monitorea tu avance hacia los 100 boletos en la tabla</p>
+              <p><strong>⭐ Ejemplo:</strong> Promotor con 120 ventas + cliente ganador = $3,000 MXN de bono</p>
             </div>
           </div>
         </div>
