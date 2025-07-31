@@ -259,47 +259,11 @@ Equipos profesionales de pesca
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header */}
           <div className="mb-8">
-                <li>• Promocionar en redes sociales personales con tu código</li>
+            <Link
               to="/"
-                <li>• Explicar el sistema de comisiones del 15% honestamente</li>
-                <li>• Usar material gráfico proporcionado por Terrapesca</li>
-                <li>• Ganar comisiones y bonos por ventas legítimas</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Call to action final */}
-        <section className="bg-gradient-to-r from-terrapesca-green-500 to-terrapesca-green-600 rounded-lg shadow-terrapesca p-8 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            🚀 ¡Comienza a Ganar Hoy Mismo!
-          </h2>
-          <p className="text-green-100 mb-6">
-            Únete a nuestro equipo de promotores y comienza a generar ingresos extra con el 15% de comisión por cada boleto vendido.
-          </p>
-          <div className="space-y-4">
-            <a
-              href="https://wa.me/526686889571?text=¡Hola!%20Quiero%20ser%20promotor%20de%20Sorteos%20Terrapesca.%20¿Pueden%20darme%20información%20sobre%20cómo%20empezar?"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-8 py-4 bg-white text-terrapesca-green-600 rounded-lg hover:bg-gray-100 transition-colors font-bold text-lg shadow-lg"
+              className="inline-flex items-center text-terrapesca-blue-600 hover:text-terrapesca-blue-800 mb-4"
             >
-              📱 Contactar por WhatsApp
-            </a>
-            <p className="text-green-100 text-sm">
-              💰 Sin costos • 📚 Sin experiencia requerida • 🆘 Soporte completo
-            </p>
-          </div>
-        </section>
-      </div>
-    </main>
-    
-    <Footer />
-  </div>
-);
-};
-
-export default ManualPromotoresPage;
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Volver al inicio
             </Link>
             
@@ -309,7 +273,7 @@ export default ManualPromotoresPage;
                   👥 Manual para Promotores
                 </h1>
                 <p className="text-xl text-terrapesca-blue-600">
-                <p className="font-bold text-terrapesca-green-600">15% base</p>
+                  Guía completa para generar ingresos con comisiones del 10%
                 </p>
               </div>
               
@@ -343,24 +307,23 @@ export default ManualPromotoresPage;
                 </div>
               </div>
               <div className="flex items-center">
-                <p className="font-bold text-terrapesca-green-600">15% + soporte</p>
-                <p className="text-xs text-terrapesca-blue-500">Capacitación premium</p>
+                <Mail className="h-6 w-6 mr-3" />
+                <div>
                   <p className="font-semibold">Email</p>
                   <button
                     onClick={() => copyToClipboard('ventasweb@terrapesca.com', 'Email')}
                     className="text-green-100 hover:text-white transition-colors underline"
                   >
                     ventasweb@terrapesca.com {copiedText === 'Email' && '✓'}
-                <p className="font-bold text-terrapesca-green-600">15% + prioridad</p>
-                <p className="text-xs text-terrapesca-blue-500">Soporte prioritario</p>
+                  </button>
+                </div>
               </div>
               <div className="flex items-center">
                 <Clock className="h-6 w-6 mr-3" />
                 <div>
                   <p className="font-semibold">Horario</p>
-                <div className="text-lg font-semibold text-terrapesca-green-700">$2,250</div>
-                <p className="font-bold text-terrapesca-green-600">15% + eventos</p>
-                <p className="text-xs text-terrapesca-blue-500">Bonos especiales</p>
+                  <p className="text-green-100">Lunes a Viernes 9:00 AM - 6:00 PM</p>
+                </div>
               </div>
             </div>
             <div className="mt-4 text-center">
@@ -620,8 +583,9 @@ export default ManualPromotoresPage;
                     <h3 className="ml-2 font-bold text-orange-800">BRONCE</h3>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">1-10 boletos/mes</p>
-                  <p className="font-semibold text-orange-700">Comisión base: $1,000</p>
-                  <p className="text-xs text-gray-500">Nivel inicial</p>
+                  <div className="text-lg font-semibold text-orange-700">$150</div>
+                  <p className="font-bold text-terrapesca-green-600">15% base</p>
+                  <p className="text-xs text-terrapesca-blue-500">Nivel inicial</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-lg border-l-4 border-gray-400">
@@ -632,8 +596,9 @@ export default ManualPromotoresPage;
                     <h3 className="ml-2 font-bold text-gray-700">PLATA</h3>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">11-25 boletos/mes</p>
-                  <p className="font-semibold text-gray-700">Comisión: $1,100</p>
-                  <p className="text-xs text-gray-500">+Capacitación premium</p>
+                  <div className="text-lg font-semibold text-gray-700">$375</div>
+                  <p className="font-bold text-terrapesca-green-600">15% + soporte</p>
+                  <p className="text-xs text-terrapesca-blue-500">Capacitación premium</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-lg border-l-4 border-yellow-400">
@@ -644,8 +609,9 @@ export default ManualPromotoresPage;
                     <h3 className="ml-2 font-bold text-yellow-700">ORO</h3>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">26-50 boletos/mes</p>
-                  <p className="font-semibold text-yellow-700">Comisión: $1,200</p>
-                  <p className="text-xs text-gray-500">+Soporte prioritario</p>
+                  <div className="text-lg font-semibold text-yellow-700">$750</div>
+                  <p className="font-bold text-terrapesca-green-600">15% + prioridad</p>
+                  <p className="text-xs text-terrapesca-blue-500">Soporte prioritario</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-lg border-l-4 border-blue-400">
@@ -656,8 +622,9 @@ export default ManualPromotoresPage;
                     <h3 className="ml-2 font-bold text-blue-700">DIAMANTE</h3>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">51+ boletos/mes</p>
-                  <p className="font-semibold text-blue-700">Comisión: $1,300</p>
-                  <p className="text-xs text-gray-500">+Bonos especiales</p>
+                  <div className="text-lg font-semibold text-terrapesca-green-700">$2,250</div>
+                  <p className="font-bold text-terrapesca-green-600">15% + eventos</p>
+                  <p className="text-xs text-terrapesca-blue-500">Bonos especiales</p>
                 </div>
               </div>
 
@@ -919,7 +886,7 @@ export default ManualPromotoresPage;
                   <ul className="space-y-2 text-green-700">
                     <li className="flex items-start">
                       <ThumbsUp className="h-4 w-4 mr-2 mt-0.5 text-green-600" />
-                      Promocionar en redes sociales personales
+                      Promocionar en redes sociales personales con tu código
                     </li>
                     <li className="flex items-start">
                       <ThumbsUp className="h-4 w-4 mr-2 mt-0.5 text-green-600" />
@@ -931,11 +898,15 @@ export default ManualPromotoresPage;
                     </li>
                     <li className="flex items-start">
                       <ThumbsUp className="h-4 w-4 mr-2 mt-0.5 text-green-600" />
-                      Usar material gráfico proporcionado
+                      Usar material gráfico proporcionado por Terrapesca
                     </li>
                     <li className="flex items-start">
                       <ThumbsUp className="h-4 w-4 mr-2 mt-0.5 text-green-600" />
-                      Crear contenido original promocional
+                      Explicar el sistema de comisiones del 15% honestamente
+                    </li>
+                    <li className="flex items-start">
+                      <ThumbsUp className="h-4 w-4 mr-2 mt-0.5 text-green-600" />
+                      Ganar comisiones y bonos por ventas legítimas
                     </li>
                   </ul>
                 </div>
@@ -1022,110 +993,25 @@ export default ManualPromotoresPage;
             </section>
 
             {/* Call to action final */}
-            <section className="bg-gradient-to-r from-terrapesca-green-500 to-terrapesca-green-600 rounded-xl shadow-terrapesca p-8 text-center text-white">
-              <div className="mb-6">
-                <Trophy className="h-16 w-16 mx-auto mb-4 text-yellow-300" />
-                <h2 className="text-4xl font-bold mb-4">
-                  🎯 ¡COMIENZA HOY MISMO!
-                </h2>
-                <p className="text-xl text-green-100 mb-6">
-                  Tu oportunidad de generar ingresos extra está aquí. Únete al equipo de promotores más exitoso de México.
-                </p>
-              </div>
-
-              <div className="bg-white bg-opacity-20 rounded-lg p-6 mb-6">
-                <h3 className="text-2xl font-bold mb-4">📋 PROCESO INMEDIATO</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-                  <div className="bg-white bg-opacity-20 p-4 rounded-lg">
-                    <h4 className="font-bold mb-2">PASO 1</h4>
-                    <p className="text-sm">Envía WhatsApp a +52 668 688 9571</p>
-                  </div>
-                  <div className="bg-white bg-opacity-20 p-4 rounded-lg">
-                    <h4 className="font-bold mb-2">PASO 2</h4>
-                    <p className="text-sm">Recibe tu código y enlace personalizado</p>
-                  </div>
-                  <div className="bg-white bg-opacity-20 p-4 rounded-lg">
-                    <h4 className="font-bold mb-2">PASO 3</h4>
-                    <p className="text-sm">¡Comienza a ganar dinero inmediatamente!</p>
-                  </div>
-                </div>
-              </div>
-
+            <section className="bg-gradient-to-r from-terrapesca-green-500 to-terrapesca-green-600 rounded-lg shadow-terrapesca p-8 text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">
+                🚀 ¡Comienza a Ganar Hoy Mismo!
+              </h2>
+              <p className="text-green-100 mb-6">
+                Únete a nuestro equipo de promotores y comienza a generar ingresos extra con el 15% de comisión por cada boleto vendido.
+              </p>
               <div className="space-y-4">
                 <a
-                  href="https://wa.me/526686889571?text=Hola,%20quiero%20ser%20promotor%20de%20Sorteos%20Terrapesca.%20Estoy%20listo%20para%20comenzar."
+                  href="https://wa.me/526686889571?text=¡Hola!%20Quiero%20ser%20promotor%20de%20Sorteos%20Terrapesca.%20¿Pueden%20darme%20información%20sobre%20cómo%20empezar?"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-8 py-4 bg-white text-terrapesca-green-600 rounded-lg hover:bg-gray-100 transition-colors font-bold text-lg shadow-lg"
                 >
-                  <MessageSquare className="mr-3 h-6 w-6" />
-                  💬 ENVIAR: "Quiero ser promotor"
+                  📱 Contactar por WhatsApp
                 </a>
-                
-                <p className="text-green-100 text-lg">
-                  💰 <strong>¡Tu primer comisión puede ser esta semana!</strong>
+                <p className="text-green-100 text-sm">
+                  💰 Sin costos • 📚 Sin experiencia requerida • 🆘 Soporte completo
                 </p>
-                
-                <div className="flex items-center justify-center space-x-4 text-sm text-green-100">
-                  <span>✅ Sin costos</span>
-                  <span>✅ Sin experiencia requerida</span>
-                  <span>✅ Soporte completo</span>
-                  <span>✅ Ganancias inmediatas</span>
-                </div>
-              </div>
-            </section>
-
-            {/* Sección de promotores */}
-            <section className="bg-gradient-to-r from-terrapesca-green-500 to-terrapesca-green-600 rounded-xl shadow-terrapesca p-8 text-white">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-white mb-4">
-                  🚀 ¡Comienza a Ganar 10% por Cada Boleto!
-                </h2>
-                <p className="text-green-100 mb-6">
-                  Únete a nuestro equipo de promotores y genera ingresos con comisiones automáticas del 10%.
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  <div>
-                    <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                      <div className="text-2xl font-bold mb-2">📱</div>
-                      <h3 className="font-semibold mb-2">1. Contactar</h3>
-                      <p className="text-sm">Solicita tu código único por WhatsApp</p>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                      <div className="text-2xl font-bold mb-2">🔗</div>
-                      <h3 className="font-semibold mb-2">2. Recibir</h3>
-                      <p className="text-sm">Enlace personalizado y dashboard</p>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                      <div className="text-2xl font-bold mb-2">💰</div>
-                      <h3 className="font-semibold mb-2">3. Ganar</h3>
-                      <p className="text-sm">10% automático por boleto</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <a
-                    href="https://wa.me/526686889571?text=¡Hola!%20Quiero%20ser%20promotor%20de%20Sorteos%20Terrapesca%20y%20ganar%2010%25%20de%20comisión%20por%20cada%20boleto%20vendido.%20¿Pueden%20asignarme%20un%20código%20único?"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-8 py-4 bg-white text-terrapesca-green-600 rounded-lg hover:bg-gray-100 transition-colors font-bold text-lg shadow-lg"
-                  >
-                    <MessageSquare className="mr-3 h-6 w-6" />
-                    💬 ¡Quiero ser Promotor YA!
-                  </a>
-                  <div className="text-green-100 text-sm">
-                    ✅ Sin costos • ✅ Sin experiencia requerida • ✅ Soporte 24/7
-                  </div>
-                  <div className="text-green-100 text-xs">
-                    🔥 Comisiones automáticas del 10% + Dashboard en tiempo real
-                  </div>
-                </div>
               </div>
             </section>
           </div>
