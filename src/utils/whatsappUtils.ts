@@ -116,10 +116,6 @@ export function sendWhatsAppToCustomer(customerPhone: string, message: string): 
     window.open('https://wa.me/526686889571', '_blank');
   }
 }
-  
-  // Open WhatsApp
-  window.open(whatsappUrl, '_blank');
-}
 
 /**
  * No quantity-based bonuses - removed as per requirements
