@@ -264,6 +264,42 @@ Equipos profesionales de pesca
                 <li>• Explicar el sistema de comisiones del 15% honestamente</li>
                 <li>• Usar material gráfico proporcionado por Terrapesca</li>
                 <li>• Ganar comisiones y bonos por ventas legítimas</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Call to action final */}
+        <section className="bg-gradient-to-r from-terrapesca-green-500 to-terrapesca-green-600 rounded-lg shadow-terrapesca p-8 text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            🚀 ¡Comienza a Ganar Hoy Mismo!
+          </h2>
+          <p className="text-green-100 mb-6">
+            Únete a nuestro equipo de promotores y comienza a generar ingresos extra con el 15% de comisión por cada boleto vendido.
+          </p>
+          <div className="space-y-4">
+            <a
+              href="https://wa.me/526686889571?text=¡Hola!%20Quiero%20ser%20promotor%20de%20Sorteos%20Terrapesca.%20¿Pueden%20darme%20información%20sobre%20cómo%20empezar?"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-8 py-4 bg-white text-terrapesca-green-600 rounded-lg hover:bg-gray-100 transition-colors font-bold text-lg shadow-lg"
+            >
+              📱 Contactar por WhatsApp
+            </a>
+            <p className="text-green-100 text-sm">
+              💰 Sin costos • 📚 Sin experiencia requerida • 🆘 Soporte completo
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+    
+    <Footer />
+  </div>
+);
+};
+
+export default ManualPromotoresPage;
               Volver al inicio
             </Link>
             
