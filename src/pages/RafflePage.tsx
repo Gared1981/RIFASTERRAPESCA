@@ -38,6 +38,7 @@ const RafflePage: React.FC = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
   const [showGifModal, setShowGifModal] = useState(false);
+  const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchRaffle = async () => {
@@ -128,6 +129,10 @@ const RafflePage: React.FC = () => {
 
   const closeGifModal = () => {
     setShowGifModal(false);
+  };
+  
+  const handleImageError = (imageUrl: string) => {
+    setImageLoadErrors(prev => new Set([...prev, imageUrl]));
   };
 
   const nextModalImage = () => {
@@ -276,6 +281,7 @@ const RafflePage: React.FC = () => {
                               src={allImages[currentImageIndex]}
                               alt={raffle.name}
                               className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover transition-transform duration-300 group-hover:scale-105"
+                              onError={() => handleImageError(allImages[currentImageIndex])}
                             />
                             
                             {/* Overlay con icono de zoom */}

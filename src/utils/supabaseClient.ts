@@ -50,9 +50,11 @@ supabase.auth.getSession().then(({ data, error }) => {
     console.log('✅ Auth session initialized, user logged in:', !!data.session);
     if (data.session) {
       console.log('👤 User ID:', data.session.user.id);
-      console.log('📧 User email:', data.session.user.email);
+      console.log('📧 User email:', data.session.user.email || 'No email');
     }
   }
+}).catch(err => {
+  console.error('❌ Auth session initialization failed:', err);
 });
 
 // Test database connection

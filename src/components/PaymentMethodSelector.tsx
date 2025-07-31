@@ -40,10 +40,14 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   const [showMercadoPago, setShowMercadoPago] = useState(false);
   const [showPDFGenerator, setShowPDFGenerator] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'whatsapp'>('mercadopago');
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   const totalAmount = selectedTickets.length * raffleInfo.price;
 
   const handleWhatsAppPayment = async () => {
+    if (processingPayment) return;
+    setProcessingPayment(true);
+    
     const ticketNumbers = selectedTickets.map(t => t.number);
     let whatsappMessage = `¡Hola! Me gustaría confirmar la reserva de mis boletos: ${ticketNumbers.join(', ')}`;
     
@@ -111,6 +115,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     // Mostrar generador de PDF para WhatsApp
     setPaymentMethod('whatsapp');
     setShowPDFGenerator(true);
+    setProcessingPayment(false);
   };
 
   const handleMercadoPagoSelect = () => {

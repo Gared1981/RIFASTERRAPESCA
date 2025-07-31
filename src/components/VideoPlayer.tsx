@@ -20,6 +20,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [showModal, setShowModal] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoError, setVideoError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Función mejorada para detectar y generar URLs de embed
   const getEmbedUrl = (url: string, isAutoplay: boolean = false) => {
@@ -109,7 +111,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   useEffect(() => {
     if (autoplay && videoRef.current && isDirectVideo) {
       videoRef.current.muted = true;
-      videoRef.current.play().catch(console.error);
+      videoRef.current.play().catch((error) => {
+        console.error('Video autoplay failed:', error);
+        setVideoError(true);
+      });
       setIsPlaying(true);
     }
   }, [autoplay]);
@@ -148,6 +153,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
           loop
           playsInline
           src={videoUrl}
+          onError={() => setVideoError(true)}
         >
           Tu navegador no soporta el elemento de video.
         </video>

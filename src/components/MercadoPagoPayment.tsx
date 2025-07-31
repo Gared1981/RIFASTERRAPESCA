@@ -44,6 +44,7 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [diagnosticInfo, setDiagnosticInfo] = useState<any>(null);
+  const [connectionTest, setConnectionTest] = useState<boolean>(false);
 
   const totalAmount = selectedTickets.length * raffleInfo.price;
 
@@ -97,6 +98,7 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
       setPaymentStatus('processing');
       setError(null);
       setDiagnosticInfo(null);
+      setConnectionTest(true);
 
       // Validar datos del usuario
       const validationErrors = validateUserData();
@@ -218,7 +220,7 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
         clearTimeout(timeoutId);
         
         if (fetchError.name === 'AbortError') {
-          throw new Error('Tiempo de espera agotado. Verifica tu conexión a internet.');
+          throw new Error('Tiempo de espera agotado. Verifica tu conexión a internet e intenta de nuevo.');
         }
         throw fetchError;
       }
@@ -226,6 +228,7 @@ const MercadoPagoPayment: React.FC<MercadoPagoPaymentProps> = ({
     } catch (error: any) {
       console.error('💥 Error creating payment preference:', error);
       setPaymentStatus('error');
+      setConnectionTest(false);
       
       // Mensajes de error más amigables
       let errorMessage = error.message;

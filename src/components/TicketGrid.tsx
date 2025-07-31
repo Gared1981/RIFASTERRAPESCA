@@ -19,6 +19,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
 
   const fetchTickets = async () => {
     try {
@@ -108,7 +109,13 @@ const TicketGrid: React.FC<TicketGridProps> = ({
       }
     } catch (err) {
       console.error('❌ Error fetching tickets:', err);
-      setError('No pudimos cargar los boletos. Intenta de nuevo más tarde.');
+      setRetryCount(prev => prev + 1);
+      if (retryCount < 3) {
+        setError(`Error al cargar boletos (intento ${retryCount + 1}/3). Reintentando...`);
+        setTimeout(() => fetchTickets(), 2000);
+      } else {
+        setTimeout(() => fetchTickets(), 1000);
+      }
     } finally {
       setLoading(false);
     }

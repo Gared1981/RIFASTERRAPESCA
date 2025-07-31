@@ -8,6 +8,7 @@ const VerifyPage: React.FC = () => {
   const [ticketInfo, setTicketInfo] = useState<(Ticket & { user?: User, raffle_name?: string }) | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +24,12 @@ const VerifyPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // Add to search history
+      setSearchHistory(prev => {
+        const newHistory = [formattedTicketNumber, ...prev.filter(h => h !== formattedTicketNumber)];
+        return newHistory.slice(0, 5); // Keep only last 5 searches
+      });
       
       // Query ticket information
       const { data: ticketData, error: ticketError } = await supabase
@@ -219,6 +226,23 @@ const VerifyPage: React.FC = () => {
                         </>
                       )}
                     </div>
+                  </div>
+                </div>
+              )}
+              {searchHistory.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500 mb-1">Búsquedas recientes:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {searchHistory.map((number, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setTicketNumber(number)}
+                        className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded border"
+                      >
+                        {number}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}

@@ -45,6 +45,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
   const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null);
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   const [reservationComplete, setReservationComplete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Load saved user data on component mount
   useEffect(() => {
@@ -162,6 +163,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
     
     try {
       setLoading(true);
+      setError(null);
       
       // Save user data for future use
       saveUserData({
@@ -221,6 +223,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
       
     } catch (error) {
       console.error('Error reserving tickets:', error);
+      setError('Hubo un error al reservar tus boletos. Intenta de nuevo.');
       toast.error('Hubo un error al reservar tus boletos. Intenta de nuevo.');
     } finally {
       setLoading(false);
@@ -347,6 +350,15 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
           </div>
         </div>
       </div>
+      
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center">
+            <div className="text-red-600 mr-2">⚠️</div>
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

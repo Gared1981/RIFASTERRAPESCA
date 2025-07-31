@@ -11,18 +11,23 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate }) => {
     minutes: 0,
     seconds: 0
   });
+  const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
       const difference = +new Date(targetDate) - +new Date();
       
       if (difference > 0) {
+        setIsExpired(false);
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
           minutes: Math.floor((difference / 1000 / 60) % 60),
           seconds: Math.floor((difference / 1000) % 60)
         });
+      } else {
+        setIsExpired(true);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     };
 
@@ -31,6 +36,19 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate }) => {
 
     return () => clearInterval(timer);
   }, [targetDate]);
+
+  if (isExpired) {
+    return (
+      <div className="text-center p-6 bg-red-50 border border-red-200 rounded-lg">
+        <h3 className="text-lg font-semibold text-red-800 mb-2">
+          🏁 ¡Sorteo Finalizado!
+        </h3>
+        <p className="text-red-600">
+          El tiempo para este sorteo ha terminado.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-4 text-center">

@@ -13,6 +13,7 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedTickets, setSelectedTickets] = useState<number[]>([]);
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
   
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = 
@@ -48,6 +49,9 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
       return;
     }
     
+    if (bulkActionLoading) return;
+    setBulkActionLoading(true);
+    
     try {
       const { error } = await supabase
         .from('tickets')
@@ -65,6 +69,8 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
     } catch (err) {
       console.error('Error confirming payment:', err);
       toast.error('Hubo un error al confirmar el pago');
+    } finally {
+      setBulkActionLoading(false);
     }
   };
   
@@ -73,6 +79,9 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
       toast.error('Selecciona al menos un boleto');
       return;
     }
+    
+    if (bulkActionLoading) return;
+    setBulkActionLoading(true);
     
     try {
       const { error } = await supabase
@@ -93,6 +102,8 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
     } catch (err) {
       console.error('Error releasing tickets:', err);
       toast.error('Hubo un error al liberar los boletos');
+    } finally {
+      setBulkActionLoading(false);
     }
   };
   
@@ -290,17 +301,19 @@ Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 
           <div className="flex items-center mt-4 gap-2">
             <button
               onClick={confirmPayment}
+              disabled={bulkActionLoading}
               className="inline-flex items-center px-3 py-1.5 bg-green-500 text-white text-sm rounded-md hover:bg-green-600"
             >
               <Check size={16} className="mr-1" />
-              Confirmar pago
+              {bulkActionLoading ? 'Procesando...' : 'Confirmar pago'}
             </button>
             <button
               onClick={releaseTickets}
+              disabled={bulkActionLoading}
               className="inline-flex items-center px-3 py-1.5 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
             >
               <X size={16} className="mr-1" />
-              Liberar boletos
+              {bulkActionLoading ? 'Procesando...' : 'Liberar boletos'}
             </button>
             <button
               onClick={exportToCSV}
