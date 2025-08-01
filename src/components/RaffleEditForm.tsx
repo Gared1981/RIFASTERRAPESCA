@@ -123,108 +123,123 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
     try {
       setRegeneratingTickets(true);
       
-      console.log(`🗑️ Starting ticket regeneration for raffle ${raffleId} with ${totalTickets} tickets...`);
+      console.log(`🗑️ Starting FORCED ticket regeneration for raffle ${raffleId} with ${totalTickets} tickets...`);
       
-      // Step 1: Count existing tickets
-      const { count: existingCount, error: countError } = await supabase
-        .from('tickets')
-        .select('*', { count: 'exact', head: true })
-        .eq('raffle_id', raffleId);
-        
-      if (countError) {
-        console.error('❌ Error counting existing tickets:', countError);
-        throw new Error(`Error al contar boletos existentes: ${countError.message}`);
-      }
-      
-      console.log(`📊 Found ${existingCount || 0} existing tickets to delete`);
-      
-      // Step 2: Delete ALL existing tickets for this raffle using CASCADE
-      const { error: deleteError } = await supabase
-        .from('tickets')
-        .delete()
-        .eq('raffle_id', raffleId);
-        
-      if (deleteError) {
-        console.error('❌ Error deleting existing tickets:', deleteError);
-        throw new Error(`Error al eliminar boletos existentes: ${deleteError.message}`);
-      }
-      
-      console.log(`✅ Deletion command executed for raffle ${raffleId}`);
-      
-      // Step 3: Force verification with multiple attempts
-      let verificationAttempts = 0;
-      const maxAttempts = 15;
-      
-      while (verificationAttempts < maxAttempts) {
-        const { count: remainingCount, error: verifyError } = await supabase
-          .from('tickets')
-          .select('*', { count: 'exact', head: true })
-          .eq('raffle_id', raffleId);
-          
-        if (verifyError) {
-          console.error('❌ Error verifying deletion:', verifyError);
-          throw new Error(`Error al verificar eliminación: ${verifyError.message}`);
-        }
-        
-        if (remainingCount === 0) {
-          console.log(`✅ Deletion verified: 0 tickets remaining for raffle ${raffleId}`);
-          break;
-        }
-        
-        verificationAttempts++;
-        console.log(`⏳ Deletion verification attempt ${verificationAttempts}/${maxAttempts}: ${remainingCount} tickets still exist`);
-        
-        if (verificationAttempts >= maxAttempts) {
-          throw new Error(`No se pudieron eliminar todos los boletos después de ${maxAttempts} intentos. Quedan ${remainingCount} boletos.`);
-        }
-        
-        // Wait before next verification
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-      
-      // Step 4: Generate new tickets with proper validation
-      console.log(`🎫 Generating ${totalTickets} new tickets...`);
-      
-      // Use optimized batch insertion for large quantities
-      const batchSize = totalTickets > 1000 ? 100 : 50; // Larger batches for big quantities
-      let totalInserted = 0;
-      
-      // Try SQL bulk insert first for better performance with large quantities
+      // Step 1: Use SQL function for forced deletion and regeneration
       try {
-        console.log(`🚀 Attempting SQL bulk insert for ${totalTickets} tickets...`);
+        console.log(`🚀 Using SQL function for forced regeneration...`);
         
-        const { error: sqlBulkError } = await supabase.rpc('sql', {
+        // Execute the SQL function that handles everything
+        const { data: sqlResult, error: sqlError } = await supabase.rpc('sql', {
           query: `
-            INSERT INTO tickets (number, status, raffle_id)
-            SELECT 
-              LPAD(generate_series::TEXT, 4, '0'),
-              'available',
-              ${raffleId}
-            FROM generate_series(0, ${totalTickets - 1})
+            DO $$
+            DECLARE
+                existing_count INTEGER;
+                final_count INTEGER;
+            BEGIN
+                -- Count existing tickets
+                SELECT COUNT(*) INTO existing_count FROM tickets WHERE raffle_id = ${raffleId};
+                RAISE NOTICE 'Existing tickets: %', existing_count;
+                
+                -- Clean payment_logs references first
+                UPDATE payment_logs 
+                SET ticket_ids = NULL 
+                WHERE ticket_ids && (
+                    SELECT ARRAY_AGG(id) 
+                    FROM tickets 
+                    WHERE raffle_id = ${raffleId}
+                );
+                
+                -- Force delete all tickets for this raffle
+                DELETE FROM tickets WHERE raffle_id = ${raffleId};
+                
+                -- Verify deletion
+                SELECT COUNT(*) INTO existing_count FROM tickets WHERE raffle_id = ${raffleId};
+                IF existing_count > 0 THEN
+                    RAISE EXCEPTION 'Could not delete all tickets. % remaining', existing_count;
+                END IF;
+                
+                -- Generate new tickets (0000 to ${totalTickets - 1})
+                INSERT INTO tickets (number, status, raffle_id)
+                SELECT 
+                    LPAD(generate_series::TEXT, 4, '0'),
+                    'available',
+                    ${raffleId}
+                FROM generate_series(0, ${totalTickets - 1});
+                
+                -- Verify final count
+                SELECT COUNT(*) INTO final_count FROM tickets WHERE raffle_id = ${raffleId};
+                IF final_count != ${totalTickets} THEN
+                    RAISE EXCEPTION 'Expected % tickets but created %', ${totalTickets}, final_count;
+                END IF;
+                
+                RAISE NOTICE 'SUCCESS: % tickets generated for raffle %', final_count, ${raffleId};
+            END $$;
           `
         });
         
-        if (!sqlBulkError) {
-          console.log(`✅ SQL bulk insert successful for ${totalTickets} tickets`);
-          totalInserted = totalTickets;
+        if (sqlError) {
+          console.error('❌ SQL function failed:', sqlError);
+          throw new Error(`Error en función SQL: ${sqlError.message}`);
         } else {
-          throw new Error('SQL bulk insert failed, falling back to batch method');
+          console.log(`✅ SQL function completed successfully`);
         }
-      } catch (sqlError) {
-        console.warn('SQL bulk insert failed, using batch method...', sqlError);
         
-        // Fallback to batch insertion
+      } catch (sqlError) {
+        console.error('❌ SQL method failed, using alternative approach...', sqlError);
+        
+        // Alternative: Use smaller batches with forced deletion
+        console.log('🔄 Attempting alternative batch method...');
+        
+        // Force delete using smaller operations
+        let deletionAttempts = 0;
+        const maxDeletionAttempts = 5;
+        
+        while (deletionAttempts < maxDeletionAttempts) {
+          try {
+            // Clean payment_logs first
+            await supabase.rpc('sql', {
+              query: `UPDATE payment_logs SET ticket_ids = NULL WHERE ticket_ids IS NOT NULL;`
+            });
+            
+            // Delete in smaller batches
+            const { error: deleteError } = await supabase
+              .from('tickets')
+              .delete()
+              .eq('raffle_id', raffleId);
+              
+            if (!deleteError) {
+              console.log('✅ Alternative deletion successful');
+              break;
+            } else {
+              throw deleteError;
+            }
+          } catch (deleteErr) {
+            deletionAttempts++;
+            console.warn(`⚠️ Deletion attempt ${deletionAttempts}/${maxDeletionAttempts} failed:`, deleteErr);
+            
+            if (deletionAttempts >= maxDeletionAttempts) {
+              throw new Error(`No se pudieron eliminar los boletos después de ${maxDeletionAttempts} intentos: ${deleteErr.message}`);
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          }
+        }
+        
+        // Generate tickets in batches
+        const batchSize = 200;
+        let totalInserted = 0;
+        
         for (let i = 0; i < totalTickets; i += batchSize) {
-          const batchStart = i;
           const batchEnd = Math.min(i + batchSize - 1, totalTickets - 1);
-          const batchCount = batchEnd - batchStart + 1;
+          const batchCount = batchEnd - i + 1;
           
-          console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(totalTickets / batchSize)} (${batchStart}-${batchEnd})...`);
+          console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(totalTickets / batchSize)} (${i.toString().padStart(4, '0')}-${batchEnd.toString().padStart(4, '0')})...`);
           
           const tickets = Array.from(
             { length: batchCount }, 
             (_, idx) => ({
-              number: (batchStart + idx).toString().padStart(4, '0'),
+              number: (i + idx).toString().padStart(4, '0'),
               status: 'available' as const,
               raffle_id: raffleId
             })
@@ -242,14 +257,14 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
           totalInserted += batchCount;
           console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${totalTickets})`);
           
-          // Shorter delay for large quantities
+          // Short delay between batches
           if (i + batchSize < totalTickets) {
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 300));
           }
         }
       }
       
-      // Step 6: Final verification
+      // Step 2: Final verification
       const { count: finalCount, error: finalError } = await supabase
         .from('tickets')
         .select('*', { count: 'exact', head: true })
@@ -264,12 +279,12 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         throw new Error(`Error: Se esperaban ${totalTickets} boletos pero se crearon ${finalCount}`);
       }
       
-      console.log(`✅ Regeneration completed successfully: ${finalCount} tickets for raffle ${raffleId}`);
-      toast.success(`${totalTickets} boletos regenerados exitosamente`);
+      console.log(`✅ FORCED regeneration completed successfully: ${finalCount} tickets for raffle ${raffleId}`);
+      toast.success(`🎉 ${totalTickets} boletos regenerados exitosamente (${(0).toString().padStart(4, '0')}-${(totalTickets-1).toString().padStart(4, '0')})`);
       
     } catch (error: any) {
       console.error('Error regenerating tickets:', error);
-      toast.error(`Error al regenerar boletos: ${error.message}`);
+      toast.error(`❌ Error al regenerar boletos: ${error.message}`);
       throw error;
     } finally {
       setRegeneratingTickets(false);

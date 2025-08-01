@@ -935,17 +935,17 @@ const AdminPage: React.FC = () => {
             </button>
             <button
               onClick={handleRegenerateTickets}
-              disabled={!selectedRaffle || loading}
+              className="mt-3 inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 font-bold disabled:opacity-50 disabled:transform-none"
               className="inline-flex items-center px-4 py-2 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw className="mr-2 h-4 w-4" />
               Regenerar Boletos
-            </button>
+                  Configurando 2000 boletos...
             <button
               onClick={handleRegenerateAllTickets}
               disabled={loading}
               className="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+                  🎣 Configurar Trolling (2000 boletos)
               <RefreshCw className="mr-2 h-4 w-4" />
               Regenerar TODOS los Boletos
             </button>
@@ -1232,7 +1232,7 @@ const AdminPage: React.FC = () => {
                         </dd>
                       </dl>
                     </div>
-                  </div>
+                  Usa este botón para configurar automáticamente el sorteo de Trolling con 2000 boletos (0000-1999).
                 </div>
               </div>
             </div>
