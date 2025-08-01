@@ -156,7 +156,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
           // Refresh tickets if any were released
           fetchTickets();
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Exception during auto cleanup:', error);
       }
     }, 60000); // 60 seconds (más frecuente)
