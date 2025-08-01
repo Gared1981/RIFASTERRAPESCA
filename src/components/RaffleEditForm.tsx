@@ -123,15 +123,26 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
     try {
       setRegeneratingTickets(true);
       
-      // Delete existing tickets for this raffle
+      console.log(`🗑️ Deleting existing tickets for raffle ${raffleId}...`);
+      
+      // First, delete ALL existing tickets for this raffle (regardless of status)
       const { error: deleteError } = await supabase
         .from('tickets')
         .delete()
         .eq('raffle_id', raffleId);
         
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error('❌ Error deleting existing tickets:', deleteError);
+        throw new Error(`Error al eliminar boletos existentes: ${deleteError.message}`);
+      }
+      
+      console.log(`✅ Existing tickets deleted for raffle ${raffleId}`);
+      
+      // Wait a moment to ensure deletion is complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Generate new tickets
+      console.log(`🎫 Generating ${totalTickets} new tickets...`);
       const tickets = Array.from(
         { length: totalTickets }, 
         (_, i) => ({
@@ -141,16 +152,32 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         })
       );
       
-      const { error: insertError } = await supabase
-        .from('tickets')
-        .insert(tickets);
+      // Insert tickets in batches to avoid potential conflicts
+      const batchSize = 100;
+      for (let i = 0; i < tickets.length; i += batchSize) {
+        const batch = tickets.slice(i, i + batchSize);
+        console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tickets.length / batchSize)}...`);
         
-      if (insertError) throw insertError;
-      
+        const { error: insertError } = await supabase
+          .from('tickets')
+          .insert(batch);
+          
+        if (insertError) {
+          console.error('❌ Error inserting ticket batch:', insertError);
+          throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${insertError.message}`);
+        }
+        
+        // Small delay between batches
+        if (i + batchSize < tickets.length) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
       console.log(`✅ Regenerated ${totalTickets} tickets for raffle ${raffleId}`);
+      toast.success(`${totalTickets} boletos regenerados exitosamente`);
       
     } catch (error) {
       console.error('Error regenerating tickets:', error);
+      toast.error(`Error al regenerar boletos: ${error.message}`);
       throw error;
     } finally {
       setRegeneratingTickets(false);

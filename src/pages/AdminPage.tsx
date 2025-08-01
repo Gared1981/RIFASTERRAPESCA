@@ -329,15 +329,26 @@ const AdminPage: React.FC = () => {
         return;
       }
       
-      // Delete existing tickets for this raffle
+      console.log(`🗑️ Deleting existing tickets for raffle ${selectedRaffle}...`);
+      
+      // Delete ALL existing tickets for this raffle (regardless of status)
       const { error: deleteError } = await supabase
         .from('tickets')
         .delete()
         .eq('raffle_id', selectedRaffle);
         
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error('❌ Error deleting existing tickets:', deleteError);
+        throw new Error(`Error al eliminar boletos existentes: ${deleteError.message}`);
+      }
+      
+      console.log(`✅ Existing tickets deleted for raffle ${selectedRaffle}`);
+      
+      // Wait a moment to ensure deletion is complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Generate new tickets
+      console.log(`🎫 Generating ${raffleData.total_tickets} new tickets...`);
       const tickets = Array.from(
         { length: raffleData.total_tickets }, 
         (_, i) => ({
@@ -347,11 +358,26 @@ const AdminPage: React.FC = () => {
         })
       );
       
-      const { error: insertError } = await supabase
-        .from('tickets')
-        .insert(tickets);
+      // Insert tickets in batches to avoid potential conflicts
+      const batchSize = 100;
+      for (let i = 0; i < tickets.length; i += batchSize) {
+        const batch = tickets.slice(i, i + batchSize);
+        console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tickets.length / batchSize)}...`);
         
-      if (insertError) throw insertError;
+        const { error: insertError } = await supabase
+          .from('tickets')
+          .insert(batch);
+          
+        if (insertError) {
+          console.error('❌ Error inserting ticket batch:', insertError);
+          throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${insertError.message}`);
+        }
+        
+        // Small delay between batches
+        if (i + batchSize < tickets.length) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
       
       toast.success(`${raffleData.total_tickets} boletos regenerados exitosamente para "${raffleData.name}"`);
       
@@ -391,11 +417,21 @@ const AdminPage: React.FC = () => {
       let totalTicketsCreated = 0;
       
       for (const raffle of allRaffles) {
+        console.log(`🗑️ Processing raffle: ${raffle.name} (${raffle.total_tickets} tickets)`);
+        
         // Delete existing tickets for this raffle
-        await supabase
+        const { error: deleteError } = await supabase
           .from('tickets')
           .delete()
           .eq('raffle_id', raffle.id);
+          
+        if (deleteError) {
+          console.error(`❌ Error deleting tickets for raffle ${raffle.id}:`, deleteError);
+          continue; // Skip this raffle and continue with others
+        }
+        
+        // Wait a moment to ensure deletion is complete
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Generate new tickets
         const tickets = Array.from(
@@ -407,15 +443,32 @@ const AdminPage: React.FC = () => {
           })
         );
         
-        const { error: insertError } = await supabase
-          .from('tickets')
-          .insert(tickets);
+        // Insert tickets in batches
+        const batchSize = 100;
+        let raffleTicketsCreated = 0;
+        
+        for (let i = 0; i < tickets.length; i += batchSize) {
+          const batch = tickets.slice(i, i + batchSize);
           
-        if (insertError) {
-          console.error(`Error creating tickets for raffle ${raffle.id}:`, insertError);
-        } else {
-          totalTicketsCreated += raffle.total_tickets;
+          const { error: insertError } = await supabase
+            .from('tickets')
+            .insert(batch);
+            
+          if (insertError) {
+            console.error(`❌ Error creating tickets batch for raffle ${raffle.id}:`, insertError);
+            break; // Stop processing this raffle
+          } else {
+            raffleTicketsCreated += batch.length;
+          }
+          
+          // Small delay between batches
+          if (i + batchSize < tickets.length) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
         }
+        
+        totalTicketsCreated += raffleTicketsCreated;
+        console.log(`✅ Created ${raffleTicketsCreated} tickets for raffle: ${raffle.name}`);
       }
       
       toast.success(`Regenerados ${totalTicketsCreated} boletos para ${allRaffles.length} sorteos`);
