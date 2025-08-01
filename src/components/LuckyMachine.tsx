@@ -95,7 +95,7 @@ const LuckyMachine: React.FC<LuckyMachineProps> = ({ raffleId, onTicketsSelected
       // Pass selected tickets to parent
       onTicketsSelected(randomTickets as Ticket[]);
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error selecting random tickets:', err);
       setError('Ocurrió un error al seleccionar boletos. Intenta de nuevo.');
     } finally {

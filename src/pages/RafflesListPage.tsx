@@ -43,7 +43,7 @@ const RafflesListPage: React.FC = () => {
         }
         
         setRaffles(data || []);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error in fetchRaffles:', err);
         setError(err instanceof Error ? err.message : 'No se pudieron cargar los sorteos');
       } finally {

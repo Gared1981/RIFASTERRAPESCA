@@ -142,7 +142,7 @@ const RafflesPage = () => {
         fetchRaffles();
       }, 1000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating raffle status:', error);
       toast.error(`Error al cambiar el estado: ${error.message}`);
     } finally {
@@ -163,7 +163,7 @@ const RafflesPage = () => {
       
       toast.success('Sorteo eliminado');
       fetchRaffles();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting raffle:', error);
       toast.error('Error al eliminar el sorteo');
     }
@@ -184,7 +184,7 @@ const RafflesPage = () => {
       const url = `${window.location.origin}/sorteo/${cleanSlug}`;
       await navigator.clipboard.writeText(url);
       toast.success('Enlace copiado al portapapeles');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error copying link:', error);
       toast.error('Error al copiar el enlace');
     }

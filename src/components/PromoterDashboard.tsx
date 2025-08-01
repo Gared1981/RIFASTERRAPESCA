@@ -117,7 +117,7 @@ const PromoterDashboard: React.FC = () => {
       if (error) throw error;
       toast.success('Promotor eliminado exitosamente');
       fetchPromoters();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting promoter:', error);
       toast.error('Error al eliminar el promotor');
     }
@@ -133,7 +133,7 @@ const PromoterDashboard: React.FC = () => {
       if (error) throw error;
       toast.success(`Promotor ${!currentStatus ? 'activado' : 'desactivado'} exitosamente`);
       fetchPromoters();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling promoter status:', error);
       toast.error('Error al cambiar el estado del promotor');
     }
@@ -145,7 +145,7 @@ const PromoterDashboard: React.FC = () => {
       const link = `${baseUrl}/boletos?promo=${promoterCode}`;
       await navigator.clipboard.writeText(link);
       toast.success('¡Enlace copiado al portapapeles!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error copying to clipboard:', error);
       toast.error('Error al copiar el enlace');
     }

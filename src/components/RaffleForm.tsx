@@ -181,7 +181,7 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
       toast.success('Sorteo creado exitosamente');
       onComplete();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating raffle:', error);
       toast.error('Error al crear el sorteo');
     } finally {

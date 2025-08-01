@@ -111,11 +111,11 @@ const TicketGrid: React.FC<TicketGridProps> = ({
       console.error('❌ Error fetching tickets:', err);
       setRetryCount(prev => prev + 1);
       if (retryCount < 3) {
-        setError(`Error al cargar boletos (intento ${retryCount + 1}/3). Reintentando...`);
+      } catch (autoGenError: any) {
         setTimeout(() => fetchTickets(), 2000);
       } else {
         setTimeout(() => fetchTickets(), 1000);
-      }
+    } catch (raffleCheckError: any) {
     } finally {
       setLoading(false);
     }
@@ -157,7 +157,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
           // Refresh tickets if any were released
           fetchTickets();
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Exception during auto cleanup:', error);
       }
     }, 60000); // 60 seconds (más frecuente)
@@ -221,7 +221,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
               selected={isSelected(ticket)}
               onSelect={onSelectTicket}
               disabled={isSelectionDisabled(ticket)}
-            />
+  } catch (err: any) {
           ))}
         </div>
       )}

@@ -82,7 +82,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       
       // Video directo
       return url;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing video URL:', error);
       return url;
     }

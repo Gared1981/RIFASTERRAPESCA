@@ -66,7 +66,7 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
       toast.success(`${selectedTickets.length} boleto(s) marcados como pagados`);
       setSelectedTickets([]);
       onRefresh();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error confirming payment:', err);
       toast.error('Hubo un error al confirmar el pago');
     } finally {
@@ -99,7 +99,7 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
       toast.success(`${selectedTickets.length} boleto(s) liberados`);
       setSelectedTickets([]);
       onRefresh();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error releasing tickets:', err);
       toast.error('Hubo un error al liberar los boletos');
     } finally {
@@ -184,7 +184,7 @@ const AdminTicketTable: React.FC<AdminTicketTableProps> = ({ tickets, onRefresh 
       } else {
         toast.error('Este usuario no tiene email registrado');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error sending email:', err);
       toast.error('Error al enviar el correo');
     }
@@ -260,7 +260,7 @@ Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 
       document.body.removeChild(link);
       
       toast.success('Archivo CSV generado');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error exporting to CSV:', err);
       toast.error('Error al generar el archivo CSV');
     }

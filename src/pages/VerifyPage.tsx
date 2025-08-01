@@ -64,7 +64,7 @@ const VerifyPage: React.FC = () => {
       
       setTicketInfo(transformedData);
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error verifying ticket:', err);
       setError('Ocurrió un error al verificar el boleto. Intenta de nuevo más tarde.');
     } finally {

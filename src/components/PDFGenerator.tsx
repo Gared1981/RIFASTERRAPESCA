@@ -487,7 +487,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
       onGenerate(blob);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating HTML:', error);
     }
   };

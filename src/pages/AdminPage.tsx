@@ -162,7 +162,7 @@ const AdminPage: React.FC = () => {
       setTickets(data as Array<Ticket & { user?: User }>);
       
       // Calculate stats
-      const ticketStats = {
+        } catch (error: any) {
         totalTickets: data.length,
         available: data.filter(t => t.status === 'available').length,
         reserved: data.filter(t => t.status === 'reserved').length,
@@ -463,7 +463,7 @@ const AdminPage: React.FC = () => {
       // Refresh tickets
       await fetchTickets(selectedRaffle);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error regenerating tickets:', error);
       toast.error(`Error al regenerar boletos: ${error.message}`);
     } finally {

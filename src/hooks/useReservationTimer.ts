@@ -48,7 +48,7 @@ export function useReservationTimer(ticketIds: number[], reservationTimeMinutes 
       setIsActive(false);
       
       console.log('Released tickets due to timer expiration:', ticketIds);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error releasing tickets:', error);
       // Don't throw here to prevent UI crashes
     }

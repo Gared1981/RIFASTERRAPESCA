@@ -80,7 +80,7 @@ const PromoterLinkGenerator: React.FC = () => {
     try {
       await navigator.clipboard.writeText(generatedLink);
       toast.success('¡Enlace copiado al portapapeles!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error copying to clipboard:', error);
       toast.error('Error al copiar el enlace');
     }

@@ -255,7 +255,7 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
       console.log(`✅ Regeneration completed successfully: ${finalCount} tickets for raffle ${raffleId}`);
       toast.success(`${totalTickets} boletos regenerados exitosamente`);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error regenerating tickets:', error);
       toast.error(`Error al regenerar boletos: ${error.message}`);
       throw error;

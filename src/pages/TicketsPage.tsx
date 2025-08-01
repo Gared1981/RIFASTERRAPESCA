@@ -75,7 +75,7 @@ const TicketsPage: React.FC = () => {
         }
         // If no raffle specified, don't select any (user must choose)
         
-      } catch (err) {
+      } catch (err: any) {
         console.error('❌ Error fetching raffles:', err);
         setError(err instanceof Error ? err.message : 'An error occurred while fetching raffles');
         setActiveRaffles([]);

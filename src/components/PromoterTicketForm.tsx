@@ -127,7 +127,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
           throw new Error(result.error || 'Failed to register sale');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error registering sales with promoter:', error);
       // Don't throw here - we still want the ticket reservation to succeed
       toast.error('Boletos reservados, pero hubo un error al registrar las ventas del promotor');
@@ -212,7 +212,7 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
         setShowPaymentMethods(true);
       }, 2000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error reserving tickets:', error);
       setError('Hubo un error al reservar tus boletos. Intenta de nuevo.');
       toast.error('Hubo un error al reservar tus boletos. Intenta de nuevo.');

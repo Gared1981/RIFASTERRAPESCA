@@ -93,7 +93,7 @@ const RafflePage: React.FC = () => {
           text: `¡Mira este sorteo: ${raffle?.name}!`,
           url
         });
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error sharing:', err);
       }
     } else {
@@ -101,7 +101,7 @@ const RafflePage: React.FC = () => {
       try {
         await navigator.clipboard.writeText(url);
         toast.success('¡Enlace copiado al portapapeles!');
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error copying to clipboard:', err);
         toast.error('No se pudo copiar el enlace');
       }

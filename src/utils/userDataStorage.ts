@@ -23,7 +23,7 @@ export const saveUserData = (userData: Omit<UserData, 'lastUsed'>): void => {
     
     localStorage.setItem(USER_DATA_KEY, JSON.stringify(dataToSave));
     console.log('✅ Datos de usuario guardados exitosamente');
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error al guardar datos de usuario:', error);
   }
 };
@@ -48,7 +48,7 @@ export const getUserData = (): UserData | null => {
     
     console.log('✅ Datos de usuario recuperados exitosamente');
     return userData;
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error al recuperar datos de usuario:', error);
     return null;
   }
@@ -58,7 +58,7 @@ export const clearUserData = (): void => {
   try {
     localStorage.removeItem(USER_DATA_KEY);
     console.log('✅ Datos de usuario eliminados');
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error al eliminar datos de usuario:', error);
   }
 };
