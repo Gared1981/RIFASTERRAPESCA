@@ -63,7 +63,7 @@ const LuckyMachine: React.FC<LuckyMachineProps> = ({ raffleId, onTicketsSelected
         .select('*')
         .eq('raffle_id', raffleId)
         .eq('status', 'available')
-        .limit(quantity * 2); // Get more tickets than needed for better randomization
+        .limit(Math.min(quantity * 3, 1000)); // Get more tickets for randomization, but limit for performance
         
       if (error) throw error;
       

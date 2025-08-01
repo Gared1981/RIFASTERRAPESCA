@@ -334,23 +334,17 @@ const AdminPage: React.FC = () => {
       // Step 1: Force delete using CASCADE
       console.log('🔥 FORCE DELETING all existing tickets...');
       
-      // Use raw SQL for more reliable deletion
-      const { error: forceDeleteError } = await supabase.rpc('sql', {
-        query: `DELETE FROM tickets WHERE raffle_id = ${selectedRaffle}`
-      });
-      
-      if (forceDeleteError) {
-        // Fallback to regular delete
-        console.warn('SQL delete failed, using regular delete...');
-        const { error: regularDeleteError } = await supabase
-          .from('tickets')
-          .delete()
-          .eq('raffle_id', selectedRaffle);
-          
-        if (regularDeleteError) {
-          throw new Error(`Error al eliminar boletos: ${regularDeleteError.message}`);
-        }
+      // Force delete all tickets for this raffle
+      const { error: deleteError } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('raffle_id', selectedRaffle);
+        
+      if (deleteError) {
+        console.error('❌ Error deleting tickets:', deleteError);
+        throw new Error(`Error al eliminar boletos: ${deleteError.message}`);
       }
+      
       
       // Wait for deletion to complete
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -375,55 +369,44 @@ const AdminPage: React.FC = () => {
       // Step 3: Generate tickets using SQL for maximum reliability
       console.log(`🎫 GENERATING ${raffleData.total_tickets} new tickets using SQL...`);
       
-      // Try SQL bulk insert first
-      const { error: sqlInsertError } = await supabase.rpc('sql', {
-        query: `
-          INSERT INTO tickets (number, status, raffle_id)
-          SELECT 
-            LPAD(generate_series::TEXT, 4, '0'),
-            'available',
-            ${selectedRaffle}
-          FROM generate_series(0, ${raffleData.total_tickets - 1})
-        `
-      });
+      // Generate tickets using optimized batch insertion
+      const batchSize = raffleData.total_tickets > 1000 ? 200 : 100; // Larger batches for big quantities
+      let totalInserted = 0;
       
-      if (sqlInsertError) {
-        console.warn('SQL bulk insert failed, using batch insert method...');
+      for (let i = 0; i < raffleData.total_tickets; i += batchSize) {
+        const batchStart = i;
+        const batchEnd = Math.min(i + batchSize - 1, raffleData.total_tickets - 1);
+        const batchCount = batchEnd - batchStart + 1;
         
-        // Fallback to batch insert
-        const batchSize = 50;
-        let totalInserted = 0;
+        console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(raffleData.total_tickets / batchSize)} (tickets ${batchStart}-${batchEnd})...`);
         
-        for (let i = 0; i < raffleData.total_tickets; i += batchSize) {
-          const batchStart = i;
-          const batchEnd = Math.min(i + batchSize - 1, raffleData.total_tickets - 1);
-          const batchCount = batchEnd - batchStart + 1;
+        const tickets = Array.from(
+          { length: batchCount }, 
+          (_, idx) => ({
+            number: (batchStart + idx).toString().padStart(4, '0'),
+            status: 'available' as const,
+            raffle_id: selectedRaffle
+          })
+        );
+        
+        const { error: batchError } = await supabase
+          .from('tickets')
+          .insert(tickets);
           
-          const tickets = Array.from(
-            { length: batchCount }, 
-            (_, idx) => ({
-              number: (batchStart + idx).toString().padStart(4, '0'),
-              status: 'available' as const,
-              raffle_id: selectedRaffle
-            })
-          );
-          
-          const { error: batchError } = await supabase
-            .from('tickets')
-            .insert(tickets);
-            
-          if (batchError) {
-            console.error('❌ Error inserting batch:', batchError);
-            throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${batchError.message}`);
-          }
-          
-          totalInserted += batchCount;
-          console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted (${totalInserted}/${raffleData.total_tickets})`);
-          
-          // Delay between batches
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        if (batchError) {
+          console.error('❌ Error inserting batch:', batchError);
+          throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${batchError.message}`);
+        }
+        
+        totalInserted += batchCount;
+        console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${raffleData.total_tickets})`);
+        
+        // Shorter delay for large quantities
+        if (i + batchSize < raffleData.total_tickets) {
+          await new Promise(resolve => setTimeout(resolve, 300));
         }
       }
+      
       
       // Wait for all inserts to complete
       await new Promise(resolve => setTimeout(resolve, 2000));

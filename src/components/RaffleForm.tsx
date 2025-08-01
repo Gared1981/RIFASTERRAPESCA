@@ -120,7 +120,7 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
     }
     
     if (parseInt(formData.total_tickets) > 10000) {
-      toast.error('El número máximo de boletos es 10,000');
+      toast.error('El número máximo de boletos es 10,000. Para cantidades mayores, contacta al administrador del sistema.');
       return;
     }
     
@@ -456,15 +456,12 @@ const RaffleForm: React.FC<RaffleFormProps> = ({ onComplete, onCancel }) => {
               onChange={handleChange}
               required
               min="1"
-              max="1001"
+              max="10000"
               className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
               placeholder="1000"
             />
             <p className="mt-1 text-sm text-gray-500">
-              Los números de boleto se generarán automáticamente desde 0000. Ejemplo: si ingresas 1000, los boletos serán 0000-0999
-            </p>
-            <p className="mt-1 text-sm text-gray-500">
-              Los números de boleto serán generados automáticamente desde 0000 hasta {formData.total_tickets ? (parseInt(formData.total_tickets) - 1).toString().padStart(4, '0') : '0999'}
+              Los números de boleto se generarán automáticamente desde 0000 hasta {formData.total_tickets ? (parseInt(formData.total_tickets) - 1).toString().padStart(4, '0') : '0999'}. Máximo: 10,000 boletos.
             </p>
           </div>
         </div>

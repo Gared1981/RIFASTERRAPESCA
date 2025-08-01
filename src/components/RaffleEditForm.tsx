@@ -185,32 +185,41 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
       // Step 4: Generate new tickets with proper validation
       console.log(`🎫 Generating ${totalTickets} new tickets...`);
       
-      // Step 5: Insert tickets using database function for better performance
-      const batchSize = 50; // Smaller batches for reliability
+      // Use optimized batch insertion for large quantities
+      const batchSize = totalTickets > 1000 ? 100 : 50; // Larger batches for big quantities
       let totalInserted = 0;
       
-      for (let i = 0; i < totalTickets; i += batchSize) {
-        const batchStart = i;
-        const batchEnd = Math.min(i + batchSize - 1, totalTickets - 1);
-        const batchCount = batchEnd - batchStart + 1;
+      // Try SQL bulk insert first for better performance with large quantities
+      try {
+        console.log(`🚀 Attempting SQL bulk insert for ${totalTickets} tickets...`);
         
-        console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tickets.length / batchSize)}...`);
-        
-        // Generate batch using SQL for better performance
-        const { error: insertError } = await supabase.rpc('sql', {
+        const { error: sqlBulkError } = await supabase.rpc('sql', {
           query: `
             INSERT INTO tickets (number, status, raffle_id)
             SELECT 
               LPAD(generate_series::TEXT, 4, '0'),
               'available',
               ${raffleId}
-            FROM generate_series(${batchStart}, ${batchEnd})
+            FROM generate_series(0, ${totalTickets - 1})
           `
         });
         
-        if (insertError) {
-          // Fallback to individual inserts if SQL function fails
-          console.warn('SQL batch insert failed, using individual inserts...');
+        if (!sqlBulkError) {
+          console.log(`✅ SQL bulk insert successful for ${totalTickets} tickets`);
+          totalInserted = totalTickets;
+        } else {
+          throw new Error('SQL bulk insert failed, falling back to batch method');
+        }
+      } catch (sqlError) {
+        console.warn('SQL bulk insert failed, using batch method...', sqlError);
+        
+        // Fallback to batch insertion
+        for (let i = 0; i < totalTickets; i += batchSize) {
+          const batchStart = i;
+          const batchEnd = Math.min(i + batchSize - 1, totalTickets - 1);
+          const batchCount = batchEnd - batchStart + 1;
+          
+          console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(totalTickets / batchSize)} (${batchStart}-${batchEnd})...`);
           
           const tickets = Array.from(
             { length: batchCount }, 
@@ -221,22 +230,22 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
             })
           );
           
-          const { error: fallbackError } = await supabase
+          const { error: batchError } = await supabase
             .from('tickets')
             .insert(tickets);
             
-          if (fallbackError) {
-            console.error('❌ Error inserting ticket batch:', fallbackError);
-            throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${fallbackError.message}`);
+          if (batchError) {
+            console.error('❌ Error inserting ticket batch:', batchError);
+            throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${batchError.message}`);
           }
-        }
-        
-        totalInserted += batchCount;
-        console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${totalTickets})`);
-        
-        // Small delay between batches
-        if (i + batchSize < totalTickets) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          totalInserted += batchCount;
+          console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${totalTickets})`);
+          
+          // Shorter delay for large quantities
+          if (i + batchSize < totalTickets) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         }
       }
       
@@ -664,12 +673,13 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
               onChange={handleChange}
               required
               min="1"
+              max="10000"
               className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
               placeholder="1000"
             />
             <div className="mt-1 space-y-1">
               <p className="text-sm text-gray-500">
-                Los números de boleto se generan automáticamente desde 0000. Ejemplo: si hay 1000 boletos, serán 0000-0999
+                Los números de boleto se generan automáticamente desde 0000 hasta {formData.total_tickets ? (parseInt(formData.total_tickets.toString()) - 1).toString().padStart(4, '0') : '0999'}. Máximo: 10,000 boletos.
               </p>
               {formData.total_tickets !== raffle.total_tickets && (
                 <div className="flex items-center text-orange-600 text-sm">
