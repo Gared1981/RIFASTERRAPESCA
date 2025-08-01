@@ -107,15 +107,14 @@ const TicketGrid: React.FC<TicketGridProps> = ({
           setError('Error al verificar la configuración del sorteo');
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Error fetching tickets:', err);
       setRetryCount(prev => prev + 1);
       if (retryCount < 3) {
-      } catch (autoGenError: any) {
         setTimeout(() => fetchTickets(), 2000);
       } else {
-        setTimeout(() => fetchTickets(), 1000);
-    } catch (raffleCheckError: any) {
+        setError('Error al cargar los boletos. Por favor, recarga la página.');
+      }
     } finally {
       setLoading(false);
     }
@@ -157,7 +156,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
           // Refresh tickets if any were released
           fetchTickets();
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('❌ Exception during auto cleanup:', error);
       }
     }, 60000); // 60 seconds (más frecuente)
@@ -221,7 +220,7 @@ const TicketGrid: React.FC<TicketGridProps> = ({
               selected={isSelected(ticket)}
               onSelect={onSelectTicket}
               disabled={isSelectionDisabled(ticket)}
-  } catch (err: any) {
+            />
           ))}
         </div>
       )}
