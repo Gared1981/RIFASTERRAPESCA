@@ -168,33 +168,36 @@ const ManualPromotoresPage: React.FC = () => {
             <section className="bg-yellow-50 rounded-lg shadow-terrapesca p-6 border border-yellow-200">
               <h2 className="text-2xl font-bold text-yellow-800 mb-4 flex items-center">
                 <AlertTriangle className="mr-3" />
-                ⚠️ Importante sobre Comisiones
+                ⚠️ Importante: Sistema de Comisiones del 15%
               </h2>
               <div className="space-y-3">
                 <div className="flex items-start">
                   <CheckCircle className="h-6 w-6 text-yellow-600 mr-3 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-yellow-800">Los ejemplos son solo referencias</h3>
+                    <h3 className="font-semibold text-yellow-800">Comisión fija del 15%</h3>
                     <p className="text-yellow-700">
-                      Todos los cálculos mostrados están basados en boletos de $150 MXN como ejemplo.
+                      <strong>SIEMPRE recibes exactamente el 15% del precio del boleto</strong>, sin importar el sorteo.
+                      Esta comisión es fija y garantizada.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <DollarSign className="h-6 w-6 text-yellow-600 mr-3 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-yellow-800">Las comisiones varían por sorteo</h3>
+                    <h3 className="font-semibold text-yellow-800">Los montos de ejemplo pueden variar</h3>
                     <p className="text-yellow-700">
-                      Cada sorteo puede tener un precio diferente, por lo que las comisiones reales pueden ser mayores o menores.
+                      Los ejemplos mostrados usan boletos de $150 MXN como referencia. Si un sorteo tiene boletos de $200 MXN, 
+                      tu comisión será $30 MXN por boleto (15% de $200). Si tiene boletos de $100 MXN, será $15 MXN por boleto (15% de $100).
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Target className="h-6 w-6 text-yellow-600 mr-3 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-yellow-800">Siempre 15% del precio real</h3>
+                    <h3 className="font-semibold text-yellow-800">Cálculo automático y transparente</h3>
                     <p className="text-yellow-700">
-                      Sin importar el precio del boleto, siempre recibes exactamente el 15% del valor real.
+                      El sistema calcula automáticamente tu comisión del 15% basándose en el precio real de cada sorteo. 
+                      Puedes ver el precio específico de cada sorteo antes de promocionarlo.
                     </p>
                   </div>
                 </div>
@@ -215,14 +218,12 @@ const ManualPromotoresPage: React.FC = () => {
                     📊 Comisiones Base (15%)
                   </h3>
                   <ul className="text-green-700 space-y-2">
-                    <li>• <strong>Comisión:</strong> 15% del precio del boleto*</li>
-                    <li>• <strong>Ejemplo:</strong> Boleto $150 = $22.50 comisión*</li>
+                    <li>• <strong>Comisión fija:</strong> 15% del precio del boleto</li>
+                    <li>• <strong>Ejemplo:</strong> Boleto $150 = $22.50 comisión</li>
+                    <li>• <strong>Otro ejemplo:</strong> Boleto $200 = $30 comisión</li>
                     <li>• <strong>Pago:</strong> Cuando cliente confirma</li>
                     <li>• <strong>Seguimiento:</strong> Tiempo real</li>
                   </ul>
-                  <p className="text-xs text-green-600 mt-3 italic">
-                    *Las comisiones reales varían según el precio del sorteo
-                  </p>
                 </div>
                 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -250,43 +251,43 @@ const ManualPromotoresPage: React.FC = () => {
               <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-4 mb-6">
                 <p className="text-yellow-800 font-medium text-center">
                   <AlertTriangle className="inline h-4 w-4 mr-2" />
-                  *Ejemplos calculados con boletos de $150 MXN. Las comisiones reales varían según el precio del sorteo.
+                  *Ejemplos calculados con boletos de $150 MXN. Tu comisión siempre será el 15% del precio real del sorteo.
                 </p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-4 rounded-lg border border-terrapesca-green-200">
-                  <h3 className="font-semibold text-terrapesca-blue-800 mb-3">📈 Promotor Nuevo (25 boletos)*</h3>
+                  <h3 className="font-semibold text-terrapesca-blue-800 mb-3">📈 Promotor Nuevo (25 boletos de $150)</h3>
                   <ul className="text-terrapesca-blue-600 space-y-1">
-                    <li>• Comisiones: $337.50 MXN*</li>
+                    <li>• Comisiones: $337.50 MXN</li>
                     <li>• Si cliente gana: +$2,000 MXN</li>
-                    <li>• <strong>Total potencial: $2,337.50*</strong></li>
+                    <li>• <strong>Total potencial: $2,337.50</strong></li>
                   </ul>
                 </div>
                 
                 <div className="bg-white p-4 rounded-lg border border-terrapesca-green-200">
-                  <h3 className="font-semibold text-terrapesca-blue-800 mb-3">🎯 Promotor Activo (75 boletos)*</h3>
+                  <h3 className="font-semibold text-terrapesca-blue-800 mb-3">🎯 Promotor Activo (75 boletos de $150)</h3>
                   <ul className="text-terrapesca-blue-600 space-y-1">
-                    <li>• Comisiones: $1,012.50 MXN*</li>
+                    <li>• Comisiones: $1,012.50 MXN</li>
                     <li>• Si cliente gana: +$2,000 MXN</li>
-                    <li>• <strong>Total potencial: $3,012.50*</strong></li>
+                    <li>• <strong>Total potencial: $3,012.50</strong></li>
                   </ul>
                 </div>
                 
                 <div className="bg-white p-4 rounded-lg border border-terrapesca-green-200">
-                  <h3 className="font-semibold text-terrapesca-blue-800 mb-3">🏆 Promotor Elite (120 boletos)*</h3>
+                  <h3 className="font-semibold text-terrapesca-blue-800 mb-3">🏆 Promotor Elite (120 boletos de $150)</h3>
                   <ul className="text-terrapesca-blue-600 space-y-1">
-                    <li>• Comisiones: $1,620 MXN*</li>
+                    <li>• Comisiones: $1,620 MXN</li>
                     <li>• Si cliente gana: +$3,000 MXN</li>
-                    <li>• <strong>Total potencial: $4,620*</strong></li>
+                    <li>• <strong>Total potencial: $4,620</strong></li>
                   </ul>
                 </div>
               </div>
               
               <div className="mt-6 p-4 bg-terrapesca-blue-100 rounded-lg">
                 <p className="text-sm text-terrapesca-blue-800 font-medium text-center">
-                  💡 <strong>Nota:</strong> Este es un ejemplo conservador basado en boletos de $150 MXN. 
-                  Consulta el precio específico de cada sorteo antes de promocionar.
+                  💡 <strong>Recuerda:</strong> Tu comisión es SIEMPRE el 15% del precio del boleto. 
+                  Los ejemplos usan $150 MXN, pero si el sorteo cuesta $200, ganarás $30 por boleto. Si cuesta $100, ganarás $15 por boleto.
                 </p>
               </div>
             </section>
