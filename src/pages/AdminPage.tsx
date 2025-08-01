@@ -162,7 +162,7 @@ const AdminPage: React.FC = () => {
       setTickets(data as Array<Ticket & { user?: User }>);
       
       // Calculate stats
-        } catch (error: any) {
+      const ticketStats = {
         totalTickets: data.length,
         available: data.filter(t => t.status === 'available').length,
         reserved: data.filter(t => t.status === 'reserved').length,
@@ -185,8 +185,8 @@ const AdminPage: React.FC = () => {
       
       setStats(ticketStats);
       
-    } catch (err) {
-      console.error('Error fetching tickets:', err);
+    } catch (error: any) {
+      console.error('Error fetching tickets:', error);
       toast.error('Error al cargar los boletos');
     } finally {
       setLoading(false);
