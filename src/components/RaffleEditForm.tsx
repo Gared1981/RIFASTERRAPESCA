@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { Calendar, DollarSign, Image, Hash, FileText, Plus, X, Gift, Video, Save, AlertCircle } from 'lucide-react';
+import { Calendar, DollarSign, Image, Hash, FileText, Plus, X, Gift, Video, Save, AlertCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface RaffleEditFormProps {
@@ -41,6 +41,7 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [regeneratingTickets, setRegeneratingTickets] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -118,6 +119,44 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
     setFormData(prev => ({ ...prev, prize_items: items }));
   };
 
+  const regenerateTickets = async (raffleId: number, totalTickets: number) => {
+    try {
+      setRegeneratingTickets(true);
+      
+      // Delete existing tickets for this raffle
+      const { error: deleteError } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('raffle_id', raffleId);
+        
+      if (deleteError) throw deleteError;
+      
+      // Generate new tickets
+      const tickets = Array.from(
+        { length: totalTickets }, 
+        (_, i) => ({
+          number: i.toString().padStart(4, '0'),
+          status: 'available',
+          raffle_id: raffleId
+        })
+      );
+      
+      const { error: insertError } = await supabase
+        .from('tickets')
+        .insert(tickets);
+        
+      if (insertError) throw insertError;
+      
+      console.log(`✅ Regenerated ${totalTickets} tickets for raffle ${raffleId}`);
+      
+    } catch (error) {
+      console.error('Error regenerating tickets:', error);
+      throw error;
+    } finally {
+      setRegeneratingTickets(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -139,12 +178,17 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
       
       const drawDateTime = `${formData.draw_date}T${formData.draw_time}`;
       
+      // Check if total_tickets changed
+      const ticketsChanged = formData.total_tickets !== raffle.total_tickets;
+      
       console.log('🔄 Updating raffle with data:', {
         id: raffle.id,
         name: formData.name,
         price: formData.price,
         status: formData.status,
-        draw_date: drawDateTime
+        draw_date: drawDateTime,
+        total_tickets: formData.total_tickets,
+        tickets_changed: ticketsChanged
       });
 
       // Direct update method
@@ -174,7 +218,14 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         console.log('✅ Direct update successful:', directUpdate);
       }
       
-      toast.success('Sorteo actualizado exitosamente');
+      // If total_tickets changed, regenerate tickets
+      if (ticketsChanged) {
+        console.log(`🎫 Tickets count changed from ${raffle.total_tickets} to ${formData.total_tickets}, regenerating...`);
+        await regenerateTickets(raffle.id, formData.total_tickets);
+        toast.success(`Sorteo actualizado y ${formData.total_tickets} boletos regenerados`);
+      } else {
+        toast.success('Sorteo actualizado exitosamente');
+      }
       
       // Wait a moment before completing to ensure the update is processed
       setTimeout(() => {
@@ -196,10 +247,10 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">Editar Sorteo</h2>
-        {saving && (
+        {(saving || regeneratingTickets) && (
           <div className="flex items-center text-blue-600">
             <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-600 mr-2"></div>
-            Guardando...
+            {regeneratingTickets ? 'Regenerando boletos...' : 'Guardando...'}
           </div>
         )}
       </div>
@@ -506,9 +557,19 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
               className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
               placeholder="1000"
             />
-            <p className="mt-1 text-sm text-gray-500">
-              Los números de boleto se generan automáticamente desde 0000. Ejemplo: si hay 1000 boletos, serán 0000-0999
-            </p>
+            <div className="mt-1 space-y-1">
+              <p className="text-sm text-gray-500">
+                Los números de boleto se generan automáticamente desde 0000. Ejemplo: si hay 1000 boletos, serán 0000-0999
+              </p>
+              {formData.total_tickets !== raffle.total_tickets && (
+                <div className="flex items-center text-orange-600 text-sm">
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  <span className="font-medium">
+                    Al guardar se regenerarán todos los boletos (se perderán las reservas existentes)
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         
@@ -516,22 +577,22 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
           <button
             type="button"
             onClick={onCancel}
-            disabled={saving}
+            disabled={saving || regeneratingTickets}
             className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            disabled={loading || saving || raffle.status === 'completed'}
+            disabled={loading || saving || regeneratingTickets || raffle.status === 'completed'}
             className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${
-              (loading || saving || raffle.status === 'completed') ? 'opacity-50 cursor-not-allowed' : ''
+              (loading || saving || regeneratingTickets || raffle.status === 'completed') ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            {saving ? (
+            {saving || regeneratingTickets ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                Guardando...
+                {regeneratingTickets ? 'Regenerando boletos...' : 'Guardando...'}
               </>
             ) : (
               <>
