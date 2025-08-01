@@ -434,9 +434,6 @@ const AdminPage: React.FC = () => {
           throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${insertError.message}`);
         // Small delay between batches
         if (i + batchSize < tickets.length) {
-        totalInserted += batch.length;
-        console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${raffleData.total_tickets})`);
-        
           await new Promise(resolve => setTimeout(resolve, 500));
         }
       }
@@ -604,6 +601,71 @@ const AdminPage: React.FC = () => {
             if (insertError) {
               console.error(`❌ Error creating tickets batch for raffle ${raffle.id}:`, insertError);
               break; // Stop processing this raffle
+            }
+            
+            totalInserted += batch.length;
+            console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${raffleData.total_tickets})`);
+            
+            } else {
+              raffleTicketsCreated += batch.length;
+            }
+            
+            // Longer delay between batches for all raffles
+            if (i + batchSize < tickets.length) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+          }
+          
+          if (raffleTicketsCreated === raffle.total_tickets) {
+            totalTicketsCreated += raffleTicketsCreated;
+            successfulRaffles++;
+            console.log(`✅ Successfully created ${raffleTicketsCreated} tickets for raffle: ${raffle.name}`);
+          } else {
+            failedRaffles++;
+            console.error(`❌ Failed to create all tickets for raffle: ${raffle.name} (created ${raffleTicketsCreated}/${raffle.total_tickets})`);
+          }
+          
+          // Delay between raffles
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+        } catch (raffleError) {
+          console.error(`❌ Exception processing raffle ${raffle.name}:`, raffleError);
+          failedRaffles++;
+        }
+      }
+      
+      // Show results
+      if (successfulRaffles > 0) {
+        toast.success(`Regenerados ${totalTicketsCreated} boletos para ${successfulRaffles} sorteos exitosos`);
+      }
+      
+      if (failedRaffles > 0) {
+        toast.error(`${failedRaffles} sorteos fallaron en la regeneración`);
+      }
+      
+      // Refresh current raffle tickets if one is selected
+      if (selectedRaffle && activeTab === 'tickets') {
+        await fetchTickets(selectedRaffle);
+      }
+      
+    } catch (error) {
+      console.error('Error regenerating all tickets:', error);
+      toast.error(`Error al regenerar todos los boletos: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  if (loading && !isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        <p className="mt-4 text-gray-600">Verificando sesión...</p>
+        </div>
+      </div>
+    );
+  }
             } else {
               raffleTicketsCreated += batch.length;
             }
