@@ -123,9 +123,22 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
     try {
       setRegeneratingTickets(true);
       
-      console.log(`🗑️ Deleting existing tickets for raffle ${raffleId}...`);
+      console.log(`🗑️ Starting ticket regeneration for raffle ${raffleId}...`);
       
-      // First, delete ALL existing tickets for this raffle (regardless of status)
+      // Step 1: Count existing tickets
+      const { count: existingCount, error: countError } = await supabase
+        .from('tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('raffle_id', raffleId);
+        
+      if (countError) {
+        console.error('❌ Error counting existing tickets:', countError);
+        throw new Error(`Error al contar boletos existentes: ${countError.message}`);
+      }
+      
+      console.log(`📊 Found ${existingCount || 0} existing tickets to delete`);
+      
+      // Step 2: Delete ALL existing tickets for this raffle (regardless of status)
       const { error: deleteError } = await supabase
         .from('tickets')
         .delete()
@@ -136,12 +149,40 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         throw new Error(`Error al eliminar boletos existentes: ${deleteError.message}`);
       }
       
-      console.log(`✅ Existing tickets deleted for raffle ${raffleId}`);
+      console.log(`✅ Deletion command executed for raffle ${raffleId}`);
       
-      // Wait a moment to ensure deletion is complete
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Step 3: Verify deletion is complete with retries
+      let verificationAttempts = 0;
+      const maxAttempts = 10;
       
-      // Generate new tickets
+      while (verificationAttempts < maxAttempts) {
+        const { count: remainingCount, error: verifyError } = await supabase
+          .from('tickets')
+          .select('*', { count: 'exact', head: true })
+          .eq('raffle_id', raffleId);
+          
+        if (verifyError) {
+          console.error('❌ Error verifying deletion:', verifyError);
+          throw new Error(`Error al verificar eliminación: ${verifyError.message}`);
+        }
+        
+        if (remainingCount === 0) {
+          console.log(`✅ Deletion verified: 0 tickets remaining for raffle ${raffleId}`);
+          break;
+        }
+        
+        verificationAttempts++;
+        console.log(`⏳ Deletion verification attempt ${verificationAttempts}/${maxAttempts}: ${remainingCount} tickets still exist`);
+        
+        if (verificationAttempts >= maxAttempts) {
+          throw new Error(`No se pudieron eliminar todos los boletos después de ${maxAttempts} intentos. Quedan ${remainingCount} boletos.`);
+        }
+        
+        // Wait before next verification
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // Step 4: Generate new tickets
       console.log(`🎫 Generating ${totalTickets} new tickets...`);
       const tickets = Array.from(
         { length: totalTickets }, 
@@ -152,11 +193,31 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         })
       );
       
-      // Insert tickets in batches to avoid potential conflicts
+      // Step 5: Insert tickets in smaller batches with verification
       const batchSize = 100;
+      let totalInserted = 0;
+      
       for (let i = 0; i < tickets.length; i += batchSize) {
         const batch = tickets.slice(i, i + batchSize);
         console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tickets.length / batchSize)}...`);
+        
+        // Verify no conflicts before inserting this batch
+        const batchNumbers = batch.map(t => t.number);
+        const { count: conflictCount, error: conflictError } = await supabase
+          .from('tickets')
+          .select('*', { count: 'exact', head: true })
+          .eq('raffle_id', raffleId)
+          .in('number', batchNumbers);
+          
+        if (conflictError) {
+          console.error('❌ Error checking for conflicts:', conflictError);
+          throw new Error(`Error al verificar conflictos: ${conflictError.message}`);
+        }
+        
+        if (conflictCount && conflictCount > 0) {
+          console.error(`❌ Found ${conflictCount} conflicting tickets in batch`);
+          throw new Error(`Se encontraron ${conflictCount} boletos duplicados en el lote ${Math.floor(i / batchSize) + 1}`);
+        }
         
         const { error: insertError } = await supabase
           .from('tickets')
@@ -167,12 +228,31 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
           throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${insertError.message}`);
         }
         
+        totalInserted += batch.length;
+        console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${totalTickets})`);
+        
         // Small delay between batches
         if (i + batchSize < tickets.length) {
-          await new Promise(resolve => setTimeout(resolve, 200));
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       }
-      console.log(`✅ Regenerated ${totalTickets} tickets for raffle ${raffleId}`);
+      
+      // Step 6: Final verification
+      const { count: finalCount, error: finalError } = await supabase
+        .from('tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('raffle_id', raffleId);
+        
+      if (finalError) {
+        console.error('❌ Error in final verification:', finalError);
+        throw new Error(`Error en verificación final: ${finalError.message}`);
+      }
+      
+      if (finalCount !== totalTickets) {
+        throw new Error(`Error: Se esperaban ${totalTickets} boletos pero se crearon ${finalCount}`);
+      }
+      
+      console.log(`✅ Regeneration completed successfully: ${finalCount} tickets for raffle ${raffleId}`);
       toast.success(`${totalTickets} boletos regenerados exitosamente`);
       
     } catch (error) {

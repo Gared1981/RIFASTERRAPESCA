@@ -329,9 +329,22 @@ const AdminPage: React.FC = () => {
         return;
       }
       
-      console.log(`🗑️ Deleting existing tickets for raffle ${selectedRaffle}...`);
+      console.log(`🗑️ Starting ticket regeneration for raffle ${selectedRaffle}...`);
       
-      // Delete ALL existing tickets for this raffle (regardless of status)
+      // Step 1: Count existing tickets
+      const { count: existingCount, error: countError } = await supabase
+        .from('tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('raffle_id', selectedRaffle);
+        
+      if (countError) {
+        console.error('❌ Error counting existing tickets:', countError);
+        throw new Error(`Error al contar boletos existentes: ${countError.message}`);
+      }
+      
+      console.log(`📊 Found ${existingCount || 0} existing tickets to delete`);
+      
+      // Step 2: Delete ALL existing tickets for this raffle (regardless of status)
       const { error: deleteError } = await supabase
         .from('tickets')
         .delete()
@@ -342,12 +355,40 @@ const AdminPage: React.FC = () => {
         throw new Error(`Error al eliminar boletos existentes: ${deleteError.message}`);
       }
       
-      console.log(`✅ Existing tickets deleted for raffle ${selectedRaffle}`);
+      console.log(`✅ Deletion command executed for raffle ${selectedRaffle}`);
       
-      // Wait a moment to ensure deletion is complete
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Step 3: Verify deletion is complete with retries
+      let verificationAttempts = 0;
+      const maxAttempts = 10;
       
-      // Generate new tickets
+      while (verificationAttempts < maxAttempts) {
+        const { count: remainingCount, error: verifyError } = await supabase
+          .from('tickets')
+          .select('*', { count: 'exact', head: true })
+          .eq('raffle_id', selectedRaffle);
+          
+        if (verifyError) {
+          console.error('❌ Error verifying deletion:', verifyError);
+          throw new Error(`Error al verificar eliminación: ${verifyError.message}`);
+        }
+        
+        if (remainingCount === 0) {
+          console.log(`✅ Deletion verified: 0 tickets remaining for raffle ${selectedRaffle}`);
+          break;
+        }
+        
+        verificationAttempts++;
+        console.log(`⏳ Deletion verification attempt ${verificationAttempts}/${maxAttempts}: ${remainingCount} tickets still exist`);
+        
+        if (verificationAttempts >= maxAttempts) {
+          throw new Error(`No se pudieron eliminar todos los boletos después de ${maxAttempts} intentos. Quedan ${remainingCount} boletos.`);
+        }
+        
+        // Wait before next verification
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // Step 4: Generate new tickets
       console.log(`🎫 Generating ${raffleData.total_tickets} new tickets...`);
       const tickets = Array.from(
         { length: raffleData.total_tickets }, 
@@ -358,11 +399,31 @@ const AdminPage: React.FC = () => {
         })
       );
       
-      // Insert tickets in batches to avoid potential conflicts
+      // Step 5: Insert tickets in smaller batches with verification
       const batchSize = 100;
+      let totalInserted = 0;
+      
       for (let i = 0; i < tickets.length; i += batchSize) {
         const batch = tickets.slice(i, i + batchSize);
         console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tickets.length / batchSize)}...`);
+        
+        // Verify no conflicts before inserting this batch
+        const batchNumbers = batch.map(t => t.number);
+        const { count: conflictCount, error: conflictError } = await supabase
+          .from('tickets')
+          .select('*', { count: 'exact', head: true })
+          .eq('raffle_id', selectedRaffle)
+          .in('number', batchNumbers);
+          
+        if (conflictError) {
+          console.error('❌ Error checking for conflicts:', conflictError);
+          throw new Error(`Error al verificar conflictos: ${conflictError.message}`);
+        }
+        
+        if (conflictCount && conflictCount > 0) {
+          console.error(`❌ Found ${conflictCount} conflicting tickets in batch`);
+          throw new Error(`Se encontraron ${conflictCount} boletos duplicados en el lote ${Math.floor(i / batchSize) + 1}`);
+        }
         
         const { error: insertError } = await supabase
           .from('tickets')
@@ -371,12 +432,28 @@ const AdminPage: React.FC = () => {
         if (insertError) {
           console.error('❌ Error inserting ticket batch:', insertError);
           throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${insertError.message}`);
-        }
-        
         // Small delay between batches
         if (i + batchSize < tickets.length) {
-          await new Promise(resolve => setTimeout(resolve, 200));
+        totalInserted += batch.length;
+        console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${raffleData.total_tickets})`);
+        
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
+      }
+      
+      // Step 6: Final verification
+      const { count: finalCount, error: finalError } = await supabase
+        .from('tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('raffle_id', selectedRaffle);
+        
+      if (finalError) {
+        console.error('❌ Error in final verification:', finalError);
+        throw new Error(`Error en verificación final: ${finalError.message}`);
+      }
+      
+      if (finalCount !== raffleData.total_tickets) {
+        throw new Error(`Error: Se esperaban ${raffleData.total_tickets} boletos pero se crearon ${finalCount}`);
       }
       
       toast.success(`${raffleData.total_tickets} boletos regenerados exitosamente para "${raffleData.name}"`);
@@ -415,63 +492,154 @@ const AdminPage: React.FC = () => {
       }
       
       let totalTicketsCreated = 0;
+      let successfulRaffles = 0;
+      let failedRaffles = 0;
       
       for (const raffle of allRaffles) {
-        console.log(`🗑️ Processing raffle: ${raffle.name} (${raffle.total_tickets} tickets)`);
-        
-        // Delete existing tickets for this raffle
-        const { error: deleteError } = await supabase
-          .from('tickets')
-          .delete()
-          .eq('raffle_id', raffle.id);
+        try {
+          console.log(`🗑️ Processing raffle: ${raffle.name} (${raffle.total_tickets} tickets)`);
           
-        if (deleteError) {
-          console.error(`❌ Error deleting tickets for raffle ${raffle.id}:`, deleteError);
-          continue; // Skip this raffle and continue with others
-        }
-        
-        // Wait a moment to ensure deletion is complete
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Generate new tickets
-        const tickets = Array.from(
-          { length: raffle.total_tickets }, 
-          (_, i) => ({
-            number: i.toString().padStart(4, '0'),
-            status: 'available',
-            raffle_id: raffle.id
-          })
-        );
-        
-        // Insert tickets in batches
-        const batchSize = 100;
-        let raffleTicketsCreated = 0;
-        
-        for (let i = 0; i < tickets.length; i += batchSize) {
-          const batch = tickets.slice(i, i + batchSize);
-          
-          const { error: insertError } = await supabase
+          // Count existing tickets
+          const { count: existingCount, error: countError } = await supabase
             .from('tickets')
-            .insert(batch);
+            .select('*', { count: 'exact', head: true })
+            .eq('raffle_id', raffle.id);
             
-          if (insertError) {
-            console.error(`❌ Error creating tickets batch for raffle ${raffle.id}:`, insertError);
-            break; // Stop processing this raffle
-          } else {
-            raffleTicketsCreated += batch.length;
+          if (countError) {
+            console.error(`❌ Error counting tickets for raffle ${raffle.id}:`, countError);
+            failedRaffles++;
+            continue;
           }
           
-          // Small delay between batches
-          if (i + batchSize < tickets.length) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-          }
-        }
+          console.log(`📊 Raffle ${raffle.name}: ${existingCount || 0} existing tickets`);
         
-        totalTicketsCreated += raffleTicketsCreated;
-        console.log(`✅ Created ${raffleTicketsCreated} tickets for raffle: ${raffle.name}`);
+          // Delete existing tickets for this raffle
+          const { error: deleteError } = await supabase
+            .from('tickets')
+            .delete()
+            .eq('raffle_id', raffle.id);
+            
+          if (deleteError) {
+            console.error(`❌ Error deleting tickets for raffle ${raffle.id}:`, deleteError);
+            failedRaffles++;
+            continue;
+          }
+          
+          // Verify deletion with retries
+          let verificationAttempts = 0;
+          const maxAttempts = 5;
+          
+          while (verificationAttempts < maxAttempts) {
+            const { count: remainingCount, error: verifyError } = await supabase
+              .from('tickets')
+              .select('*', { count: 'exact', head: true })
+              .eq('raffle_id', raffle.id);
+              
+            if (verifyError) {
+              console.error(`❌ Error verifying deletion for raffle ${raffle.id}:`, verifyError);
+              break;
+            }
+            
+            if (remainingCount === 0) {
+              console.log(`✅ Deletion verified for raffle ${raffle.name}`);
+              break;
+            }
+            
+            verificationAttempts++;
+            console.log(`⏳ Verification attempt ${verificationAttempts}/${maxAttempts} for ${raffle.name}: ${remainingCount} tickets remain`);
+            
+            if (verificationAttempts >= maxAttempts) {
+              console.error(`❌ Could not verify deletion for raffle ${raffle.name} after ${maxAttempts} attempts`);
+              failedRaffles++;
+              break;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          
+          // Skip if deletion verification failed
+          if (verificationAttempts >= maxAttempts) {
+            continue;
+          }
+          
+          // Generate new tickets
+          const tickets = Array.from(
+            { length: raffle.total_tickets }, 
+            (_, i) => ({
+              number: i.toString().padStart(4, '0'),
+              status: 'available',
+              raffle_id: raffle.id
+            })
+          );
+          
+          // Insert tickets in batches
+          const batchSize = 50; // Smaller batches for all raffles
+          let raffleTicketsCreated = 0;
+          
+          for (let i = 0; i < tickets.length; i += batchSize) {
+            const batch = tickets.slice(i, i + batchSize);
+            
+            // Check for conflicts before inserting
+            const batchNumbers = batch.map(t => t.number);
+            const { count: conflictCount, error: conflictError } = await supabase
+              .from('tickets')
+              .select('*', { count: 'exact', head: true })
+              .eq('raffle_id', raffle.id)
+              .in('number', batchNumbers);
+              
+            if (conflictError) {
+              console.error(`❌ Error checking conflicts for raffle ${raffle.id}:`, conflictError);
+              break;
+            }
+            
+            if (conflictCount && conflictCount > 0) {
+              console.error(`❌ Found ${conflictCount} conflicting tickets for raffle ${raffle.name}`);
+              break;
+            }
+            
+            const { error: insertError } = await supabase
+              .from('tickets')
+              .insert(batch);
+              
+            if (insertError) {
+              console.error(`❌ Error creating tickets batch for raffle ${raffle.id}:`, insertError);
+              break; // Stop processing this raffle
+            } else {
+              raffleTicketsCreated += batch.length;
+            }
+            
+            // Longer delay between batches for all raffles
+            if (i + batchSize < tickets.length) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+          }
+          
+          if (raffleTicketsCreated === raffle.total_tickets) {
+            totalTicketsCreated += raffleTicketsCreated;
+            successfulRaffles++;
+            console.log(`✅ Successfully created ${raffleTicketsCreated} tickets for raffle: ${raffle.name}`);
+          } else {
+            failedRaffles++;
+            console.error(`❌ Failed to create all tickets for raffle: ${raffle.name} (created ${raffleTicketsCreated}/${raffle.total_tickets})`);
+          }
+          
+          // Delay between raffles
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+        } catch (raffleError) {
+          console.error(`❌ Exception processing raffle ${raffle.name}:`, raffleError);
+          failedRaffles++;
+        }
       }
       
-      toast.success(`Regenerados ${totalTicketsCreated} boletos para ${allRaffles.length} sorteos`);
+      // Show results
+      if (successfulRaffles > 0) {
+        toast.success(`Regenerados ${totalTicketsCreated} boletos para ${successfulRaffles} sorteos exitosos`);
+      }
+      
+      if (failedRaffles > 0) {
+        toast.error(`${failedRaffles} sorteos fallaron en la regeneración`);
+      }
       
       // Refresh current raffle tickets if one is selected
       if (selectedRaffle && activeTab === 'tickets') {
