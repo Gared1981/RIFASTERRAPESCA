@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { Calendar, DollarSign, Image, Hash, FileText, Plus, X, Gift, Video, Save, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
