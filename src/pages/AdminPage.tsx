@@ -931,11 +931,11 @@ const AdminPage: React.FC = () => {
               className="inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw className="mr-2 h-4 w-4" />
-              🎣 Configurar Trolling (2000)
+              {loading ? 'Configurando 2000 boletos...' : '🎣 Configurar Trolling (2000 boletos)'}
             </button>
             <button
               onClick={handleRegenerateTickets}
-              disabled={!selectedRaffle || loading}
+              disabled={loading}
               className="inline-flex items-center px-4 py-2 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw className="mr-2 h-4 w-4" />
