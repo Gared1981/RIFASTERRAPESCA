@@ -308,6 +308,46 @@ const PromoterTicketForm: React.FC<PromoterTicketFormProps> = ({
         </div>
         <p className="text-lg font-bold mt-2">
           Total a pagar: ${totalAmount.toLocaleString()} MXN
+        </p>
+        
+        <div className="mt-4">
+          <h4 className="font-semibold text-green-800 mb-1">Proceso de reserva</h4>
+          <p className="text-sm text-gray-600 mt-1">
+            Al completar tu reserva:
+          </p>
+          <ul className="text-sm text-gray-600 mt-2 space-y-1">
+            <li>• Tus boletos se reservarán por 3 horas</li>
+            <li>• Podrás elegir tu método de pago preferido</li>
+            <li>• Recibirás tu comprobante de participación</li>
+            <li>• Podrás verificar tus boletos en cualquier momento</li>
+          </ul>
+        </div>
+        
+        {selectedPromoter && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <span className="font-semibold">Código de promotor: {selectedPromoter.code}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Información sobre confirmación por WhatsApp */}
+      <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div className="flex items-start">
+          <MessageSquare className="h-5 w-5 text-green-600 mr-2 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-green-800 mb-1">Confirmación automática</h4>
+            <p className="text-sm text-green-700">
+              Al completar tu reserva, recibirás automáticamente un mensaje en tu WhatsApp con:
+            </p>
+            <ul className="text-xs text-green-600 mt-2 space-y-1">
+              <li>• Confirmación de tus boletos reservados</li>
+              <li>• Enlace directo para pagar con Mercado Pago</li>
+              <li>• Información completa del sorteo</li>
+              <li>• Tiempo límite de reserva (3 horas)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
               <h4 className="font-semibold text-green-800 mb-1">Proceso de reserva</h4>
         <p className="text-sm text-gray-600 mt-1">
                 Al completar tu reserva:
