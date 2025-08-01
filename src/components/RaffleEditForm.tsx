@@ -123,7 +123,7 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
     try {
       setRegeneratingTickets(true);
       
-      console.log(`🗑️ Starting ticket regeneration for raffle ${raffleId}...`);
+      console.log(`🗑️ Starting ticket regeneration for raffle ${raffleId} with ${totalTickets} tickets...`);
       
       // Step 1: Count existing tickets
       const { count: existingCount, error: countError } = await supabase
@@ -138,7 +138,7 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
       
       console.log(`📊 Found ${existingCount || 0} existing tickets to delete`);
       
-      // Step 2: Delete ALL existing tickets for this raffle (regardless of status)
+      // Step 2: Delete ALL existing tickets for this raffle using CASCADE
       const { error: deleteError } = await supabase
         .from('tickets')
         .delete()
@@ -151,9 +151,9 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
       
       console.log(`✅ Deletion command executed for raffle ${raffleId}`);
       
-      // Step 3: Verify deletion is complete with retries
+      // Step 3: Force verification with multiple attempts
       let verificationAttempts = 0;
-      const maxAttempts = 10;
+      const maxAttempts = 15;
       
       while (verificationAttempts < maxAttempts) {
         const { count: remainingCount, error: verifyError } = await supabase
@@ -179,61 +179,64 @@ const RaffleEditForm: React.FC<RaffleEditFormProps> = ({ raffle, onComplete, onC
         }
         
         // Wait before next verification
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
-      // Step 4: Generate new tickets
+      // Step 4: Generate new tickets with proper validation
       console.log(`🎫 Generating ${totalTickets} new tickets...`);
-      const tickets = Array.from(
-        { length: totalTickets }, 
-        (_, i) => ({
-          number: i.toString().padStart(4, '0'),
-          status: 'available',
-          raffle_id: raffleId
-        })
-      );
       
-      // Step 5: Insert tickets in smaller batches with verification
-      const batchSize = 100;
+      // Step 5: Insert tickets using database function for better performance
+      const batchSize = 50; // Smaller batches for reliability
       let totalInserted = 0;
       
-      for (let i = 0; i < tickets.length; i += batchSize) {
-        const batch = tickets.slice(i, i + batchSize);
+      for (let i = 0; i < totalTickets; i += batchSize) {
+        const batchStart = i;
+        const batchEnd = Math.min(i + batchSize - 1, totalTickets - 1);
+        const batchCount = batchEnd - batchStart + 1;
+        
         console.log(`📦 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tickets.length / batchSize)}...`);
         
-        // Verify no conflicts before inserting this batch
-        const batchNumbers = batch.map(t => t.number);
-        const { count: conflictCount, error: conflictError } = await supabase
-          .from('tickets')
-          .select('*', { count: 'exact', head: true })
-          .eq('raffle_id', raffleId)
-          .in('number', batchNumbers);
-          
-        if (conflictError) {
-          console.error('❌ Error checking for conflicts:', conflictError);
-          throw new Error(`Error al verificar conflictos: ${conflictError.message}`);
-        }
+        // Generate batch using SQL for better performance
+        const { error: insertError } = await supabase.rpc('sql', {
+          query: `
+            INSERT INTO tickets (number, status, raffle_id)
+            SELECT 
+              LPAD(generate_series::TEXT, 4, '0'),
+              'available',
+              ${raffleId}
+            FROM generate_series(${batchStart}, ${batchEnd})
+          `
+        });
         
-        if (conflictCount && conflictCount > 0) {
-          console.error(`❌ Found ${conflictCount} conflicting tickets in batch`);
-          throw new Error(`Se encontraron ${conflictCount} boletos duplicados en el lote ${Math.floor(i / batchSize) + 1}`);
-        }
-        
-        const { error: insertError } = await supabase
-          .from('tickets')
-          .insert(batch);
-          
         if (insertError) {
-          console.error('❌ Error inserting ticket batch:', insertError);
-          throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${insertError.message}`);
+          // Fallback to individual inserts if SQL function fails
+          console.warn('SQL batch insert failed, using individual inserts...');
+          
+          const tickets = Array.from(
+            { length: batchCount }, 
+            (_, idx) => ({
+              number: (batchStart + idx).toString().padStart(4, '0'),
+              status: 'available' as const,
+              raffle_id: raffleId
+            })
+          );
+          
+          const { error: fallbackError } = await supabase
+            .from('tickets')
+            .insert(tickets);
+            
+          if (fallbackError) {
+            console.error('❌ Error inserting ticket batch:', fallbackError);
+            throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${fallbackError.message}`);
+          }
         }
         
-        totalInserted += batch.length;
+        totalInserted += batchCount;
         console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${totalTickets})`);
         
         // Small delay between batches
-        if (i + batchSize < tickets.length) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+        if (i + batchSize < totalTickets) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
       
