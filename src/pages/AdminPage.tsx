@@ -432,13 +432,13 @@ const AdminPage: React.FC = () => {
         if (insertError) {
           console.error('❌ Error inserting ticket batch:', insertError);
           throw new Error(`Error al crear boletos (lote ${Math.floor(i / batchSize) + 1}): ${insertError.message}`);
+        } else {
+          totalInserted += batch.length;
+          console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${raffleData.total_tickets})`);
         }
         
         // Small delay between batches
         if (i + batchSize < tickets.length) {
-          totalInserted += batch.length;
-          console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} inserted successfully (${totalInserted}/${raffleData.total_tickets})`);
-          
           await new Promise(resolve => setTimeout(resolve, 500));
         }
       }
@@ -660,8 +660,8 @@ const AdminPage: React.FC = () => {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-          <p className="mt-4 text-gray-600">Verificando sesión...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        <p className="mt-4 text-gray-600">Verificando sesión...</p>
         </div>
       </div>
     );
@@ -818,8 +818,6 @@ const AdminPage: React.FC = () => {
                 Análisis de Ganancias
               </button>
             </nav>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={handleCleanupExpiredTickets}
               className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
