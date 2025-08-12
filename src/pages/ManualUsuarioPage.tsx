@@ -195,7 +195,7 @@ const ManualUsuarioPage: React.FC = () => {
                   Accede al manual completo en formato web optimizado para móviles
                 </p>
                 <a
-                  href="https://voluble-marigold-f68bd1.netlify.app/manual-usuario"
+                  href="https://clubterrapesca.netlify.app/manual-usuario"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 bg-terrapesca-orange-600 text-white rounded-md hover:bg-terrapesca-orange-700 transition-colors font-medium"

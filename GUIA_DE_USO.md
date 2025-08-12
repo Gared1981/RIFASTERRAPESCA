@@ -1,7 +1,7 @@
 # 📋 Guía de Uso - Sorteos Terrapesca
 
 ## 🌐 Acceso a la Aplicación
-**URL de Producción:** https://voluble-marigold-f68bd1.netlify.app
+**URL de Producción:** https://clubterrapesca.netlify.app
 
 ---
 

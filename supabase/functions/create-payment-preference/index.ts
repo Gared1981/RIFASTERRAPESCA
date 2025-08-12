@@ -59,7 +59,7 @@ serve(async (req) => {
     }
 
     // Obtener la URL base de la aplicación
-    const origin = req.headers.get('origin') || 'https://voluble-marigold-f68bd1.netlify.app'
+    const origin = req.headers.get('origin') || 'https://clubterrapesca.netlify.app'
     
     console.log('🔧 Processing payment for origin:', origin)
     
