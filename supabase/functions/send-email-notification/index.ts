@@ -182,6 +182,7 @@ serve(async (req: Request) => {
             ` : ''}
             
             <p>Puedes verificar el estado de tus boletos en cualquier momento visitando <a href="https://sorteosterrapesca.com/verificar">nuestra página de verificación</a>.</p>
+            <p>Puedes verificar el estado de tus boletos en cualquier momento visitando <a href="https://clubterrapesca.netlify.app/verificar">nuestra página de verificación</a>.</p>
             
             <p>Si tienes alguna pregunta, no dudes en contactarnos:</p>
             <ul>
@@ -233,6 +234,7 @@ serve(async (req: Request) => {
             </div>
             
             <p>Puedes ver más detalles en el <a href="https://sorteosterrapesca.com/admin">panel de administración</a>.</p>
+            <p>Puedes ver más detalles en el <a href="https://clubterrapesca.netlify.app/admin">panel de administración</a>.</p>
           </div>
           
           <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666;">

@@ -446,7 +446,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
                 <h4>✅ Boletos Confirmados y Registrados</h4>
                 <p><strong>Estado:</strong> ${paymentMethod === 'mercadopago' ? 'Pagado y Confirmado' : 'Reservado - Pendiente de Pago'}</p>
                 <p>Puedes verificar tus boletos en cualquier momento en:</p>
-                <p><strong>www.sorteosterrapesca.com/verificar</strong></p>
+                <p><strong>clubterrapesca.netlify.app/verificar</strong></p>
                 ${paymentMethod === 'mercadopago' ? `
                   <p style="color: #FF6B35; font-weight: bold; margin-top: 15px;">
                     🎁 BONUS: Participas automáticamente en el premio especial con envío GRATIS

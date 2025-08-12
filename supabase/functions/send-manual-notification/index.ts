@@ -83,6 +83,7 @@ serve(async (req: Request) => {
             </div>
             
             <p>Puedes verificar el estado de tu boleto en cualquier momento visitando <a href="https://sorteosterrapesca.com/verificar">nuestra página de verificación</a>.</p>
+            <p>Puedes verificar el estado de tu boleto en cualquier momento visitando <a href="https://clubterrapesca.netlify.app/verificar">nuestra página de verificación</a>.</p>
             
             <p>Si tienes alguna pregunta, no dudes en contactarnos:</p>
             <ul>

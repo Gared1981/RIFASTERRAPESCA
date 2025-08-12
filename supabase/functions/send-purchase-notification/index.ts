@@ -173,7 +173,7 @@ Ahora solo queda cruzar los dedos 🤞 y esperar que la suerte esté de tu lado 
 
 ${promoterCode ? `👨‍💼 *Código de promotor:* ${promoterCode}\n` : ""}
 📞 *Contacto:* +52 668 688 9571
-🌐 *Web:* ${supabaseUrl.replace('/functions/v1/send-purchase-notification', '')}`;
+🌐 *Web:* https://clubterrapesca.netlify.app`;
     
     console.log(`Would send WhatsApp notification to customer: ${userPhone}`);
     console.log(customerWhatsappMessage);
